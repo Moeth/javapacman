@@ -7,53 +7,29 @@ class Mover {
     int frameCount = 0;
 
     /* State contains the game map */
-    final boolean[][] state;
+//    final boolean[][] state;
+    private final GameMap gameMap;
 
     /* Generic constructor */
-    public Mover() {
-        state = new boolean[Board.GRID_SIZE][Board.GRID_SIZE];
-        for (int i = 0; i < Board.GRID_SIZE; i++) {
-            for (int j = 0; j < Board.GRID_SIZE; j++) {
-                state[i][j] = false;
-            }
-        }
+    public Mover(final GameMap gameMap) {
+//        state = new boolean[Board.GRID_SIZE][Board.GRID_SIZE];
+//        for (int i = 0; i < Board.GRID_SIZE; i++) {
+//            for (int j = 0; j < Board.GRID_SIZE; j++) {
+//                state[i][j] = false;
+//            }
+//        }
+        this.gameMap = gameMap;
     }
 
     /* Updates the state information */
-    public void updateState(boolean[][] state) {
-        for (int i = 0; i < Board.GRID_SIZE; i++) {
-            for (int j = 0; j < Board.GRID_SIZE; j++) {
-                this.state[i][j] = state[i][j];
-            }
-        }
-    }
+//    public void updateState(boolean[][] state) {
+//        gameMap.updateState(state);
+//    }
 
     Position move(Direction desiredDirection, final Position location) {
         if (isValidDirection(desiredDirection, location)) {
             return desiredDirection.move(location, Board.INCREMENT);
         }
-//        switch (desiredDirection) {
-//            case L:
-//                if (isValidDest(location.x - increment, location.y)) {
-//                    return location.move(-increment, 0);
-//                }
-//                break;
-//            case R:
-//                if (isValidDest(location.x + Board.GRID_SIZE, location.y)) {
-//                    return location.move(increment, 0);
-//                }
-//                break;
-//            case U:
-//                if (isValidDest(location.x, location.y - increment)) {
-//                    return location.move(0, -increment);
-//                }
-//                break;
-//            case D:
-//                if (isValidDest(location.x, location.y + Board.GRID_SIZE)) {
-//                    return location.move(0, increment);
-//                }
-//                break;
-//        }
         return location;
     }
 
@@ -75,6 +51,6 @@ class Mover {
     public boolean isValidDest(int x, int y) {
     /* The first statements check that the x and y are inbounds.  The last statement checks the map to
        see if it's a valid location */
-        return (x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && state[x / Board.GRID_SIZE - 1][y / Board.GRID_SIZE - 1];
+        return (x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && gameMap.state[x / Board.GRID_SIZE - 1][y / Board.GRID_SIZE - 1];
     }
 }

@@ -25,7 +25,8 @@ public class Player extends Mover {
     boolean stopped = false;
 
     /* Constructor places pacman in initial location and orientation */
-    public Player(Position position) {
+    public Player(Position position, GameMap gameMap) {
+        super(gameMap);
         teleport = false;
         pelletsEaten = 0;
         pellet = Position.ofGrid(position);
@@ -37,7 +38,6 @@ public class Player extends Mover {
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
     private Direction newDirection() {
-        int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
         Direction backwards = direction.backwards();
         Direction newDirection = backwards;
@@ -47,26 +47,21 @@ public class Player extends Mover {
                 newDirection = backwards;
                 break;
             }
-            newX = location.x;
-            newY = location.y;
             lookX = location.x;
             lookY = location.y;
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = Direction.L;
-                newX -= Board.INCREMENT;
                 lookX -= Board.INCREMENT;
             } else if (random == 2) {
                 newDirection = Direction.R;
-                newX += Board.INCREMENT;
+
                 lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = Direction.U;
-                newY -= Board.INCREMENT;
                 lookY -= Board.INCREMENT;
             } else if (random == 4) {
                 newDirection = Direction.D;
-                newY += Board.INCREMENT;
                 lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {

@@ -20,7 +20,8 @@ public class Ghost extends Mover {
     public Position lastPellet;
 
     /*Constructor places ghost and updates states*/
-    public Ghost(Position position) {
+    public Ghost(Position position, GameMap gameMap) {
+        super(gameMap);
         direction = L;
         pellet = Position.ofGrid(position);
         lastPellet = pellet;

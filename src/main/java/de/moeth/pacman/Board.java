@@ -53,15 +53,7 @@ public class Board extends JPanel {
 
     int numLives = 2;
 
-    /*Contains the game map, passed to player and ghosts */
-    boolean[][] state;
-
-    /* Contains the state of all pellets*/
-    boolean[][] pellets;
-
-    /* Game dimensions */
-    final int gridSize = GRID_SIZE;
-    final int max = MAX;
+    private final GameMap gameMap = new GameMap();
 
     /* State flags*/
     public boolean stopped = false;
@@ -87,11 +79,11 @@ public class Board extends JPanel {
     }
 
     private void init() {
-        player = new Player(Position.of(200, 300));
-        ghost1 = new Ghost(Position.of(180, 180));
-        ghost2 = new Ghost(Position.of(200, 180));
-        ghost3 = new Ghost(Position.of(220, 180));
-        ghost4 = new Ghost(Position.of(220, 180));
+        player = new Player(Position.of(200, 300), gameMap);
+        ghost1 = new Ghost(Position.of(180, 180), gameMap);
+        ghost2 = new Ghost(Position.of(200, 180), gameMap);
+        ghost3 = new Ghost(Position.of(220, 180), gameMap);
+        ghost4 = new Ghost(Position.of(220, 180), gameMap);
     }
 
     /* Reads the high scores file and saves it */
@@ -132,41 +124,11 @@ public class Board extends JPanel {
     /* Reset occurs on a new game*/
     private void reset() {
         numLives = 2;
-        state = new boolean[GRID_SIZE][GRID_SIZE];
-        pellets = new boolean[GRID_SIZE][GRID_SIZE];
 
-        /* Clear state and pellets arrays */
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                state[i][j] = true;
-                pellets[i][j] = true;
-            }
-        }
-
-        /* Handle the weird spots with no pellets*/
-        for (int i = 5; i < 14; i++) {
-            for (int j = 5; j < 12; j++) {
-                pellets[i][j] = false;
-            }
-        }
-        pellets[9][7] = false;
-        pellets[8][8] = false;
-        pellets[9][8] = false;
-        pellets[10][8] = false;
     }
 
-    /* Function is called during drawing of the map.
-       Whenever the a portion of the map is covered up with a barrier,
-       the map and pellets arrays are updated accordingly to note
-       that those are invalid locations to travel or put pellets
-    */
-    public void updateMap(int x, int y, int width, int height) {
-        for (int i = x / gridSize; i < x / gridSize + width / gridSize; i++) {
-            for (int j = y / gridSize; j < y / gridSize + height / gridSize; j++) {
-                state[i - 1][j - 1] = false;
-                pellets[i - 1][j - 1] = false;
-            }
-        }
+    private void updateMap(int x, int y, int width, int height) {
+        gameMap.updateMap(x, y, width, height);
     }
 
     /* Draws the appropriate number of lives on the bottom left of the screen.
@@ -175,18 +137,18 @@ public class Board extends JPanel {
         g.setColor(Color.BLACK);
 
         /*Clear the bottom bar*/
-        g.fillRect(0, max + 5, 600, gridSize);
+        g.fillRect(0, MAX + 5, 600, GRID_SIZE);
         g.setColor(Color.YELLOW);
         for (int i = 0; i < numLives; i++) {
             /*Draw each life */
-            g.fillOval(gridSize * (i + 1), max + 5, gridSize, gridSize);
+            g.fillOval(GRID_SIZE * (i + 1), MAX + 5, GRID_SIZE, GRID_SIZE);
         }
         /* Draw the menu items */
         g.setColor(Color.YELLOW);
         g.setFont(font);
-        g.drawString("Reset", 100, max + 5 + gridSize);
-        g.drawString("Clear High Scores", 180, max + 5 + gridSize);
-        g.drawString("Exit", 350, max + 5 + gridSize);
+        g.drawString("Reset", 100, MAX + 5 + GRID_SIZE);
+        g.drawString("Clear High Scores", 180, MAX + 5 + GRID_SIZE);
+        g.drawString("Exit", 350, MAX + 5 + GRID_SIZE);
     }
 
     /*  This function draws the board.  The pacman board is really complicated and can only feasibly be done
@@ -268,7 +230,7 @@ public class Board extends JPanel {
         g.setColor(Color.YELLOW);
         for (int i = 1; i < GRID_SIZE; i++) {
             for (int j = 1; j < GRID_SIZE; j++) {
-                if (pellets[i - 1][j - 1]) {
+                if (gameMap.pellets[i - 1][j - 1]) {
                     g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, INCREMENT, INCREMENT);
                 }
             }
@@ -394,14 +356,6 @@ public class Board extends JPanel {
             drawBoard(g);
             drawPellets(g);
             drawLives(g);
-            /* Send the game map to player and all ghosts */
-            player.updateState(state);
-            /* Don't let the player go in the ghost box*/
-            player.state[9][7] = false;
-            ghost1.updateState(state);
-            ghost2.updateState(state);
-            ghost3.updateState(state);
-            ghost4.updateState(state);
 
             /* Draw the top menu bar*/
             g.setColor(Color.YELLOW);
@@ -491,7 +445,7 @@ public class Board extends JPanel {
         g.fillRect(ghost4.last.x, ghost4.last.y, GRID_SIZE, GRID_SIZE);
 
         /* Eat pellets */
-        if (pellets[player.pellet.x][player.pellet.y] && New != 2 && New != 3) {
+        if (gameMap.pellets[player.pellet.x][player.pellet.y] && New != 2 && New != 3) {
             lastPelletEatenX = player.pellet.x;
             lastPelletEatenY = player.pellet.y;
 
@@ -502,7 +456,7 @@ public class Board extends JPanel {
             player.pelletsEaten++;
 
             /* Delete the pellet*/
-            pellets[player.pellet.x][player.pellet.y] = false;
+            gameMap.pellets[player.pellet.x][player.pellet.y] = false;
 
             /* Increment the score */
             currScore += 50;
@@ -541,16 +495,16 @@ public class Board extends JPanel {
 
 
         /* Replace pellets that have been run over by ghosts */
-        if (pellets[ghost1.lastPellet.x][ghost1.lastPellet.y]) {
+        if (gameMap.pellets[ghost1.lastPellet.x][ghost1.lastPellet.y]) {
             fillPellet(ghost1.lastPellet.x, ghost1.lastPellet.y, g);
         }
-        if (pellets[ghost2.lastPellet.x][ghost2.lastPellet.y]) {
+        if (gameMap.pellets[ghost2.lastPellet.x][ghost2.lastPellet.y]) {
             fillPellet(ghost2.lastPellet.x, ghost2.lastPellet.y, g);
         }
-        if (pellets[ghost3.lastPellet.x][ghost3.lastPellet.y]) {
+        if (gameMap.pellets[ghost3.lastPellet.x][ghost3.lastPellet.y]) {
             fillPellet(ghost3.lastPellet.x, ghost3.lastPellet.y, g);
         }
-        if (pellets[ghost4.lastPellet.x][ghost4.lastPellet.y]) {
+        if (gameMap.pellets[ghost4.lastPellet.x][ghost4.lastPellet.y]) {
             fillPellet(ghost4.lastPellet.x, ghost4.lastPellet.y, g);
         }
 
