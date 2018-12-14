@@ -2,6 +2,7 @@ package de.moeth.pacman;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /* This is the pacman object */
 public class Player extends Mover {
@@ -23,10 +24,12 @@ public class Player extends Mover {
     public boolean teleport;
     /* Stopped is set when the pacman is not moving or has been killed */
     boolean stopped = false;
+    private final Supplier<Direction> directionSupplier;
 
     /* Constructor places pacman in initial location and orientation */
-    public Player(Position position, GameMap gameMap) {
+    public Player(Position position, GameMap gameMap, final Supplier<Direction> directionSupplier) {
         super(gameMap);
+        this.directionSupplier = directionSupplier;
         teleport = false;
         pelletsEaten = 0;
         pellet = Position.ofGrid(position);
@@ -89,6 +92,9 @@ public class Player extends Mover {
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
         /* Or if we're reversing*/
+        if (location.isGrid()) {
+            desiredDirection = directionSupplier.get();
+        }
         if (location.isGrid() || Direction.isOpposite(desiredDirection, currDirection)) {
             location = move(desiredDirection, location);
         }

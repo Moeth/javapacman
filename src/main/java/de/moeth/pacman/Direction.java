@@ -1,8 +1,12 @@
 package de.moeth.pacman;
 
+import java.util.Random;
+
 public enum Direction {
 
     L, R, U, D;
+
+    public static final Random RANDOM = new Random();
 
     public Direction backwards() {
         switch (this) {
@@ -38,5 +42,10 @@ public enum Direction {
                 return location.move(0, increment);
         }
         return location;
+    }
+
+    public static Direction random() {
+        int v = RANDOM.nextInt(Direction.values().length);
+        return Direction.values()[v];
     }
 }

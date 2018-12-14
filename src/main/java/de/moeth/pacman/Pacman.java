@@ -6,22 +6,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.function.Supplier;
 
 /* This class contains the entire game... most of the game logic is in the Board class but this
    creates the gui and captures mouse and keyboard input, as well as controls the game states */
 public class Pacman extends JApplet implements KeyListener {
 
+    public static final int DELAY = 10;
     /* These timers are used to kill title, game over, and victory screens after a set idle period (5 seconds)*/
     private long timer = -1;
 
     /* Create a new board */
-    private final Board b = new Board();
+    private final Board b;
 
     /* This timer is used to do request new frames be drawn*/
     private final Timer frameTimer;
 
     /* This constructor creates the entire game essentially */
     public Pacman() {
+        final Supplier<Direction> directionSupplier = () -> Direction.random();
+        b = new Board(directionSupplier);
         b.requestFocus();
 
         /* Create and set up window frame*/
@@ -45,7 +49,8 @@ public class Pacman extends JApplet implements KeyListener {
         stepFrame(true);
 
         /* Create a timer that calls stepFrame every 30 milliseconds */
-        frameTimer = new Timer(30, new ActionListener() {
+        frameTimer = new Timer(DELAY, new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 stepFrame(false);
             }
@@ -60,6 +65,7 @@ public class Pacman extends JApplet implements KeyListener {
     /* This repaint function repaints only the parts of the screen that may have changed.
        Namely the area around every player ghost and the menu bars
     */
+    @Override
     public void repaint() {
         if (b.player.teleport) {
             b.repaint(b.player.last.x - Board.GRID_SIZE, b.player.last.y - Board.GRID_SIZE, 80, 80);
@@ -91,10 +97,11 @@ public class Pacman extends JApplet implements KeyListener {
        of b.New.  Update New accordingly */
         New = New || (b.New != 0);
 
-        if (b.titleScreen) {
-            b.repaint();
-            return;
-        } else if (b.winScreen || b.overScreen) {
+//        if (b.titleScreen) {
+//            b.repaint();
+//            return;
+//        } else
+        if (b.titleScreen || b.winScreen || b.overScreen) {
     /* If this is the win screen or game over screen, make sure to only stay on the screen for 5 seconds.
        If after 5 seconds the user hasn't pressed a key, go to title screen */
             if (timer == -1) {
@@ -102,10 +109,10 @@ public class Pacman extends JApplet implements KeyListener {
             }
 
             long currTime = System.currentTimeMillis();
-            if (currTime - timer >= 5000) {
+            if (currTime - timer >= 500) {
                 b.winScreen = false;
                 b.overScreen = false;
-                b.titleScreen = true;
+                b.titleScreen = false;
                 timer = -1;
             }
             b.repaint();
@@ -166,6 +173,7 @@ public class Pacman extends JApplet implements KeyListener {
     }
 
     /* Handles user key presses*/
+    @Override
     public void keyPressed(KeyEvent e) {
         /* Pressing a key in the title screen starts a game */
         if (b.titleScreen) {
@@ -181,28 +189,33 @@ public class Pacman extends JApplet implements KeyListener {
         }
 
         /* Otherwise, key presses control the player! */
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                b.player.desiredDirection = Direction.L;
-                break;
-            case KeyEvent.VK_RIGHT:
-                b.player.desiredDirection = Direction.R;
-                break;
-            case KeyEvent.VK_UP:
-                b.player.desiredDirection = Direction.U;
-                break;
-            case KeyEvent.VK_DOWN:
-                b.player.desiredDirection = Direction.D;
-                break;
-        }
+//        switch (e.getKeyCode()) {
+//            case KeyEvent.VK_LEFT:
+//                b.player.desiredDirection = Direction.L;
+//                break;
+//            case KeyEvent.VK_RIGHT:
+//                b.player.desiredDirection = Direction.R;
+//                break;
+//            case KeyEvent.VK_UP:
+//                b.player.desiredDirection = Direction.U;
+//                break;
+//            case KeyEvent.VK_DOWN:
+//                b.player.desiredDirection = Direction.D;
+//                break;
+//        }
 
         repaint();
     }
 
+    private Direction ki() {
+        return Direction.random();
+    }
 
+    @Override
     public void keyReleased(KeyEvent e) {
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
     }
 

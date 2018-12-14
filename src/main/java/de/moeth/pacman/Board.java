@@ -2,6 +2,7 @@ package de.moeth.pacman;/* Drew Schuster */
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /*This board class contains the player, ghosts, pellets, and most of the game logic.*/
@@ -56,17 +57,19 @@ class Board extends JPanel {
     public int New = 0;
 
     private Position lastPelletEaten = Position.of(0, 0);
+    private final Supplier<Direction> directionSupplier;
 
     /* This is the font used for the menus */
     private final Font font = new Font("Monospaced", Font.BOLD, 12);
 
     /* Constructor initializes state flags etc.*/
-    public Board() {
+    public Board(final Supplier<Direction> directionSupplier) {
+        this.directionSupplier = directionSupplier;
         init();
     }
 
     private void init() {
-        player = new Player(Position.of(200, 300), gameMap);
+        player = new Player(Position.of(200, 300), gameMap, directionSupplier);
         ghost1 = new Ghost(Position.of(180, 180), gameMap);
         ghost2 = new Ghost(Position.of(200, 180), gameMap);
         ghost3 = new Ghost(Position.of(220, 180), gameMap);
@@ -195,71 +198,23 @@ class Board extends JPanel {
     /* If we're playing the dying animation, don't update the entire screen.
        Just kill the pacman*/
         if (dying > 0) {
-            /* Draw the pacman */
-            g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
-            g.setColor(Color.BLACK);
-
-            /* Kill the pacman */
-            if (dying == 4) {
-                g.fillRect(player.location.x, player.location.y, GRID_SIZE, 7);
-            } else if (dying == 3) {
-                g.fillRect(player.location.x, player.location.y, GRID_SIZE, 14);
-            } else if (dying == 2) {
-                g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
-            } else if (dying == 1) {
-                g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
-            }
-     
-      /* Take .1 seconds on each frame of death, and then take 2 seconds
-         for the final frame to allow for the sound effect to end */
-            long currTime = System.currentTimeMillis();
-            long temp;
-            if (dying != 1) {
-                temp = 100;
-            } else {
-                temp = 2000;
-            }
-            /* If it's time to draw a new death frame... */
-            if (currTime - timer >= temp) {
-                dying--;
-                timer = currTime;
-                /* If this was the last death frame...*/
-                if (dying == 0) {
-                    if (numLives == -1) {
-                        /* Game over for player.  If relevant, update high score.  Set gameOver flag*/
-                        if (currScore > highScore) {
-                            updateScore(currScore);
-                        }
-                        overScreen = true;
-                    }
-                }
-            }
+            handleDying(g);
             return;
         }
 
-        /* If this is the title screen, draw the title screen and return */
         if (titleScreen) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, 600);
-            g.drawImage(titleScreenImage, 0, 0, Color.BLACK, null);
+            /* If this is the title screen, draw the title screen and return */
+            fillImage(g, titleScreenImage);
             New = 1;
             return;
-        }
-
-        /* If this is the win screen, draw the win screen and return */
-        else if (winScreen) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, 600);
-            g.drawImage(winScreenImage, 0, 0, Color.BLACK, null);
+        } else if (winScreen) {
+            /* If this is the win screen, draw the win screen and return */
+            fillImage(g, winScreenImage);
             New = 1;
             return;
-        }
-
-        /* If this is the game over screen, draw the game over screen and return */
-        else if (overScreen) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, 600);
-            g.drawImage(gameOverImage, 0, 0, Color.BLACK, null);
+        } else if (overScreen) {
+            /* If this is the game over screen, draw the game over screen and return */
+            fillImage(g, gameOverImage);
             New = 1;
             return;
         }
@@ -290,26 +245,17 @@ class Board extends JPanel {
             g.setFont(font);
             g.drawString("Score: " + currScore + "\t High Score: " + highScore, GRID_SIZE, 10);
             New++;
-        }
-        /* Second frame of new game */
-        else if (New == 2) {
+        } else if (New == 2) {
+            /* Second frame of new game */
             New++;
-        }
-        /* Third frame of new game */
-        else if (New == 3) {
+        } else if (New == 3) {
+            /* Third frame of new game */
             New++;
             timer = System.currentTimeMillis();
             return;
-        }
-        /* Fourth frame of new game */
-        else if (New == 4) {
-            /* Stay in this state until the sound effect is over */
-//            long currTime = System.currentTimeMillis();
-//            if (currTime - timer >= 5000) {
+        } else if (New == 4) {
+            /* Fourth frame of new game */
             New = 0;
-//            } else {
-//                return;
-//            }
         }
 
         /* Drawing optimization */
@@ -370,11 +316,6 @@ class Board extends JPanel {
             }
         }
 
-        /* If we moved to a location without pellets, stop the sounds */
-        else if (player.pellet.x != lastPelletEaten.x || player.pellet.y != lastPelletEaten.y || player.stopped) {
-        }
-
-
         /* Replace pellets that have been run over by ghosts */
         handlePellet(g, ghost1);
         handlePellet(g, ghost2);
@@ -432,6 +373,49 @@ class Board extends JPanel {
         /* Draw the border around the game in case it was overwritten by ghost movement or something */
         g.setColor(Color.WHITE);
         g.drawRect(19, 19, 382, 382);
+    }
+
+    private void handleDying(final Graphics g) {
+        /* Draw the pacman */
+        g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
+        g.setColor(Color.BLACK);
+
+        /* Kill the pacman */
+        if (dying == 4) {
+            g.fillRect(player.location.x, player.location.y, GRID_SIZE, 7);
+        } else if (dying == 3) {
+            g.fillRect(player.location.x, player.location.y, GRID_SIZE, 14);
+        } else if (dying == 2) {
+            g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
+        } else if (dying == 1) {
+            g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
+        }
+
+      /* Take .1 seconds on each frame of death, and then take 2 seconds
+         for the final frame to allow for the sound effect to end */
+        long currTime = System.currentTimeMillis();
+        long temp = dying == 1 ? 2000 : 100;
+        /* If it's time to draw a new death frame... */
+        if (currTime - timer >= temp) {
+            dying--;
+            timer = currTime;
+            /* If this was the last death frame...*/
+            if (dying == 0) {
+                if (numLives == -1) {
+                    /* Game over for player.  If relevant, update high score.  Set gameOver flag*/
+                    if (currScore > highScore) {
+                        updateScore(currScore);
+                    }
+                    overScreen = true;
+                }
+            }
+        }
+    }
+
+    private void fillImage(final Graphics g, final Image image) {
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, 600, 600);
+        g.drawImage(image, 0, 0, Color.BLACK, null);
     }
 
     private void handlePellet(final Graphics g, final Ghost ghost) {
