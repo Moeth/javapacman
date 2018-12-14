@@ -31,7 +31,7 @@ public class Player extends Mover {
         pelletsEaten = 0;
         pellet = Position.ofGrid(position);
         last = position;
-        this.location = position;
+        location = position;
         currDirection = Direction.L;
         desiredDirection = Direction.L;
     }
@@ -141,5 +141,10 @@ public class Player extends Mover {
         if (location.isGrid()) {
             pellet = Position.ofGrid(location);
         }
+    }
+
+    public boolean hitGhost3(Ghost ghost) {
+        return location.x == ghost.location.x && Math.abs(location.y - ghost.location.y) < 10
+                || location.y == ghost.location.y && Math.abs(location.x - ghost.location.x) < 10;
     }
 }

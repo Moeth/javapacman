@@ -2,14 +2,14 @@ package de.moeth.pacman;
 
 import static de.moeth.pacman.Board.GRID_SIZE;
 
-public class GameMap {
+class GameMap {
 
     /*Contains the game map, passed to player and ghosts */
-    boolean[][] state;
+    private final boolean[][] state;
 //    private final GameMap gameMap = new GameMap();
 
     /* Contains the state of all pellets*/
-    boolean[][] pellets;
+    private final boolean[][] pellets;
 
     public GameMap() {
         state = new boolean[GRID_SIZE][GRID_SIZE];
@@ -66,7 +66,7 @@ public class GameMap {
         eatPellet(position.x, position.y);
     }
 
-    public void eatPellet(int x, int y) {
+    private void eatPellet(int x, int y) {
         pellets[x][y] = false;
     }
 

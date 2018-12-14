@@ -10,7 +10,7 @@ public class Position {
     public final int x;
     public final int y;
 
-    public Position(final int x, final int y) {
+    private Position(final int x, final int y) {
         this.x = x;
         this.y = y;
     }
@@ -23,7 +23,7 @@ public class Position {
         return ofGrid(location.x, location.y);
     }
 
-    public static Position ofGrid(final int x, final int y) {
+    private static Position ofGrid(final int x, final int y) {
         return Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
     }
 
@@ -32,7 +32,7 @@ public class Position {
     }
 
     public Position setX(final int x) {
-        return Position.of(x, this.y);
+        return Position.of(x, y);
     }
 
     public boolean isGrid() {

@@ -9,13 +9,13 @@ import static de.moeth.pacman.Direction.*;
 public class Ghost extends Mover {
 
     /* Direction ghost is heading */
-    Direction direction;
+    private Direction direction;
     /* Last ghost location*/
     Position last;
     /* Current ghost location */
     public Position location;
     /* The pellet the ghost is on top of */
-    public Position pellet;
+    private Position pellet;
     /* The pellet the ghost was last on top of */
     public Position lastPellet;
 
@@ -26,7 +26,7 @@ public class Ghost extends Mover {
         pellet = Position.ofGrid(position);
         lastPellet = pellet;
         last = position;
-        this.location = position;
+        location = position;
     }
 
     /* update pellet status */
@@ -41,7 +41,6 @@ public class Ghost extends Mover {
     /* Chooses a new direction randomly for the ghost to move */
     private Direction newDirection() {
         Direction backwards = U;
-        int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
         backwards = direction.backwards();
 
@@ -55,8 +54,6 @@ public class Ghost extends Mover {
                 break;
             }
 
-            newX = location.x;
-            newY = location.y;
             lookX = location.x;
             lookY = location.y;
 
@@ -64,19 +61,15 @@ public class Ghost extends Mover {
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = L;
-                newX -= Board.INCREMENT;
                 lookX -= Board.INCREMENT;
             } else if (random == 2) {
                 newDirection = R;
-                newX += Board.INCREMENT;
                 lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = U;
-                newY -= Board.INCREMENT;
                 lookY -= Board.INCREMENT;
             } else if (random == 4) {
                 newDirection = D;
-                newY += Board.INCREMENT;
                 lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {

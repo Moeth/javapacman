@@ -11,7 +11,7 @@ class Mover {
     private final GameMap gameMap;
 
     /* Generic constructor */
-    public Mover(final GameMap gameMap) {
+    Mover(final GameMap gameMap) {
 //        state = new boolean[Board.GRID_SIZE][Board.GRID_SIZE];
 //        for (int i = 0; i < Board.GRID_SIZE; i++) {
 //            for (int j = 0; j < Board.GRID_SIZE; j++) {
@@ -48,7 +48,7 @@ class Mover {
     }
 
     /* Determines if a set of coordinates is a valid destination.*/
-    public boolean isValidDest(int x, int y) {
+    boolean isValidDest(int x, int y) {
     /* The first statements check that the x and y are inbounds.  The last statement checks the map to
        see if it's a valid location */
         int vvv = x / Board.GRID_SIZE - 1;
