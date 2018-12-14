@@ -156,8 +156,8 @@ public class Player extends Mover {
 
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
-        int gridSize = 20;
-        if (x % 20 == 0 && y % 20 == 0 ||
+        int gridSize = Board.GRID_SIZE;
+        if (x % Board.GRID_SIZE == 0 && y % Board.GRID_SIZE == 0 ||
                 /* Or if we're reversing*/
                 (desiredDirection == Direction.L && currDirection == Direction.R) ||
                 (desiredDirection == Direction.R && currDirection == Direction.L) ||

@@ -1,7 +1,4 @@
-/* Drew Schuster */
-
-import de.moeth.pacman.Board;
-import de.moeth.pacman.Direction;
+package de.moeth.pacman;/* Drew Schuster */
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,16 +61,16 @@ public class Pacman extends JApplet implements MouseListener, KeyListener {
     */
     public void repaint() {
         if (b.player.teleport) {
-            b.repaint(b.player.lastX - 20, b.player.lastY - 20, 80, 80);
+            b.repaint(b.player.lastX - Board.GRID_SIZE, b.player.lastY - Board.GRID_SIZE, 80, 80);
             b.player.teleport = false;
         }
-        b.repaint(0, 0, 600, 20);
+        b.repaint(0, 0, 600, Board.GRID_SIZE);
         b.repaint(0, 420, 600, 40);
-        b.repaint(b.player.x - 20, b.player.y - 20, 80, 80);
-        b.repaint(b.ghost1.x - 20, b.ghost1.y - 20, 80, 80);
-        b.repaint(b.ghost2.x - 20, b.ghost2.y - 20, 80, 80);
-        b.repaint(b.ghost3.x - 20, b.ghost3.y - 20, 80, 80);
-        b.repaint(b.ghost4.x - 20, b.ghost4.y - 20, 80, 80);
+        b.repaint(b.player.x - Board.GRID_SIZE, b.player.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost1.x - Board.GRID_SIZE, b.ghost1.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost2.x - Board.GRID_SIZE, b.ghost2.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost3.x - Board.GRID_SIZE, b.ghost3.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost4.x - Board.GRID_SIZE, b.ghost4.y - Board.GRID_SIZE, 80, 80);
     }
 
     /* Steps the screen forward one frame */

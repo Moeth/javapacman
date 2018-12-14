@@ -19,12 +19,12 @@ class Mover {
 
     /* Generic constructor */
     public Mover() {
-        gridSize = 20;
+        gridSize = Board.GRID_SIZE;
         increment = 4;
-        max = 400;
-        state = new boolean[20][20];
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 20; j++) {
+        max = Board.MAX;
+        state = new boolean[Board.GRID_SIZE][Board.GRID_SIZE];
+        for (int i = 0; i < Board.GRID_SIZE; i++) {
+            for (int j = 0; j < Board.GRID_SIZE; j++) {
                 state[i][j] = false;
             }
         }
@@ -32,8 +32,8 @@ class Mover {
 
     /* Updates the state information */
     public void updateState(boolean[][] state) {
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 20; j++) {
+        for (int i = 0; i < Board.GRID_SIZE; i++) {
+            for (int j = 0; j < Board.GRID_SIZE; j++) {
                 this.state[i][j] = state[i][j];
             }
         }
@@ -43,7 +43,7 @@ class Mover {
     public boolean isValidDest(int x, int y) {
     /* The first statements check that the x and y are inbounds.  The last statement checks the map to
        see if it's a valid location */
-        if ((x % 20 == 0 || y % 20 == 0) && 20 <= x && x < 400 && 20 <= y && y < 400 && state[x / 20 - 1][y / 20 - 1]) {
+        if ((x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && state[x / Board.GRID_SIZE - 1][y / Board.GRID_SIZE - 1]) {
             return true;
         }
         return false;

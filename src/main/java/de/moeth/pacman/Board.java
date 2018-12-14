@@ -9,6 +9,8 @@ import java.util.Scanner;
 /*This board class contains the player, ghosts, pellets, and most of the game logic.*/
 public class Board extends JPanel {
 
+    public static final int GRID_SIZE = 20;
+    public static final int MAX = 400;
     /* Initialize the images*/
     final Image pacmanImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacman.jpg"));
     final Image pacmanUpImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanup.jpg"));
@@ -42,7 +44,7 @@ public class Board extends JPanel {
     public int dying = 0;
 
     /* Score information */
-    int currScore;
+    int currScore = 0;
     int highScore;
 
     /* if the high scores have been cleared, we have to update the top of the screen to reflect that */
@@ -57,19 +59,19 @@ public class Board extends JPanel {
     boolean[][] pellets;
 
     /* Game dimensions */
-    final int gridSize;
-    final int max;
+    final int gridSize = GRID_SIZE;
+    final int max = MAX;
 
     /* State flags*/
-    public boolean stopped;
-    public boolean titleScreen;
+    public boolean stopped = false;
+    public boolean titleScreen = true;
     public boolean winScreen = false;
     public boolean overScreen = false;
     public boolean demo = false;
-    public int New;
+    public int New = 0;
 
     /* Used to call sound effects */
-    public final GameSounds sounds;
+    public final GameSounds sounds = new GameSounds();
 
     int lastPelletEatenX = 0;
     int lastPelletEatenY = 0;
@@ -80,13 +82,6 @@ public class Board extends JPanel {
     /* Constructor initializes state flags etc.*/
     public Board() {
         initHighScores();
-        sounds = new GameSounds();
-        currScore = 0;
-        stopped = false;
-        max = 400;
-        gridSize = 20;
-        New = 0;
-        titleScreen = true;
     }
 
     /* Reads the high scores file and saves it */
@@ -127,12 +122,12 @@ public class Board extends JPanel {
     /* Reset occurs on a new game*/
     private void reset() {
         numLives = 2;
-        state = new boolean[20][20];
-        pellets = new boolean[20][20];
+        state = new boolean[GRID_SIZE][GRID_SIZE];
+        pellets = new boolean[GRID_SIZE][GRID_SIZE];
 
         /* Clear state and pellets arrays */
-        for (int i = 0; i < 20; i++) {
-            for (int j = 0; j < 20; j++) {
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
                 state[i][j] = true;
                 pellets[i][j] = true;
             }
@@ -194,111 +189,77 @@ public class Board extends JPanel {
         g.fillRect(0, 0, 420, 420);
 
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, 20, 600);
-        g.fillRect(0, 0, 600, 20);
+        g.fillRect(0, 0, GRID_SIZE, 600);
+        g.fillRect(0, 0, 600, GRID_SIZE);
         g.setColor(Color.WHITE);
         g.drawRect(19, 19, 382, 382);
         g.setColor(Color.BLUE);
 
-        g.fillRect(40, 40, 60, 20);
-        updateMap(40, 40, 60, 20);
-        g.fillRect(120, 40, 60, 20);
-        updateMap(120, 40, 60, 20);
-        g.fillRect(200, 20, 20, 40);
-        updateMap(200, 20, 20, 40);
-        g.fillRect(240, 40, 60, 20);
-        updateMap(240, 40, 60, 20);
-        g.fillRect(320, 40, 60, 20);
-        updateMap(320, 40, 60, 20);
-        g.fillRect(40, 80, 60, 20);
-        updateMap(40, 80, 60, 20);
-        g.fillRect(160, 80, 100, 20);
-        updateMap(160, 80, 100, 20);
-        g.fillRect(200, 80, 20, 60);
-        updateMap(200, 80, 20, 60);
-        g.fillRect(320, 80, 60, 20);
-        updateMap(320, 80, 60, 20);
+        fooo(g, 40, 40, 60, GRID_SIZE);
+        fooo(g, 120, 40, 60, GRID_SIZE);
+        fooo(g, 200, GRID_SIZE, GRID_SIZE, 40);
+        fooo(g, 240, 40, 60, GRID_SIZE);
+        fooo(g, 320, 40, 60, GRID_SIZE);
+        fooo(g, 40, 80, 60, GRID_SIZE);
+        fooo(g, 160, 80, 100, GRID_SIZE);
+        fooo(g, 200, 80, GRID_SIZE, 60);
+        fooo(g, 320, 80, 60, GRID_SIZE);
 
-        g.fillRect(20, 120, 80, 60);
-        updateMap(20, 120, 80, 60);
-        g.fillRect(320, 120, 80, 60);
-        updateMap(320, 120, 80, 60);
-        g.fillRect(20, 200, 80, 60);
-        updateMap(20, 200, 80, 60);
-        g.fillRect(320, 200, 80, 60);
-        updateMap(320, 200, 80, 60);
+        fooo(g, GRID_SIZE, 120, 80, 60);
+        fooo(g, 320, 120, 80, 60);
+        fooo(g, GRID_SIZE, 200, 80, 60);
+        fooo(g, 320, 200, 80, 60);
 
-        g.fillRect(160, 160, 40, 20);
-        updateMap(160, 160, 40, 20);
-        g.fillRect(220, 160, 40, 20);
-        updateMap(220, 160, 40, 20);
-        g.fillRect(160, 180, 20, 20);
-        updateMap(160, 180, 20, 20);
-        g.fillRect(160, 200, 100, 20);
-        updateMap(160, 200, 100, 20);
-        g.fillRect(240, 180, 20, 20);
-        updateMap(240, 180, 20, 20);
+        fooo(g, 160, 160, 40, GRID_SIZE);
+        fooo(g, 220, 160, 40, GRID_SIZE);
+        fooo(g, 160, 180, GRID_SIZE, GRID_SIZE);
+        fooo(g, 160, 200, 100, GRID_SIZE);
+        fooo(g, 240, 180, GRID_SIZE, GRID_SIZE);
         g.setColor(Color.BLUE);
 
-        g.fillRect(120, 120, 60, 20);
-        updateMap(120, 120, 60, 20);
-        g.fillRect(120, 80, 20, 100);
-        updateMap(120, 80, 20, 100);
-        g.fillRect(280, 80, 20, 100);
-        updateMap(280, 80, 20, 100);
-        g.fillRect(240, 120, 60, 20);
-        updateMap(240, 120, 60, 20);
+        fooo(g, 120, 120, 60, GRID_SIZE);
+        fooo(g, 120, 80, GRID_SIZE, 100);
+        fooo(g, 280, 80, GRID_SIZE, 100);
+        fooo(g, 240, 120, 60, GRID_SIZE);
 
-        g.fillRect(280, 200, 20, 60);
-        updateMap(280, 200, 20, 60);
-        g.fillRect(120, 200, 20, 60);
-        updateMap(120, 200, 20, 60);
-        g.fillRect(160, 240, 100, 20);
-        updateMap(160, 240, 100, 20);
-        g.fillRect(200, 260, 20, 40);
-        updateMap(200, 260, 20, 40);
+        fooo(g, 280, 200, GRID_SIZE, 60);
+        fooo(g, 120, 200, GRID_SIZE, 60);
+        fooo(g, 160, 240, 100, GRID_SIZE);
+        fooo(g, 200, 260, GRID_SIZE, 40);
 
-        g.fillRect(120, 280, 60, 20);
-        updateMap(120, 280, 60, 20);
-        g.fillRect(240, 280, 60, 20);
-        updateMap(240, 280, 60, 20);
+        fooo(g, 120, 280, 60, GRID_SIZE);
+        fooo(g, 240, 280, 60, GRID_SIZE);
 
-        g.fillRect(40, 280, 60, 20);
-        updateMap(40, 280, 60, 20);
-        g.fillRect(80, 280, 20, 60);
-        updateMap(80, 280, 20, 60);
-        g.fillRect(320, 280, 60, 20);
-        updateMap(320, 280, 60, 20);
-        g.fillRect(320, 280, 20, 60);
-        updateMap(320, 280, 20, 60);
+        fooo(g, 40, 280, 60, GRID_SIZE);
+        fooo(g, 80, 280, GRID_SIZE, 60);
+        fooo(g, 320, 280, 60, GRID_SIZE);
+        fooo(g, 320, 280, GRID_SIZE, 60);
 
-        g.fillRect(20, 320, 40, 20);
-        updateMap(20, 320, 40, 20);
-        g.fillRect(360, 320, 40, 20);
-        updateMap(360, 320, 40, 20);
-        g.fillRect(160, 320, 100, 20);
-        updateMap(160, 320, 100, 20);
-        g.fillRect(200, 320, 20, 60);
-        updateMap(200, 320, 20, 60);
+        fooo(g, GRID_SIZE, 320, 40, GRID_SIZE);
+        fooo(g, 360, 320, 40, GRID_SIZE);
+        fooo(g, 160, 320, 100, GRID_SIZE);
+        fooo(g, 200, 320, GRID_SIZE, 60);
 
-        g.fillRect(40, 360, 140, 20);
-        updateMap(40, 360, 140, 20);
-        g.fillRect(240, 360, 140, 20);
-        updateMap(240, 360, 140, 20);
-        g.fillRect(280, 320, 20, 40);
-        updateMap(280, 320, 20, 60);
-        g.fillRect(120, 320, 20, 60);
-        updateMap(120, 320, 20, 60);
+        fooo(g, 40, 360, 140, GRID_SIZE);
+        fooo(g, 240, 360, 140, GRID_SIZE);
+        g.fillRect(280, 320, GRID_SIZE, 40);
+        updateMap(280, 320, GRID_SIZE, 60);
+        fooo(g, 120, 320, GRID_SIZE, 60);
         drawLives(g);
+    }
+
+    private void fooo(Graphics g, final int x, final int y, final int width, final int height) {
+        g.fillRect(x, y, width, height);
+        updateMap(x, y, width, height);
     }
 
     /* Draws the pellets on the screen */
     public void drawPellets(Graphics g) {
         g.setColor(Color.YELLOW);
-        for (int i = 1; i < 20; i++) {
-            for (int j = 1; j < 20; j++) {
+        for (int i = 1; i < GRID_SIZE; i++) {
+            for (int j = 1; j < GRID_SIZE; j++) {
                 if (pellets[i - 1][j - 1]) {
-                    g.fillOval(i * 20 + 8, j * 20 + 8, 4, 4);
+                    g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, 4, 4);
                 }
             }
         }
@@ -307,7 +268,7 @@ public class Board extends JPanel {
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
     public void fillPellet(int x, int y, Graphics g) {
         g.setColor(Color.YELLOW);
-        g.fillOval(x * 20 + 28, y * 20 + 28, 4, 4);
+        g.fillOval(x * GRID_SIZE + 28, y * GRID_SIZE + 28, 4, 4);
     }
 
     /* This is the main function that draws one entire frame of the game */
@@ -324,13 +285,13 @@ public class Board extends JPanel {
 
             /* Kill the pacman */
             if (dying == 4) {
-                g.fillRect(player.x, player.y, 20, 7);
+                g.fillRect(player.x, player.y, GRID_SIZE, 7);
             } else if (dying == 3) {
-                g.fillRect(player.x, player.y, 20, 14);
+                g.fillRect(player.x, player.y, GRID_SIZE, 14);
             } else if (dying == 2) {
-                g.fillRect(player.x, player.y, 20, 20);
+                g.fillRect(player.x, player.y, GRID_SIZE, GRID_SIZE);
             } else if (dying == 1) {
-                g.fillRect(player.x, player.y, 20, 20);
+                g.fillRect(player.x, player.y, GRID_SIZE, GRID_SIZE);
             }
      
       /* Take .1 seconds on each frame of death, and then take 2 seconds
@@ -407,9 +368,9 @@ public class Board extends JPanel {
             g.setFont(font);
             clearHighScores = false;
             if (demo) {
-                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, 20, 10);
+                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, GRID_SIZE, 10);
             } else {
-                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, 20, 10);
+                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, GRID_SIZE, 10);
             }
         }
 
@@ -440,9 +401,9 @@ public class Board extends JPanel {
             g.setColor(Color.YELLOW);
             g.setFont(font);
             if (demo) {
-                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, 20, 10);
+                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, GRID_SIZE, 10);
             } else {
-                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, 20, 10);
+                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, GRID_SIZE, 10);
             }
             New++;
         }
@@ -470,11 +431,11 @@ public class Board extends JPanel {
         }
 
         /* Drawing optimization */
-        g.copyArea(player.x - 20, player.y - 20, 80, 80, 0, 0);
-        g.copyArea(ghost1.x - 20, ghost1.y - 20, 80, 80, 0, 0);
-        g.copyArea(ghost2.x - 20, ghost2.y - 20, 80, 80, 0, 0);
-        g.copyArea(ghost3.x - 20, ghost3.y - 20, 80, 80, 0, 0);
-        g.copyArea(ghost4.x - 20, ghost4.y - 20, 80, 80, 0, 0);
+        g.copyArea(player.x - GRID_SIZE, player.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost1.x - GRID_SIZE, ghost1.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost2.x - GRID_SIZE, ghost2.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost3.x - GRID_SIZE, ghost3.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost4.x - GRID_SIZE, ghost4.y - GRID_SIZE, 80, 80, 0, 0);
 
 
 
@@ -517,11 +478,11 @@ public class Board extends JPanel {
 
         /* Delete the players and ghosts */
         g.setColor(Color.BLACK);
-        g.fillRect(player.lastX, player.lastY, 20, 20);
-        g.fillRect(ghost1.lastX, ghost1.lastY, 20, 20);
-        g.fillRect(ghost2.lastX, ghost2.lastY, 20, 20);
-        g.fillRect(ghost3.lastX, ghost3.lastY, 20, 20);
-        g.fillRect(ghost4.lastX, ghost4.lastY, 20, 20);
+        g.fillRect(player.lastX, player.lastY, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost1.lastX, ghost1.lastY, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost2.lastX, ghost2.lastY, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost3.lastX, ghost3.lastY, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost4.lastX, ghost4.lastY, GRID_SIZE, GRID_SIZE);
 
         /* Eat pellets */
         if (pellets[player.pelletX][player.pelletY] && New != 2 && New != 3) {
@@ -542,13 +503,13 @@ public class Board extends JPanel {
 
             /* Update the screen to reflect the new score */
             g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, 20);
+            g.fillRect(0, 0, 600, GRID_SIZE);
             g.setColor(Color.YELLOW);
             g.setFont(font);
             if (demo) {
-                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, 20, 10);
+                g.drawString("DEMO MODE PRESS ANY KEY TO START A GAME\t High Score: " + highScore, GRID_SIZE, 10);
             } else {
-                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, 20, 10);
+                g.drawString("Score: " + (currScore) + "\t High Score: " + highScore, GRID_SIZE, 10);
             }
 
             /* If this was the last pellet */
