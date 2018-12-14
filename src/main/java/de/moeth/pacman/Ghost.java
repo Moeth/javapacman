@@ -10,54 +10,35 @@ public class Ghost extends Mover {
 
     /* Direction ghost is heading */
     Direction direction;
-
     /* Last ghost location*/
-//    int lastX;
-//    int last.y;
     Position last;
-
     /* Current ghost location */
-//    public int locationx;
-//    public int locationy;
     public Position location;
-
     /* The pellet the ghost is on top of */
-//    int pelletX, pellet.y;
     public Position pellet;
-
     /* The pellet the ghost was last on top of */
-//    int lastPellet.x, lastPellet.y;
     public Position lastPellet;
 
     /*Constructor places ghost and updates states*/
-    public Ghost(int x, int y) {
+    public Ghost(Position position) {
         direction = L;
-        pellet = Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
+        pellet = Position.ofGrid(position);
         lastPellet = pellet;
-        last = Position.of(x, y);
-        this.location = Position.of(x, y);
+        last = position;
+        this.location = position;
     }
 
     /* update pellet status */
     public void updatePellet() {
-        int tempX = location.x / Board.GRID_SIZE - 1;
-        int tempY = location.y / Board.GRID_SIZE - 1;
-        if (tempX != pellet.x || tempY != pellet.y) {
+        Position temp = Position.ofGrid(location);
+        if (temp.x != pellet.x || temp.y != pellet.y) {
             lastPellet = pellet;
-            pellet = Position.of(tempX, tempY);
+            pellet = temp;
         }
-    }
-
-    /* Determines if the location is one where the ghost has to make a decision*/
-    public boolean isChoiceDest() {
-        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
-            return true;
-        }
-        return false;
     }
 
     /* Chooses a new direction randomly for the ghost to move */
-    public Direction newDirection() {
+    private Direction newDirection() {
         Direction backwards = U;
         int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
@@ -82,19 +63,19 @@ public class Ghost extends Mover {
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = L;
-                newX -= increment;
-                lookX -= increment;
+                newX -= Board.INCREMENT;
+                lookX -= Board.INCREMENT;
             } else if (random == 2) {
                 newDirection = R;
-                newX += increment;
+                newX += Board.INCREMENT;
                 lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = U;
-                newY -= increment;
-                lookY -= increment;
+                newY -= Board.INCREMENT;
+                lookY -= Board.INCREMENT;
             } else if (random == 4) {
                 newDirection = D;
-                newY += increment;
+                newY += Board.INCREMENT;
                 lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {
@@ -109,33 +90,11 @@ public class Ghost extends Mover {
         last = location;
 
         /* If we can make a decision, pick a new direction randomly */
-        if (isChoiceDest()) {
+        if (location.isGrid()) {
             direction = newDirection();
         }
 
         /* If that direction is valid, move that way */
-        switch (direction) {
-            case L:
-                if (isValidDest(location.x - increment, location.y)) {
-                    location = location.move(-increment, 0);
-                }
-                break;
-            case R:
-                if (isValidDest(location.x + Board.GRID_SIZE, location.y)) {
-                    location = location.move(increment, 0);
-                }
-                break;
-            case U:
-                if (isValidDest(location.x, location.y - increment)) {
-                    location = location.move(0, -increment);
-
-                }
-                break;
-            case D:
-                if (isValidDest(location.x, location.y + Board.GRID_SIZE)) {
-                    location = location.move(0, increment);
-                }
-                break;
-        }
+        location = move(direction, location);
     }
 }

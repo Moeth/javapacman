@@ -31,11 +31,11 @@ public class Board extends JPanel {
     final Image winScreenImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/winScreen.jpg"));
 
     /* Initialize the player and ghosts */
-    public Player player = new Player(200, 300);
-    public Ghost ghost1 = new Ghost(180, 180);
-    public Ghost ghost2 = new Ghost(200, 180);
-    public Ghost ghost3 = new Ghost(220, 180);
-    public Ghost ghost4 = new Ghost(220, 180);
+    public Player player;
+    public Ghost ghost1;
+    public Ghost ghost2;
+    public Ghost ghost3;
+    public Ghost ghost4;
 
     /* Timer is used for playing sound effects and animations */
     long timer = System.currentTimeMillis();
@@ -83,6 +83,15 @@ public class Board extends JPanel {
     /* Constructor initializes state flags etc.*/
     public Board() {
         initHighScores();
+        init();
+    }
+
+    private void init() {
+        player = new Player(Position.of(200, 300));
+        ghost1 = new Ghost(Position.of(180, 180));
+        ghost2 = new Ghost(Position.of(200, 180));
+        ghost3 = new Ghost(Position.of(220, 180));
+        ghost4 = new Ghost(Position.of(220, 180));
     }
 
     /* Reads the high scores file and saves it */
@@ -380,11 +389,7 @@ public class Board extends JPanel {
         /* Game initialization */
         if (New == 1) {
             reset();
-            player = new Player(200, 300);
-            ghost1 = new Ghost(180, 180);
-            ghost2 = new Ghost(200, 180);
-            ghost3 = new Ghost(220, 180);
-            ghost4 = new Ghost(220, 180);
+            init();
             currScore = 0;
             drawBoard(g);
             drawPellets(g);

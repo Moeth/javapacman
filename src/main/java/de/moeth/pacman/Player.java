@@ -25,18 +25,18 @@ public class Player extends Mover {
     boolean stopped = false;
 
     /* Constructor places pacman in initial location and orientation */
-    public Player(int x, int y) {
+    public Player(Position position) {
         teleport = false;
         pelletsEaten = 0;
-        pellet = Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
-        last = Position.of(x, y);
-        this.location = Position.of(x, y);
+        pellet = Position.ofGrid(position);
+        last = position;
+        this.location = position;
         currDirection = Direction.L;
         desiredDirection = Direction.L;
     }
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
-    public Direction newDirection() {
+    private Direction newDirection() {
         int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
         Direction backwards = direction.backwards();
@@ -54,19 +54,19 @@ public class Player extends Mover {
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = Direction.L;
-                newX -= increment;
-                lookX -= increment;
+                newX -= Board.INCREMENT;
+                lookX -= Board.INCREMENT;
             } else if (random == 2) {
                 newDirection = Direction.R;
-                newX += increment;
+                newX += Board.INCREMENT;
                 lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = Direction.U;
-                newY -= increment;
-                lookY -= increment;
+                newY -= Board.INCREMENT;
+                lookY -= Board.INCREMENT;
             } else if (random == 4) {
                 newDirection = Direction.D;
-                newY += increment;
+                newY += Board.INCREMENT;
                 lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {
@@ -77,47 +77,12 @@ public class Player extends Mover {
     }
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
-    public boolean isChoiceDest() {
-        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
     public void demoMove() {
         last = location;
-        if (isChoiceDest()) {
+        if (location.isGrid()) {
             direction = newDirection();
         }
-        switch (direction) {
-            case L:
-                if (isValidDest(location.x - increment, location.y)) {
-                    location = location.move(-increment, 0);
-                } else if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
-                    location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
-                    teleport = true;
-                }
-                break;
-            case R:
-                if (isValidDest(location.x + Board.GRID_SIZE, location.y)) {
-                    location = location.move(increment, 0);
-                } else if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
-                    location = location.setX(1 * Board.GRID_SIZE);
-                    teleport = true;
-                }
-                break;
-            case U:
-                if (isValidDest(location.x, location.y - increment)) {
-                    location = location.move(0, -increment);
-                }
-                break;
-            case D:
-                if (isValidDest(location.x, location.y + Board.GRID_SIZE)) {
-                    location = location.move(0, increment);
-                }
-                break;
-        }
+        moveOrTeleport(direction);
         currDirection = direction;
         frameCount++;
     }
@@ -128,67 +93,13 @@ public class Player extends Mover {
 
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
-        int gridSize = Board.GRID_SIZE;
-        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0 ||
-                /* Or if we're reversing*/
-                (desiredDirection == Direction.L && currDirection == Direction.R) ||
-                (desiredDirection == Direction.R && currDirection == Direction.L) ||
-                (desiredDirection == Direction.U && currDirection == Direction.D) ||
-                (desiredDirection == Direction.D && currDirection == Direction.U)
-                ) {
-            switch (desiredDirection) {
-                case L:
-                    if (isValidDest(location.x - increment, location.y)) {
-                        location = location.move(-increment, 0);
-                    }
-                    break;
-                case R:
-                    if (isValidDest(location.x + gridSize, location.y)) {
-                        location = location.move(increment, 0);
-                    }
-                    break;
-                case U:
-                    if (isValidDest(location.x, location.y - increment)) {
-                        location = location.move(0, -increment);
-                    }
-                    break;
-                case D:
-                    if (isValidDest(location.x, location.y + gridSize)) {
-                        location = location.move(0, increment);
-                    }
-                    break;
-            }
+        /* Or if we're reversing*/
+        if (location.isGrid() || Direction.isOpposite(desiredDirection, currDirection)) {
+            location = move(desiredDirection, location);
         }
         /* If we haven't moved, then move in the direction the pacman was headed anyway */
-        if (last.x == location.x && last.y == location.y) {
-            switch (currDirection) {
-                case L:
-                    if (isValidDest(location.x - increment, location.y)) {
-                        location = location.move(-increment, 0);
-                    } else if (location.y == 9 * gridSize && location.x < 2 * gridSize) {
-                        location = location.setX(Board.MAX - gridSize * 1);
-                        teleport = true;
-                    }
-                    break;
-                case R:
-                    if (isValidDest(location.x + gridSize, location.y)) {
-                        location = location.move(increment, 0);
-                    } else if (location.y == 9 * gridSize && location.x > Board.MAX - gridSize * 2) {
-                        location = location.setX(1 * gridSize);
-                        teleport = true;
-                    }
-                    break;
-                case U:
-                    if (isValidDest(location.x, location.y - increment)) {
-                        location = location.move(0, -increment);
-                    }
-                    break;
-                case D:
-                    if (isValidDest(location.x, location.y + gridSize)) {
-                        location = location.move(0, increment);
-                    }
-                    break;
-            }
+        if (Position.isEqualll(last, location)) {
+            moveOrTeleport(currDirection);
         }
 
         /* If we did change direction, update currDirection to reflect that */
@@ -197,7 +108,7 @@ public class Player extends Mover {
         }
 
         /* If we didn't move at all, set the stopped flag */
-        if (last.x == location.x && last.y == location.y) {
+        if (Position.isEqualll(last, location)) {
             stopped = true;
         }
 
@@ -208,10 +119,32 @@ public class Player extends Mover {
         }
     }
 
+    private void moveOrTeleport(final Direction direction) {
+        if (isValidDirection(direction, location)) {
+            location = direction.move(location, Board.INCREMENT);
+        } else {
+
+            switch (direction) {
+                case L:
+                    if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
+                        location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
+                        teleport = true;
+                    }
+                    break;
+                case R:
+                    if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
+                        location = location.setX(1 * Board.GRID_SIZE);
+                        teleport = true;
+                    }
+                    break;
+            }
+        }
+    }
+
     /* Update what pellet the pacman is on top of */
     public void updatePellet() {
-        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
-            pellet = Position.of(location.x / Board.GRID_SIZE - 1, location.y / Board.GRID_SIZE - 1);
+        if (location.isGrid()) {
+            pellet = Position.ofGrid(location);
         }
     }
 }
