@@ -30,17 +30,16 @@ public class Ghost extends Mover {
         pelletY = x / gridSize - 1;
         lastPelletX = pelletX;
         lastPelletY = pelletY;
-        this.lastX = x;
-        this.lastY = y;
+        lastX = x;
+        lastY = y;
         this.x = x;
         this.y = y;
     }
 
     /* update pellet status */
     public void updatePellet() {
-        int tempX, tempY;
-        tempX = x / gridSize - 1;
-        tempY = y / gridSize - 1;
+        int tempX = x / gridSize - 1;
+        int tempY = y / gridSize - 1;
         if (tempX != pelletX || tempY != pelletY) {
             lastPelletX = pelletX;
             lastPelletY = pelletY;
@@ -59,11 +58,9 @@ public class Ghost extends Mover {
 
     /* Chooses a new direction randomly for the ghost to move */
     public char newDirection() {
-        int random;
         char backwards = 'U';
         int newX = x, newY = y;
         int lookX = x, lookY = y;
-        Set<Character> set = new HashSet<Character>();
         switch (direction) {
             case 'L':
                 backwards = 'R';
@@ -81,6 +78,7 @@ public class Ghost extends Mover {
 
         char newDirection = backwards;
         /* While we still haven't found a valid direction */
+        Set<Character> set = new HashSet<Character>();
         while (newDirection == backwards || !isValidDest(lookX, lookY)) {
             /* If we've tried every location, turn around and break the loop */
             if (set.size() == 3) {
@@ -94,7 +92,7 @@ public class Ghost extends Mover {
             lookY = y;
 
             /* Randomly choose a direction */
-            random = (int) (Math.random() * 4) + 1;
+            int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = 'L';
                 newX -= increment;
@@ -132,20 +130,24 @@ public class Ghost extends Mover {
         /* If that direction is valid, move that way */
         switch (direction) {
             case 'L':
-                if (isValidDest(x - increment, y))
+                if (isValidDest(x - increment, y)) {
                     x -= increment;
+                }
                 break;
             case 'R':
-                if (isValidDest(x + gridSize, y))
+                if (isValidDest(x + gridSize, y)) {
                     x += increment;
+                }
                 break;
             case 'U':
-                if (isValidDest(x, y - increment))
+                if (isValidDest(x, y - increment)) {
                     y -= increment;
+                }
                 break;
             case 'D':
-                if (isValidDest(x, y + gridSize))
+                if (isValidDest(x, y + gridSize)) {
                     y += increment;
+                }
                 break;
         }
     }

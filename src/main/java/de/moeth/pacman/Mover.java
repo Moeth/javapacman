@@ -7,15 +7,15 @@ class Mover {
     int frameCount = 0;
 
     /* State contains the game map */
-    boolean[][] state;
+    final boolean[][] state;
 
     /* gridSize is the size of one square in the game.
        max is the height/width of the game.
        increment is the speed at which the object moves,
        1 increment per move() call */
-    int gridSize;
-    int max;
-    int increment;
+    final int gridSize;
+    final int max;
+    final int increment;
 
     /* Generic constructor */
     public Mover() {
@@ -43,7 +43,7 @@ class Mover {
     public boolean isValidDest(int x, int y) {
     /* The first statements check that the x and y are inbounds.  The last statement checks the map to
        see if it's a valid location */
-        if ((((x) % 20 == 0) || ((y) % 20) == 0) && 20 <= x && x < 400 && 20 <= y && y < 400 && state[x / 20 - 1][y / 20 - 1]) {
+        if ((x % 20 == 0 || y % 20 == 0) && 20 <= x && x < 400 && 20 <= y && y < 400 && state[x / 20 - 1][y / 20 - 1]) {
             return true;
         }
         return false;

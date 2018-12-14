@@ -39,8 +39,8 @@ public class Player extends Mover {
         pelletsEaten = 0;
         pelletX = x / gridSize - 1;
         pelletY = y / gridSize - 1;
-        this.lastX = x;
-        this.lastY = y;
+        lastX = x;
+        lastY = y;
         this.x = x;
         this.y = y;
         currDirection = 'L';
@@ -49,11 +49,9 @@ public class Player extends Mover {
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
     public char newDirection() {
-        int random;
         char backwards = 'U';
         int newX = x, newY = y;
         int lookX = x, lookY = y;
-        Set<Character> set = new HashSet<Character>();
         switch (direction) {
             case 'L':
                 backwards = 'R';
@@ -69,6 +67,7 @@ public class Player extends Mover {
                 break;
         }
         char newDirection = backwards;
+        Set<Character> set = new HashSet<Character>();
         while (newDirection == backwards || !isValidDest(lookX, lookY)) {
             if (set.size() == 3) {
                 newDirection = backwards;
@@ -78,7 +77,7 @@ public class Player extends Mover {
             newY = y;
             lookX = x;
             lookY = y;
-            random = (int) (Math.random() * 4) + 1;
+            int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
                 newDirection = 'L';
                 newX -= increment;
@@ -136,12 +135,14 @@ public class Player extends Mover {
                 }
                 break;
             case 'U':
-                if (isValidDest(x, y - increment))
+                if (isValidDest(x, y - increment)) {
                     y -= increment;
+                }
                 break;
             case 'D':
-                if (isValidDest(x, y + gridSize))
+                if (isValidDest(x, y + gridSize)) {
                     y += increment;
+                }
                 break;
         }
         currDirection = direction;
@@ -150,12 +151,12 @@ public class Player extends Mover {
 
     /* The move function moves the pacman for one frame in non demo mode */
     public void move() {
-        int gridSize = 20;
         lastX = x;
         lastY = y;
 
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
+        int gridSize = 20;
         if (x % 20 == 0 && y % 20 == 0 ||
                 /* Or if we're reversing*/
                 (desiredDirection == 'L' && currDirection == 'R') ||
@@ -165,20 +166,24 @@ public class Player extends Mover {
                 ) {
             switch (desiredDirection) {
                 case 'L':
-                    if (isValidDest(x - increment, y))
+                    if (isValidDest(x - increment, y)) {
                         x -= increment;
+                    }
                     break;
                 case 'R':
-                    if (isValidDest(x + gridSize, y))
+                    if (isValidDest(x + gridSize, y)) {
                         x += increment;
+                    }
                     break;
                 case 'U':
-                    if (isValidDest(x, y - increment))
+                    if (isValidDest(x, y - increment)) {
                         y -= increment;
+                    }
                     break;
                 case 'D':
-                    if (isValidDest(x, y + gridSize))
+                    if (isValidDest(x, y + gridSize)) {
                         y += increment;
+                    }
                     break;
             }
         }
@@ -186,28 +191,30 @@ public class Player extends Mover {
         if (lastX == x && lastY == y) {
             switch (currDirection) {
                 case 'L':
-                    if (isValidDest(x - increment, y))
+                    if (isValidDest(x - increment, y)) {
                         x -= increment;
-                    else if (y == 9 * gridSize && x < 2 * gridSize) {
+                    } else if (y == 9 * gridSize && x < 2 * gridSize) {
                         x = max - gridSize * 1;
                         teleport = true;
                     }
                     break;
                 case 'R':
-                    if (isValidDest(x + gridSize, y))
+                    if (isValidDest(x + gridSize, y)) {
                         x += increment;
-                    else if (y == 9 * gridSize && x > max - gridSize * 2) {
+                    } else if (y == 9 * gridSize && x > max - gridSize * 2) {
                         x = 1 * gridSize;
                         teleport = true;
                     }
                     break;
                 case 'U':
-                    if (isValidDest(x, y - increment))
+                    if (isValidDest(x, y - increment)) {
                         y -= increment;
+                    }
                     break;
                 case 'D':
-                    if (isValidDest(x, y + gridSize))
+                    if (isValidDest(x, y + gridSize)) {
                         y += increment;
+                    }
                     break;
             }
         }
@@ -218,8 +225,9 @@ public class Player extends Mover {
         }
 
         /* If we didn't move at all, set the stopped flag */
-        if (lastX == x && lastY == y)
+        if (lastX == x && lastY == y) {
             stopped = true;
+        }
 
             /* Otherwise, clear the stopped flag and increment the frameCount for animation purposes*/
         else {
