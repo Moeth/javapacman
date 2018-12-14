@@ -46,22 +46,38 @@ public class GameMap {
 //        }
     }
 
-//    public void updateState(boolean[][] state) {
-//        for (int i = 0; i < GRID_SIZE; i++) {
-//            for (int j = 0; j < GRID_SIZE; j++) {
-//                this.state[i][j] = state[i][j];
-//            }
-//        }
-//    }
+    public boolean getState(Position position) {
+        return getState(position.x, position.y);
+    }
+
+    public boolean getState(int x, int y) {
+        return state[x][y];
+    }
+
+    public boolean getPellet(Position position) {
+        return getPellet(position.x, position.y);
+    }
+
+    public boolean getPellet(int x, int y) {
+        return pellets[x][y];
+    }
+
+    public void eatPellet(Position position) {
+        eatPellet(position.x, position.y);
+    }
+
+    public void eatPellet(int x, int y) {
+        pellets[x][y] = false;
+    }
 
     /* Function is called during drawing of the map.
-   Whenever the a portion of the map is covered up with a barrier,
-   the map and pellets arrays are updated accordingly to note
-   that those are invalid locations to travel or put pellets
-*/
+       Whenever the a portion of the map is covered up with a barrier,
+       the map and pellets arrays are updated accordingly to note
+       that those are invalid locations to travel or put pellets
+    */
     public void updateMap(int x, int y, int width, int height) {
-        for (int i = x / GRID_SIZE; i < x / GRID_SIZE + width / GRID_SIZE; i++) {
-            for (int j = y / GRID_SIZE; j < y / GRID_SIZE + height / GRID_SIZE; j++) {
+        for (int i = Position.toGrid(x); i < Position.toGrid(x) + Position.toGrid(width); i++) {
+            for (int j = Position.toGrid(y); j < Position.toGrid(y) + Position.toGrid(height); j++) {
                 state[i - 1][j - 1] = false;
                 pellets[i - 1][j - 1] = false;
             }

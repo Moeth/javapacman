@@ -124,11 +124,6 @@ public class Board extends JPanel {
     /* Reset occurs on a new game*/
     private void reset() {
         numLives = 2;
-
-    }
-
-    private void updateMap(int x, int y, int width, int height) {
-        gameMap.updateMap(x, y, width, height);
     }
 
     /* Draws the appropriate number of lives on the bottom left of the screen.
@@ -214,23 +209,22 @@ public class Board extends JPanel {
 
         fooo(g, 40, 360, 140, GRID_SIZE);
         fooo(g, 240, 360, 140, GRID_SIZE);
-        g.fillRect(280, 320, GRID_SIZE, 40);
-        updateMap(280, 320, GRID_SIZE, 60);
+        fooo(g, 280, 320, GRID_SIZE, 40);
         fooo(g, 120, 320, GRID_SIZE, 60);
         drawLives(g);
     }
 
     private void fooo(Graphics g, final int x, final int y, final int width, final int height) {
         g.fillRect(x, y, width, height);
-        updateMap(x, y, width, height);
+        gameMap.updateMap(x, y, width, height);
     }
 
     /* Draws the pellets on the screen */
-    public void drawPellets(Graphics g) {
+    private void drawPellets(Graphics g) {
         g.setColor(Color.YELLOW);
         for (int i = 1; i < GRID_SIZE; i++) {
             for (int j = 1; j < GRID_SIZE; j++) {
-                if (gameMap.pellets[i - 1][j - 1]) {
+                if (gameMap.getPellet(i - 1, j - 1)) {
                     g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, INCREMENT, INCREMENT);
                 }
             }
@@ -238,7 +232,7 @@ public class Board extends JPanel {
     }
 
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
-    public void fillPellet(int x, int y, Graphics g) {
+    private void fillPellet(int x, int y, Graphics g) {
         g.setColor(Color.YELLOW);
         g.fillOval(x * GRID_SIZE + 28, y * GRID_SIZE + 28, INCREMENT, INCREMENT);
     }
@@ -445,7 +439,7 @@ public class Board extends JPanel {
         g.fillRect(ghost4.last.x, ghost4.last.y, GRID_SIZE, GRID_SIZE);
 
         /* Eat pellets */
-        if (gameMap.pellets[player.pellet.x][player.pellet.y] && New != 2 && New != 3) {
+        if (gameMap.getPellet(player.pellet) && New != 2 && New != 3) {
             lastPelletEatenX = player.pellet.x;
             lastPelletEatenY = player.pellet.y;
 
@@ -456,7 +450,7 @@ public class Board extends JPanel {
             player.pelletsEaten++;
 
             /* Delete the pellet*/
-            gameMap.pellets[player.pellet.x][player.pellet.y] = false;
+            gameMap.eatPellet(player.pellet);
 
             /* Increment the score */
             currScore += 50;
@@ -495,16 +489,16 @@ public class Board extends JPanel {
 
 
         /* Replace pellets that have been run over by ghosts */
-        if (gameMap.pellets[ghost1.lastPellet.x][ghost1.lastPellet.y]) {
+        if (gameMap.getPellet(ghost1.lastPellet)) {
             fillPellet(ghost1.lastPellet.x, ghost1.lastPellet.y, g);
         }
-        if (gameMap.pellets[ghost2.lastPellet.x][ghost2.lastPellet.y]) {
+        if (gameMap.getPellet(ghost2.lastPellet)) {
             fillPellet(ghost2.lastPellet.x, ghost2.lastPellet.y, g);
         }
-        if (gameMap.pellets[ghost3.lastPellet.x][ghost3.lastPellet.y]) {
+        if (gameMap.getPellet(ghost3.lastPellet)) {
             fillPellet(ghost3.lastPellet.x, ghost3.lastPellet.y, g);
         }
-        if (gameMap.pellets[ghost4.lastPellet.x][ghost4.lastPellet.y]) {
+        if (gameMap.getPellet(ghost4.lastPellet)) {
             fillPellet(ghost4.lastPellet.x, ghost4.lastPellet.y, g);
         }
 

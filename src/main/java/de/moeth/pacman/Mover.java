@@ -51,6 +51,8 @@ class Mover {
     public boolean isValidDest(int x, int y) {
     /* The first statements check that the x and y are inbounds.  The last statement checks the map to
        see if it's a valid location */
-        return (x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && gameMap.state[x / Board.GRID_SIZE - 1][y / Board.GRID_SIZE - 1];
+        int vvv = x / Board.GRID_SIZE - 1;
+        int gy = y / Board.GRID_SIZE - 1;
+        return (x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && gameMap.getState(vvv, gy);
     }
 }

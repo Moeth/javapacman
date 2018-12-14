@@ -2,6 +2,8 @@ package de.moeth.pacman;
 
 import lombok.ToString;
 
+import static de.moeth.pacman.Board.GRID_SIZE;
+
 @ToString
 public class Position {
 
@@ -41,4 +43,7 @@ public class Position {
         return p1.x == p2.x && p1.y == p2.y;
     }
 
+    public static int toGrid(int p) {
+        return p / GRID_SIZE;
+    }
 }
