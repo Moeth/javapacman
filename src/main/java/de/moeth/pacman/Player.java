@@ -13,34 +13,22 @@ public class Player extends Mover {
 
     /* Keeps track of pellets eaten to determine end of game */
     int pelletsEaten;
-
     /* Last location */
-//    public int last.x;
-//    public int last.y;
     public Position last;
-
     /* Current location */
-//    public int location.x;
-//    public int location.y;
     public Position location;
-
     /* Which pellet the pacman is on top of */
-//    int pellet.x;
-//    int pellet.y;
     public Position pellet;
-
     /* teleport is true when travelling through the teleport tunnels*/
     public boolean teleport;
-
     /* Stopped is set when the pacman is not moving or has been killed */
     boolean stopped = false;
 
     /* Constructor places pacman in initial location and orientation */
     public Player(int x, int y) {
-
         teleport = false;
         pelletsEaten = 0;
-        pellet = Position.of(x / gridSize - 1, y / gridSize - 1);
+        pellet = Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
         last = Position.of(x, y);
         this.location = Position.of(x, y);
         currDirection = Direction.L;
@@ -49,23 +37,9 @@ public class Player extends Mover {
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
     public Direction newDirection() {
-        Direction backwards = Direction.U;
         int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
-        switch (direction) {
-            case L:
-                backwards = Direction.R;
-                break;
-            case R:
-                backwards = Direction.L;
-                break;
-            case U:
-                backwards = Direction.D;
-                break;
-            case D:
-                backwards = Direction.U;
-                break;
-        }
+        Direction backwards = direction.backwards();
         Direction newDirection = backwards;
         Set<Direction> set = new HashSet<Direction>();
         while (newDirection == backwards || !isValidDest(lookX, lookY)) {
@@ -85,7 +59,7 @@ public class Player extends Mover {
             } else if (random == 2) {
                 newDirection = Direction.R;
                 newX += increment;
-                lookX += gridSize;
+                lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = Direction.U;
                 newY -= increment;
@@ -93,7 +67,7 @@ public class Player extends Mover {
             } else if (random == 4) {
                 newDirection = Direction.D;
                 newY += increment;
-                lookY += gridSize;
+                lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {
                 set.add(newDirection);
@@ -104,7 +78,7 @@ public class Player extends Mover {
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
     public boolean isChoiceDest() {
-        if (location.x % gridSize == 0 && location.y % gridSize == 0) {
+        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
             return true;
         }
         return false;
@@ -120,16 +94,16 @@ public class Player extends Mover {
             case L:
                 if (isValidDest(location.x - increment, location.y)) {
                     location = location.move(-increment, 0);
-                } else if (location.y == 9 * gridSize && location.x < 2 * gridSize) {
-                    location = location.setX(max - gridSize * 1);
+                } else if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
+                    location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
                     teleport = true;
                 }
                 break;
             case R:
-                if (isValidDest(location.x + gridSize, location.y)) {
+                if (isValidDest(location.x + Board.GRID_SIZE, location.y)) {
                     location = location.move(increment, 0);
-                } else if (location.y == 9 * gridSize && location.x > max - gridSize * 2) {
-                    location = location.setX(1 * gridSize);
+                } else if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
+                    location = location.setX(1 * Board.GRID_SIZE);
                     teleport = true;
                 }
                 break;
@@ -139,7 +113,7 @@ public class Player extends Mover {
                 }
                 break;
             case D:
-                if (isValidDest(location.x, location.y + gridSize)) {
+                if (isValidDest(location.x, location.y + Board.GRID_SIZE)) {
                     location = location.move(0, increment);
                 }
                 break;
@@ -192,14 +166,14 @@ public class Player extends Mover {
                     if (isValidDest(location.x - increment, location.y)) {
                         location = location.move(-increment, 0);
                     } else if (location.y == 9 * gridSize && location.x < 2 * gridSize) {
-                        location = location.setX(max - gridSize * 1);
+                        location = location.setX(Board.MAX - gridSize * 1);
                         teleport = true;
                     }
                     break;
                 case R:
                     if (isValidDest(location.x + gridSize, location.y)) {
                         location = location.move(increment, 0);
-                    } else if (location.y == 9 * gridSize && location.x > max - gridSize * 2) {
+                    } else if (location.y == 9 * gridSize && location.x > Board.MAX - gridSize * 2) {
                         location = location.setX(1 * gridSize);
                         teleport = true;
                     }
@@ -227,7 +201,7 @@ public class Player extends Mover {
             stopped = true;
         }
 
-            /* Otherwise, clear the stopped flag and increment the frameCount for animation purposes*/
+        /* Otherwise, clear the stopped flag and increment the frameCount for animation purposes*/
         else {
             stopped = false;
             frameCount++;
@@ -236,8 +210,8 @@ public class Player extends Mover {
 
     /* Update what pellet the pacman is on top of */
     public void updatePellet() {
-        if (location.x % gridSize == 0 && location.y % gridSize == 0) {
-            pellet = Position.of(location.x / gridSize - 1, location.y / gridSize - 1);
+        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
+            pellet = Position.of(location.x / Board.GRID_SIZE - 1, location.y / Board.GRID_SIZE - 1);
         }
     }
 }

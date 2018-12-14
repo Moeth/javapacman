@@ -32,7 +32,7 @@ public class Ghost extends Mover {
     /*Constructor places ghost and updates states*/
     public Ghost(int x, int y) {
         direction = L;
-        pellet = Position.of(x / gridSize - 1, y / gridSize - 1);
+        pellet = Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
         lastPellet = pellet;
         last = Position.of(x, y);
         this.location = Position.of(x, y);
@@ -40,8 +40,8 @@ public class Ghost extends Mover {
 
     /* update pellet status */
     public void updatePellet() {
-        int tempX = location.x / gridSize - 1;
-        int tempY = location.y / gridSize - 1;
+        int tempX = location.x / Board.GRID_SIZE - 1;
+        int tempY = location.y / Board.GRID_SIZE - 1;
         if (tempX != pellet.x || tempY != pellet.y) {
             lastPellet = pellet;
             pellet = Position.of(tempX, tempY);
@@ -50,7 +50,7 @@ public class Ghost extends Mover {
 
     /* Determines if the location is one where the ghost has to make a decision*/
     public boolean isChoiceDest() {
-        if (location.x % gridSize == 0 && location.y % gridSize == 0) {
+        if (location.x % Board.GRID_SIZE == 0 && location.y % Board.GRID_SIZE == 0) {
             return true;
         }
         return false;
@@ -61,20 +61,7 @@ public class Ghost extends Mover {
         Direction backwards = U;
         int newX = location.x, newY = location.y;
         int lookX = location.x, lookY = location.y;
-        switch (direction) {
-            case L:
-                backwards = R;
-                break;
-            case R:
-                backwards = L;
-                break;
-            case U:
-                backwards = D;
-                break;
-            case D:
-                backwards = U;
-                break;
-        }
+        backwards = direction.backwards();
 
         Direction newDirection = backwards;
         /* While we still haven't found a valid direction */
@@ -100,7 +87,7 @@ public class Ghost extends Mover {
             } else if (random == 2) {
                 newDirection = R;
                 newX += increment;
-                lookX += gridSize;
+                lookX += Board.GRID_SIZE;
             } else if (random == 3) {
                 newDirection = U;
                 newY -= increment;
@@ -108,7 +95,7 @@ public class Ghost extends Mover {
             } else if (random == 4) {
                 newDirection = D;
                 newY += increment;
-                lookY += gridSize;
+                lookY += Board.GRID_SIZE;
             }
             if (newDirection != backwards) {
                 set.add(newDirection);
@@ -131,11 +118,10 @@ public class Ghost extends Mover {
             case L:
                 if (isValidDest(location.x - increment, location.y)) {
                     location = location.move(-increment, 0);
-
                 }
                 break;
             case R:
-                if (isValidDest(location.x + gridSize, location.y)) {
+                if (isValidDest(location.x + Board.GRID_SIZE, location.y)) {
                     location = location.move(increment, 0);
                 }
                 break;
@@ -146,7 +132,7 @@ public class Ghost extends Mover {
                 }
                 break;
             case D:
-                if (isValidDest(location.x, location.y + gridSize)) {
+                if (isValidDest(location.x, location.y + Board.GRID_SIZE)) {
                     location = location.move(0, increment);
                 }
                 break;

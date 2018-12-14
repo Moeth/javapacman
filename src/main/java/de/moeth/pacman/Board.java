@@ -11,6 +11,7 @@ public class Board extends JPanel {
 
     public static final int GRID_SIZE = 20;
     public static final int MAX = 400;
+    public static final int INCREMENT = 4;
     /* Initialize the images*/
     final Image pacmanImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacman.jpg"));
     final Image pacmanUpImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanup.jpg"));
@@ -259,7 +260,7 @@ public class Board extends JPanel {
         for (int i = 1; i < GRID_SIZE; i++) {
             for (int j = 1; j < GRID_SIZE; j++) {
                 if (pellets[i - 1][j - 1]) {
-                    g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, 4, 4);
+                    g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, INCREMENT, INCREMENT);
                 }
             }
         }
@@ -268,7 +269,7 @@ public class Board extends JPanel {
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
     public void fillPellet(int x, int y, Graphics g) {
         g.setColor(Color.YELLOW);
-        g.fillOval(x * GRID_SIZE + 28, y * GRID_SIZE + 28, 4, 4);
+        g.fillOval(x * GRID_SIZE + 28, y * GRID_SIZE + 28, INCREMENT, INCREMENT);
     }
 
     /* This is the main function that draws one entire frame of the game */

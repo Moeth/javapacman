@@ -9,19 +9,11 @@ class Mover {
     /* State contains the game map */
     final boolean[][] state;
 
-    /* gridSize is the size of one square in the game.
-       max is the height/width of the game.
-       increment is the speed at which the object moves,
-       1 increment per move() call */
-    final int gridSize;
-    final int max;
     final int increment;
 
     /* Generic constructor */
     public Mover() {
-        gridSize = Board.GRID_SIZE;
-        increment = 4;
-        max = Board.MAX;
+        increment = Board.INCREMENT;
         state = new boolean[Board.GRID_SIZE][Board.GRID_SIZE];
         for (int i = 0; i < Board.GRID_SIZE; i++) {
             for (int j = 0; j < Board.GRID_SIZE; j++) {
