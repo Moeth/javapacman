@@ -3,11 +3,13 @@ package de.moeth.pacman;
 import java.util.HashSet;
 import java.util.Set;
 
+import static de.moeth.pacman.Direction.*;
+
 /* Ghost class controls the ghost. */
 public class Ghost extends Mover {
 
     /* Direction ghost is heading */
-    char direction;
+    Direction direction;
 
     /* Last ghost location*/
     int lastX;
@@ -25,7 +27,7 @@ public class Ghost extends Mover {
 
     /*Constructor places ghost and updates states*/
     public Ghost(int x, int y) {
-        direction = 'L';
+        direction = L;
         pelletX = x / gridSize - 1;
         pelletY = x / gridSize - 1;
         lastPelletX = pelletX;
@@ -57,28 +59,28 @@ public class Ghost extends Mover {
     }
 
     /* Chooses a new direction randomly for the ghost to move */
-    public char newDirection() {
-        char backwards = 'U';
+    public Direction newDirection() {
+        Direction backwards = U;
         int newX = x, newY = y;
         int lookX = x, lookY = y;
         switch (direction) {
-            case 'L':
-                backwards = 'R';
+            case L:
+                backwards = R;
                 break;
-            case 'R':
-                backwards = 'L';
+            case R:
+                backwards = L;
                 break;
-            case 'U':
-                backwards = 'D';
+            case U:
+                backwards = D;
                 break;
-            case 'D':
-                backwards = 'U';
+            case D:
+                backwards = U;
                 break;
         }
 
-        char newDirection = backwards;
+        Direction newDirection = backwards;
         /* While we still haven't found a valid direction */
-        Set<Character> set = new HashSet<Character>();
+        Set<Direction> set = new HashSet<Direction>();
         while (newDirection == backwards || !isValidDest(lookX, lookY)) {
             /* If we've tried every location, turn around and break the loop */
             if (set.size() == 3) {
@@ -94,24 +96,24 @@ public class Ghost extends Mover {
             /* Randomly choose a direction */
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
-                newDirection = 'L';
+                newDirection = L;
                 newX -= increment;
                 lookX -= increment;
             } else if (random == 2) {
-                newDirection = 'R';
+                newDirection = R;
                 newX += increment;
                 lookX += gridSize;
             } else if (random == 3) {
-                newDirection = 'U';
+                newDirection = U;
                 newY -= increment;
                 lookY -= increment;
             } else if (random == 4) {
-                newDirection = 'D';
+                newDirection = D;
                 newY += increment;
                 lookY += gridSize;
             }
             if (newDirection != backwards) {
-                set.add(new Character(newDirection));
+                set.add(newDirection);
             }
         }
         return newDirection;
@@ -129,22 +131,22 @@ public class Ghost extends Mover {
 
         /* If that direction is valid, move that way */
         switch (direction) {
-            case 'L':
+            case L:
                 if (isValidDest(x - increment, y)) {
                     x -= increment;
                 }
                 break;
-            case 'R':
+            case R:
                 if (isValidDest(x + gridSize, y)) {
                     x += increment;
                 }
                 break;
-            case 'U':
+            case U:
                 if (isValidDest(x, y - increment)) {
                     y -= increment;
                 }
                 break;
-            case 'D':
+            case D:
                 if (isValidDest(x, y + gridSize)) {
                     y += increment;
                 }

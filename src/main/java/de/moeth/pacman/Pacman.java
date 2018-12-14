@@ -1,6 +1,7 @@
 /* Drew Schuster */
 
 import de.moeth.pacman.Board;
+import de.moeth.pacman.Direction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -163,9 +164,9 @@ public class Pacman extends JApplet implements MouseListener, KeyListener {
             }
 
             /* Move all game elements back to starting positions and orientations */
-            b.player.currDirection = 'L';
-            b.player.direction = 'L';
-            b.player.desiredDirection = 'L';
+            b.player.currDirection = Direction.L;
+            b.player.direction = Direction.L;
+            b.player.desiredDirection = Direction.L;
             b.player.x = 200;
             b.player.y = 300;
             b.ghost1.x = 180;
@@ -216,16 +217,16 @@ public class Pacman extends JApplet implements MouseListener, KeyListener {
         /* Otherwise, key presses control the player! */
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
-                b.player.desiredDirection = 'L';
+                b.player.desiredDirection = Direction.L;
                 break;
             case KeyEvent.VK_RIGHT:
-                b.player.desiredDirection = 'R';
+                b.player.desiredDirection = Direction.R;
                 break;
             case KeyEvent.VK_UP:
-                b.player.desiredDirection = 'U';
+                b.player.desiredDirection = Direction.U;
                 break;
             case KeyEvent.VK_DOWN:
-                b.player.desiredDirection = 'D';
+                b.player.desiredDirection = Direction.D;
                 break;
         }
 

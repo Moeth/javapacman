@@ -7,9 +7,9 @@ import java.util.Set;
 public class Player extends Mover {
 
     /* Direction is used in demoMode, currDirection and desiredDirection are used in non demoMode*/
-    public char direction;
-    public char currDirection;
-    public char desiredDirection;
+    public Direction direction;
+    public Direction currDirection;
+    public Direction desiredDirection;
 
     /* Keeps track of pellets eaten to determine end of game */
     int pelletsEaten;
@@ -43,31 +43,31 @@ public class Player extends Mover {
         lastY = y;
         this.x = x;
         this.y = y;
-        currDirection = 'L';
-        desiredDirection = 'L';
+        currDirection = Direction.L;
+        desiredDirection = Direction.L;
     }
 
     /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
-    public char newDirection() {
-        char backwards = 'U';
+    public Direction newDirection() {
+        Direction backwards = Direction.U;
         int newX = x, newY = y;
         int lookX = x, lookY = y;
         switch (direction) {
-            case 'L':
-                backwards = 'R';
+            case L:
+                backwards = Direction.R;
                 break;
-            case 'R':
-                backwards = 'L';
+            case R:
+                backwards = Direction.L;
                 break;
-            case 'U':
-                backwards = 'D';
+            case U:
+                backwards = Direction.D;
                 break;
-            case 'D':
-                backwards = 'U';
+            case D:
+                backwards = Direction.U;
                 break;
         }
-        char newDirection = backwards;
-        Set<Character> set = new HashSet<Character>();
+        Direction newDirection = backwards;
+        Set<Direction> set = new HashSet<Direction>();
         while (newDirection == backwards || !isValidDest(lookX, lookY)) {
             if (set.size() == 3) {
                 newDirection = backwards;
@@ -79,24 +79,24 @@ public class Player extends Mover {
             lookY = y;
             int random = (int) (Math.random() * 4) + 1;
             if (random == 1) {
-                newDirection = 'L';
+                newDirection = Direction.L;
                 newX -= increment;
                 lookX -= increment;
             } else if (random == 2) {
-                newDirection = 'R';
+                newDirection = Direction.R;
                 newX += increment;
                 lookX += gridSize;
             } else if (random == 3) {
-                newDirection = 'U';
+                newDirection = Direction.U;
                 newY -= increment;
                 lookY -= increment;
             } else if (random == 4) {
-                newDirection = 'D';
+                newDirection = Direction.D;
                 newY += increment;
                 lookY += gridSize;
             }
             if (newDirection != backwards) {
-                set.add(new Character(newDirection));
+                set.add(newDirection);
             }
         }
         return newDirection;
@@ -118,7 +118,7 @@ public class Player extends Mover {
             direction = newDirection();
         }
         switch (direction) {
-            case 'L':
+            case L:
                 if (isValidDest(x - increment, y)) {
                     x -= increment;
                 } else if (y == 9 * gridSize && x < 2 * gridSize) {
@@ -126,7 +126,7 @@ public class Player extends Mover {
                     teleport = true;
                 }
                 break;
-            case 'R':
+            case R:
                 if (isValidDest(x + gridSize, y)) {
                     x += increment;
                 } else if (y == 9 * gridSize && x > max - gridSize * 2) {
@@ -134,12 +134,12 @@ public class Player extends Mover {
                     teleport = true;
                 }
                 break;
-            case 'U':
+            case U:
                 if (isValidDest(x, y - increment)) {
                     y -= increment;
                 }
                 break;
-            case 'D':
+            case D:
                 if (isValidDest(x, y + gridSize)) {
                     y += increment;
                 }
@@ -159,28 +159,28 @@ public class Player extends Mover {
         int gridSize = 20;
         if (x % 20 == 0 && y % 20 == 0 ||
                 /* Or if we're reversing*/
-                (desiredDirection == 'L' && currDirection == 'R') ||
-                (desiredDirection == 'R' && currDirection == 'L') ||
-                (desiredDirection == 'U' && currDirection == 'D') ||
-                (desiredDirection == 'D' && currDirection == 'U')
+                (desiredDirection == Direction.L && currDirection == Direction.R) ||
+                (desiredDirection == Direction.R && currDirection == Direction.L) ||
+                (desiredDirection == Direction.U && currDirection == Direction.D) ||
+                (desiredDirection == Direction.D && currDirection == Direction.U)
                 ) {
             switch (desiredDirection) {
-                case 'L':
+                case L:
                     if (isValidDest(x - increment, y)) {
                         x -= increment;
                     }
                     break;
-                case 'R':
+                case R:
                     if (isValidDest(x + gridSize, y)) {
                         x += increment;
                     }
                     break;
-                case 'U':
+                case U:
                     if (isValidDest(x, y - increment)) {
                         y -= increment;
                     }
                     break;
-                case 'D':
+                case D:
                     if (isValidDest(x, y + gridSize)) {
                         y += increment;
                     }
@@ -190,7 +190,7 @@ public class Player extends Mover {
         /* If we haven't moved, then move in the direction the pacman was headed anyway */
         if (lastX == x && lastY == y) {
             switch (currDirection) {
-                case 'L':
+                case L:
                     if (isValidDest(x - increment, y)) {
                         x -= increment;
                     } else if (y == 9 * gridSize && x < 2 * gridSize) {
@@ -198,7 +198,7 @@ public class Player extends Mover {
                         teleport = true;
                     }
                     break;
-                case 'R':
+                case R:
                     if (isValidDest(x + gridSize, y)) {
                         x += increment;
                     } else if (y == 9 * gridSize && x > max - gridSize * 2) {
@@ -206,12 +206,12 @@ public class Player extends Mover {
                         teleport = true;
                     }
                     break;
-                case 'U':
+                case U:
                     if (isValidDest(x, y - increment)) {
                         y -= increment;
                     }
                     break;
-                case 'D':
+                case D:
                     if (isValidDest(x, y + gridSize)) {
                         y += increment;
                     }

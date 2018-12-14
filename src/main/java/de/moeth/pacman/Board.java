@@ -620,16 +620,16 @@ public class Board extends JPanel {
             }
 
             switch (player.currDirection) {
-                case 'L':
+                case L:
                     g.drawImage(pacmanLeftImage, player.x, player.y, Color.BLACK, null);
                     break;
-                case 'R':
+                case R:
                     g.drawImage(pacmanRightImage, player.x, player.y, Color.BLACK, null);
                     break;
-                case 'U':
+                case U:
                     g.drawImage(pacmanUpImage, player.x, player.y, Color.BLACK, null);
                     break;
-                case 'D':
+                case D:
                     g.drawImage(pacmanDownImage, player.x, player.y, Color.BLACK, null);
                     break;
             }
