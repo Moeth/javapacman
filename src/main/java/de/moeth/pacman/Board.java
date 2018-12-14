@@ -280,18 +280,18 @@ public class Board extends JPanel {
             sounds.nomNomStop();
 
             /* Draw the pacman */
-            g.drawImage(pacmanImage, player.x, player.y, Color.BLACK, null);
+            g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
             g.setColor(Color.BLACK);
 
             /* Kill the pacman */
             if (dying == 4) {
-                g.fillRect(player.x, player.y, GRID_SIZE, 7);
+                g.fillRect(player.location.x, player.location.y, GRID_SIZE, 7);
             } else if (dying == 3) {
-                g.fillRect(player.x, player.y, GRID_SIZE, 14);
+                g.fillRect(player.location.x, player.location.y, GRID_SIZE, 14);
             } else if (dying == 2) {
-                g.fillRect(player.x, player.y, GRID_SIZE, GRID_SIZE);
+                g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
             } else if (dying == 1) {
-                g.fillRect(player.x, player.y, GRID_SIZE, GRID_SIZE);
+                g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
             }
      
       /* Take .1 seconds on each frame of death, and then take 2 seconds
@@ -431,31 +431,31 @@ public class Board extends JPanel {
         }
 
         /* Drawing optimization */
-        g.copyArea(player.x - GRID_SIZE, player.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost1.x - GRID_SIZE, ghost1.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost2.x - GRID_SIZE, ghost2.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost3.x - GRID_SIZE, ghost3.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost4.x - GRID_SIZE, ghost4.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(player.location.x - GRID_SIZE, player.location.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost1.location.x - GRID_SIZE, ghost1.location.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost2.location.x - GRID_SIZE, ghost2.location.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost3.location.x - GRID_SIZE, ghost3.location.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(ghost4.location.x - GRID_SIZE, ghost4.location.y - GRID_SIZE, 80, 80, 0, 0);
 
 
 
         /* Detect collisions */
         boolean oops = false;
-        if (player.x == ghost1.x && Math.abs(player.y - ghost1.y) < 10) {
+        if (player.location.x == ghost1.location.x && Math.abs(player.location.y - ghost1.location.y) < 10) {
             oops = true;
-        } else if (player.x == ghost2.x && Math.abs(player.y - ghost2.y) < 10) {
+        } else if (player.location.x == ghost2.location.x && Math.abs(player.location.y - ghost2.location.y) < 10) {
             oops = true;
-        } else if (player.x == ghost3.x && Math.abs(player.y - ghost3.y) < 10) {
+        } else if (player.location.x == ghost3.location.x && Math.abs(player.location.y - ghost3.location.y) < 10) {
             oops = true;
-        } else if (player.x == ghost4.x && Math.abs(player.y - ghost4.y) < 10) {
+        } else if (player.location.x == ghost4.location.x && Math.abs(player.location.y - ghost4.location.y) < 10) {
             oops = true;
-        } else if (player.y == ghost1.y && Math.abs(player.x - ghost1.x) < 10) {
+        } else if (player.location.y == ghost1.location.y && Math.abs(player.location.x - ghost1.location.x) < 10) {
             oops = true;
-        } else if (player.y == ghost2.y && Math.abs(player.x - ghost2.x) < 10) {
+        } else if (player.location.y == ghost2.location.y && Math.abs(player.location.x - ghost2.location.x) < 10) {
             oops = true;
-        } else if (player.y == ghost3.y && Math.abs(player.x - ghost3.x) < 10) {
+        } else if (player.location.y == ghost3.location.y && Math.abs(player.location.x - ghost3.location.x) < 10) {
             oops = true;
-        } else if (player.y == ghost4.y && Math.abs(player.x - ghost4.x) < 10) {
+        } else if (player.location.y == ghost4.location.y && Math.abs(player.location.x - ghost4.location.x) < 10) {
             oops = true;
         }
 
@@ -478,16 +478,16 @@ public class Board extends JPanel {
 
         /* Delete the players and ghosts */
         g.setColor(Color.BLACK);
-        g.fillRect(player.lastX, player.lastY, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost1.lastX, ghost1.lastY, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost2.lastX, ghost2.lastY, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost3.lastX, ghost3.lastY, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost4.lastX, ghost4.lastY, GRID_SIZE, GRID_SIZE);
+        g.fillRect(player.last.x, player.last.y, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost1.last.x, ghost1.last.y, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost2.last.x, ghost2.last.y, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost3.last.x, ghost3.last.y, GRID_SIZE, GRID_SIZE);
+        g.fillRect(ghost4.last.x, ghost4.last.y, GRID_SIZE, GRID_SIZE);
 
         /* Eat pellets */
-        if (pellets[player.pelletX][player.pelletY] && New != 2 && New != 3) {
-            lastPelletEatenX = player.pelletX;
-            lastPelletEatenY = player.pelletY;
+        if (pellets[player.pellet.x][player.pellet.y] && New != 2 && New != 3) {
+            lastPelletEatenX = player.pellet.x;
+            lastPelletEatenY = player.pellet.y;
 
             /* Play eating sound */
             sounds.nomNom();
@@ -496,7 +496,7 @@ public class Board extends JPanel {
             player.pelletsEaten++;
 
             /* Delete the pellet*/
-            pellets[player.pelletX][player.pelletY] = false;
+            pellets[player.pellet.x][player.pellet.y] = false;
 
             /* Increment the score */
             currScore += 50;
@@ -528,41 +528,41 @@ public class Board extends JPanel {
         }
 
         /* If we moved to a location without pellets, stop the sounds */
-        else if ((player.pelletX != lastPelletEatenX || player.pelletY != lastPelletEatenY) || player.stopped) {
+        else if ((player.pellet.x != lastPelletEatenX || player.pellet.y != lastPelletEatenY) || player.stopped) {
             /* Stop any pacman eating sounds */
             sounds.nomNomStop();
         }
 
 
         /* Replace pellets that have been run over by ghosts */
-        if (pellets[ghost1.lastPelletX][ghost1.lastPelletY]) {
-            fillPellet(ghost1.lastPelletX, ghost1.lastPelletY, g);
+        if (pellets[ghost1.lastPellet.x][ghost1.lastPellet.y]) {
+            fillPellet(ghost1.lastPellet.x, ghost1.lastPellet.y, g);
         }
-        if (pellets[ghost2.lastPelletX][ghost2.lastPelletY]) {
-            fillPellet(ghost2.lastPelletX, ghost2.lastPelletY, g);
+        if (pellets[ghost2.lastPellet.x][ghost2.lastPellet.y]) {
+            fillPellet(ghost2.lastPellet.x, ghost2.lastPellet.y, g);
         }
-        if (pellets[ghost3.lastPelletX][ghost3.lastPelletY]) {
-            fillPellet(ghost3.lastPelletX, ghost3.lastPelletY, g);
+        if (pellets[ghost3.lastPellet.x][ghost3.lastPellet.y]) {
+            fillPellet(ghost3.lastPellet.x, ghost3.lastPellet.y, g);
         }
-        if (pellets[ghost4.lastPelletX][ghost4.lastPelletY]) {
-            fillPellet(ghost4.lastPelletX, ghost4.lastPelletY, g);
+        if (pellets[ghost4.lastPellet.x][ghost4.lastPellet.y]) {
+            fillPellet(ghost4.lastPellet.x, ghost4.lastPellet.y, g);
         }
 
 
         /*Draw the ghosts */
         if (ghost1.frameCount < 5) {
             /* Draw first frame of ghosts */
-            g.drawImage(ghost10, ghost1.x, ghost1.y, Color.BLACK, null);
-            g.drawImage(ghost20, ghost2.x, ghost2.y, Color.BLACK, null);
-            g.drawImage(ghost30, ghost3.x, ghost3.y, Color.BLACK, null);
-            g.drawImage(ghost40, ghost4.x, ghost4.y, Color.BLACK, null);
+            g.drawImage(ghost10, ghost1.location.x, ghost1.location.y, Color.BLACK, null);
+            g.drawImage(ghost20, ghost2.location.x, ghost2.location.y, Color.BLACK, null);
+            g.drawImage(ghost30, ghost3.location.x, ghost3.location.y, Color.BLACK, null);
+            g.drawImage(ghost40, ghost4.location.x, ghost4.location.y, Color.BLACK, null);
             ghost1.frameCount++;
         } else {
             /* Draw second frame of ghosts */
-            g.drawImage(ghost11, ghost1.x, ghost1.y, Color.BLACK, null);
-            g.drawImage(ghost21, ghost2.x, ghost2.y, Color.BLACK, null);
-            g.drawImage(ghost31, ghost3.x, ghost3.y, Color.BLACK, null);
-            g.drawImage(ghost41, ghost4.x, ghost4.y, Color.BLACK, null);
+            g.drawImage(ghost11, ghost1.location.x, ghost1.location.y, Color.BLACK, null);
+            g.drawImage(ghost21, ghost2.location.x, ghost2.location.y, Color.BLACK, null);
+            g.drawImage(ghost31, ghost3.location.x, ghost3.location.y, Color.BLACK, null);
+            g.drawImage(ghost41, ghost4.location.x, ghost4.location.y, Color.BLACK, null);
             if (ghost1.frameCount >= 10) {
                 ghost1.frameCount = 0;
             } else {
@@ -573,7 +573,7 @@ public class Board extends JPanel {
         /* Draw the pacman */
         if (player.frameCount < 5) {
             /* Draw mouth closed */
-            g.drawImage(pacmanImage, player.x, player.y, Color.BLACK, null);
+            g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
         } else {
             /* Draw mouth open in appropriate direction */
             if (player.frameCount >= 10) {
@@ -582,16 +582,16 @@ public class Board extends JPanel {
 
             switch (player.currDirection) {
                 case L:
-                    g.drawImage(pacmanLeftImage, player.x, player.y, Color.BLACK, null);
+                    g.drawImage(pacmanLeftImage, player.location.x, player.location.y, Color.BLACK, null);
                     break;
                 case R:
-                    g.drawImage(pacmanRightImage, player.x, player.y, Color.BLACK, null);
+                    g.drawImage(pacmanRightImage, player.location.x, player.location.y, Color.BLACK, null);
                     break;
                 case U:
-                    g.drawImage(pacmanUpImage, player.x, player.y, Color.BLACK, null);
+                    g.drawImage(pacmanUpImage, player.location.x, player.location.y, Color.BLACK, null);
                     break;
                 case D:
-                    g.drawImage(pacmanDownImage, player.x, player.y, Color.BLACK, null);
+                    g.drawImage(pacmanDownImage, player.location.x, player.location.y, Color.BLACK, null);
                     break;
             }
         }

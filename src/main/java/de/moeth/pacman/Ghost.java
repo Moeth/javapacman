@@ -12,47 +12,45 @@ public class Ghost extends Mover {
     Direction direction;
 
     /* Last ghost location*/
-    int lastX;
-    int lastY;
+//    int lastX;
+//    int last.y;
+    Position last;
 
     /* Current ghost location */
-    public int x;
-    public int y;
+//    public int locationx;
+//    public int locationy;
+    public Position location;
 
     /* The pellet the ghost is on top of */
-    int pelletX, pelletY;
+//    int pelletX, pellet.y;
+    public Position pellet;
 
     /* The pellet the ghost was last on top of */
-    int lastPelletX, lastPelletY;
+//    int lastPellet.x, lastPellet.y;
+    public Position lastPellet;
 
     /*Constructor places ghost and updates states*/
     public Ghost(int x, int y) {
         direction = L;
-        pelletX = x / gridSize - 1;
-        pelletY = x / gridSize - 1;
-        lastPelletX = pelletX;
-        lastPelletY = pelletY;
-        lastX = x;
-        lastY = y;
-        this.x = x;
-        this.y = y;
+        pellet = Position.of(x / gridSize - 1, y / gridSize - 1);
+        lastPellet = pellet;
+        last = Position.of(x, y);
+        this.location = Position.of(x, y);
     }
 
     /* update pellet status */
     public void updatePellet() {
-        int tempX = x / gridSize - 1;
-        int tempY = y / gridSize - 1;
-        if (tempX != pelletX || tempY != pelletY) {
-            lastPelletX = pelletX;
-            lastPelletY = pelletY;
-            pelletX = tempX;
-            pelletY = tempY;
+        int tempX = location.x / gridSize - 1;
+        int tempY = location.y / gridSize - 1;
+        if (tempX != pellet.x || tempY != pellet.y) {
+            lastPellet = pellet;
+            pellet = Position.of(tempX, tempY);
         }
     }
 
     /* Determines if the location is one where the ghost has to make a decision*/
     public boolean isChoiceDest() {
-        if (x % gridSize == 0 && y % gridSize == 0) {
+        if (location.x % gridSize == 0 && location.y % gridSize == 0) {
             return true;
         }
         return false;
@@ -61,8 +59,8 @@ public class Ghost extends Mover {
     /* Chooses a new direction randomly for the ghost to move */
     public Direction newDirection() {
         Direction backwards = U;
-        int newX = x, newY = y;
-        int lookX = x, lookY = y;
+        int newX = location.x, newY = location.y;
+        int lookX = location.x, lookY = location.y;
         switch (direction) {
             case L:
                 backwards = R;
@@ -88,10 +86,10 @@ public class Ghost extends Mover {
                 break;
             }
 
-            newX = x;
-            newY = y;
-            lookX = x;
-            lookY = y;
+            newX = location.x;
+            newY = location.y;
+            lookX = location.x;
+            lookY = location.y;
 
             /* Randomly choose a direction */
             int random = (int) (Math.random() * 4) + 1;
@@ -121,8 +119,7 @@ public class Ghost extends Mover {
 
     /* Random move function for ghost */
     public void move() {
-        lastX = x;
-        lastY = y;
+        last = location;
 
         /* If we can make a decision, pick a new direction randomly */
         if (isChoiceDest()) {
@@ -132,23 +129,25 @@ public class Ghost extends Mover {
         /* If that direction is valid, move that way */
         switch (direction) {
             case L:
-                if (isValidDest(x - increment, y)) {
-                    x -= increment;
+                if (isValidDest(location.x - increment, location.y)) {
+                    location = location.move(-increment, 0);
+
                 }
                 break;
             case R:
-                if (isValidDest(x + gridSize, y)) {
-                    x += increment;
+                if (isValidDest(location.x + gridSize, location.y)) {
+                    location = location.move(increment, 0);
                 }
                 break;
             case U:
-                if (isValidDest(x, y - increment)) {
-                    y -= increment;
+                if (isValidDest(location.x, location.y - increment)) {
+                    location = location.move(0, -increment);
+
                 }
                 break;
             case D:
-                if (isValidDest(x, y + gridSize)) {
-                    y += increment;
+                if (isValidDest(location.x, location.y + gridSize)) {
+                    location = location.move(0, increment);
                 }
                 break;
         }

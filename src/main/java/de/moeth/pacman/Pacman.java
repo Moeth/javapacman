@@ -61,16 +61,16 @@ public class Pacman extends JApplet implements MouseListener, KeyListener {
     */
     public void repaint() {
         if (b.player.teleport) {
-            b.repaint(b.player.lastX - Board.GRID_SIZE, b.player.lastY - Board.GRID_SIZE, 80, 80);
+            b.repaint(b.player.last.x - Board.GRID_SIZE, b.player.last.y - Board.GRID_SIZE, 80, 80);
             b.player.teleport = false;
         }
         b.repaint(0, 0, 600, Board.GRID_SIZE);
         b.repaint(0, 420, 600, 40);
-        b.repaint(b.player.x - Board.GRID_SIZE, b.player.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost1.x - Board.GRID_SIZE, b.ghost1.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost2.x - Board.GRID_SIZE, b.ghost2.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost3.x - Board.GRID_SIZE, b.ghost3.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost4.x - Board.GRID_SIZE, b.ghost4.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.player.location.x - Board.GRID_SIZE, b.player.location.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost1.location.x - Board.GRID_SIZE, b.ghost1.location.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost2.location.x - Board.GRID_SIZE, b.ghost2.location.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost3.location.x - Board.GRID_SIZE, b.ghost3.location.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.ghost4.location.x - Board.GRID_SIZE, b.ghost4.location.y - Board.GRID_SIZE, 80, 80);
     }
 
     /* Steps the screen forward one frame */
@@ -164,16 +164,11 @@ public class Pacman extends JApplet implements MouseListener, KeyListener {
             b.player.currDirection = Direction.L;
             b.player.direction = Direction.L;
             b.player.desiredDirection = Direction.L;
-            b.player.x = 200;
-            b.player.y = 300;
-            b.ghost1.x = 180;
-            b.ghost1.y = 180;
-            b.ghost2.x = 200;
-            b.ghost2.y = 180;
-            b.ghost3.x = 220;
-            b.ghost3.y = 180;
-            b.ghost4.x = 220;
-            b.ghost4.y = 180;
+            b.player.location = Position.of(200, 300);
+            b.ghost1.location = Position.of(180, 180);
+            b.ghost2.location = Position.of(200, 180);
+            b.ghost3.location = Position.of(220, 180);
+            b.ghost4.location = Position.of(220, 180);
 
             /* Advance a frame to display main state*/
             b.repaint(0, 0, 600, 600);
