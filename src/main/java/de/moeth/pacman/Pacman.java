@@ -67,17 +67,13 @@ public class Pacman extends JApplet implements KeyListener {
     */
     @Override
     public void repaint() {
-        if (b.player.teleport) {
-            b.repaint(b.player.last.x - Board.GRID_SIZE, b.player.last.y - Board.GRID_SIZE, 80, 80);
-            b.player.teleport = false;
-        }
         b.repaint(0, 0, 600, Board.GRID_SIZE);
         b.repaint(0, 420, 600, 40);
-        b.repaint(b.player.location.x - Board.GRID_SIZE, b.player.location.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost1.location.x - Board.GRID_SIZE, b.ghost1.location.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost2.location.x - Board.GRID_SIZE, b.ghost2.location.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost3.location.x - Board.GRID_SIZE, b.ghost3.location.y - Board.GRID_SIZE, 80, 80);
-        b.repaint(b.ghost4.location.x - Board.GRID_SIZE, b.ghost4.location.y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.player.getLocation().x - Board.GRID_SIZE, b.player.getLocation().y - Board.GRID_SIZE, 80, 80);
+//        b.repaint(b.ghost1.getLocation().x - Board.GRID_SIZE, b.ghost1.getLocation().y - Board.GRID_SIZE, 80, 80);
+//        b.repaint(b.ghost2.getLocation().x - Board.GRID_SIZE, b.ghost2.getLocation().y - Board.GRID_SIZE, 80, 80);
+//        b.repaint(b.ghost3.getLocation().x - Board.GRID_SIZE, b.ghost3.getLocation().y - Board.GRID_SIZE, 80, 80);
+//        b.repaint(b.ghost4.getLocation().x - Board.GRID_SIZE, b.ghost4.getLocation().y - Board.GRID_SIZE, 80, 80);
     }
 
     /* Steps the screen forward one frame */
@@ -124,7 +120,7 @@ public class Pacman extends JApplet implements KeyListener {
         if (!New) {
       /* The pacman player has two functions, demoMove if we're in demo mode and move if we're in
          user playable mode.  Call the appropriate one here */
-                b.player.move();
+            b.player.move();
 
             /* Also move the ghosts, and update the pellet states */
             b.ghost1.move();
@@ -132,10 +128,6 @@ public class Pacman extends JApplet implements KeyListener {
             b.ghost3.move();
             b.ghost4.move();
             b.player.updatePellet();
-            b.ghost1.updatePellet();
-            b.ghost2.updatePellet();
-            b.ghost3.updatePellet();
-            b.ghost4.updatePellet();
         }
 
         /* We either have a new game or the user has died, either way we have to reset the board */
@@ -150,14 +142,11 @@ public class Pacman extends JApplet implements KeyListener {
             }
 
             /* Move all game elements back to starting positions and orientations */
-            b.player.currDirection = Direction.L;
-            b.player.direction = Direction.L;
-            b.player.desiredDirection = Direction.L;
-            b.player.location = Position.of(200, 300);
-            b.ghost1.location = Position.of(180, 180);
-            b.ghost2.location = Position.of(200, 180);
-            b.ghost3.location = Position.of(220, 180);
-            b.ghost4.location = Position.of(220, 180);
+            b.player.reset();
+            b.ghost1.setLocation(Position.of(180, 180));
+            b.ghost2.setLocation(Position.of(200, 180));
+            b.ghost3.setLocation(Position.of(220, 180));
+            b.ghost4.setLocation(Position.of(220, 180));
 
             /* Advance a frame to display main state*/
             b.repaint(0, 0, 600, 600);
@@ -179,30 +168,13 @@ public class Pacman extends JApplet implements KeyListener {
         if (b.titleScreen) {
             b.titleScreen = false;
             return;
-        }
-        /* Pressing a key in the win screen or game over screen goes to the title screen */
-        else if (b.winScreen || b.overScreen) {
+        } else if (b.winScreen || b.overScreen) {
+            /* Pressing a key in the win screen or game over screen goes to the title screen */
             b.titleScreen = true;
             b.winScreen = false;
             b.overScreen = false;
             return;
         }
-
-        /* Otherwise, key presses control the player! */
-//        switch (e.getKeyCode()) {
-//            case KeyEvent.VK_LEFT:
-//                b.player.desiredDirection = Direction.L;
-//                break;
-//            case KeyEvent.VK_RIGHT:
-//                b.player.desiredDirection = Direction.R;
-//                break;
-//            case KeyEvent.VK_UP:
-//                b.player.desiredDirection = Direction.U;
-//                break;
-//            case KeyEvent.VK_DOWN:
-//                b.player.desiredDirection = Direction.D;
-//                break;
-//        }
 
         repaint();
     }

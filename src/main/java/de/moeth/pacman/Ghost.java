@@ -1,41 +1,30 @@
 package de.moeth.pacman;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
 import static de.moeth.pacman.Direction.*;
 
 /* Ghost class controls the ghost. */
-public class Ghost extends Mover {
+public class Ghost extends Mover implements Drawable {
 
+    private final Image image;
     /* Direction ghost is heading */
     private Direction direction;
-    /* Last ghost location*/
-    Position last;
     /* Current ghost location */
-    public Position location;
+    @Deprecated
+    private Position location;
     /* The pellet the ghost is on top of */
     private Position pellet;
-    /* The pellet the ghost was last on top of */
-    public Position lastPellet;
 
     /*Constructor places ghost and updates states*/
-    public Ghost(Position position, GameMap gameMap) {
+    public Ghost(Position position, GameMap gameMap, final Image image) {
         super(gameMap);
+        this.image = image;
         direction = L;
         pellet = Position.ofGrid(position);
-        lastPellet = pellet;
-        last = position;
         location = position;
-    }
-
-    /* update pellet status */
-    public void updatePellet() {
-        Position temp = Position.ofGrid(location);
-        if (temp.x != pellet.x || temp.y != pellet.y) {
-            lastPellet = pellet;
-            pellet = temp;
-        }
     }
 
     /* Chooses a new direction randomly for the ghost to move */
@@ -81,8 +70,6 @@ public class Ghost extends Mover {
 
     /* Random move function for ghost */
     public void move() {
-        last = location;
-
         /* If we can make a decision, pick a new direction randomly */
         if (location.isGrid()) {
             direction = newDirection();
@@ -90,5 +77,23 @@ public class Ghost extends Mover {
 
         /* If that direction is valid, move that way */
         location = move(direction, location);
+        pellet = Position.ofGrid(location);
+    }
+
+    public Position getLocation() {
+        return location;
+    }
+
+    public void setLocation(Position location) {
+        this.location = location;
+    }
+
+    public Position getPellet() {
+        return pellet;
+    }
+
+    @Override
+    public void draw(final Graphics g) {
+        g.drawImage(image, getLocation().x, getLocation().y, Color.BLACK, null);
     }
 }

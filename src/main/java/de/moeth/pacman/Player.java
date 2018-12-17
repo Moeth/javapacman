@@ -1,11 +1,17 @@
 package de.moeth.pacman;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.awt.*;
 import java.util.function.Supplier;
 
 /* This is the pacman object */
-public class Player extends Mover {
+public class Player extends Mover implements Drawable {
+
+    final Image pacmanImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacman.jpg"));
+    private final Image pacmanUpImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanup.jpg"));
+    private final Image pacmanDownImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmandown.jpg"));
+    private final Image pacmanLeftImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanleft.jpg"));
+    private final Image pacmanRightImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanright.jpg"));
+
 
     /* Direction is used in demoMode, currDirection and desiredDirection are used in non demoMode*/
     public Direction direction;
@@ -13,81 +19,34 @@ public class Player extends Mover {
     public Direction desiredDirection;
 
     /* Keeps track of pellets eaten to determine end of game */
-    int pelletsEaten;
-    /* Last location */
-    public Position last;
+    private int pelletsEaten;
     /* Current location */
-    public Position location;
+    private Position location;
     /* Which pellet the pacman is on top of */
-    public Position pellet;
-    /* teleport is true when travelling through the teleport tunnels*/
-    public boolean teleport;
-    /* Stopped is set when the pacman is not moving or has been killed */
-    boolean stopped = false;
+    private Position pellet;
     private final Supplier<Direction> directionSupplier;
 
     /* Constructor places pacman in initial location and orientation */
     public Player(Position position, GameMap gameMap, final Supplier<Direction> directionSupplier) {
         super(gameMap);
         this.directionSupplier = directionSupplier;
-        teleport = false;
         pelletsEaten = 0;
         pellet = Position.ofGrid(position);
-        last = position;
         location = position;
         currDirection = Direction.L;
         desiredDirection = Direction.L;
     }
 
-    /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
-    private Direction newDirection() {
-        int lookX = location.x, lookY = location.y;
-        Direction backwards = direction.backwards();
-        Direction newDirection = backwards;
-        Set<Direction> set = new HashSet<Direction>();
-        while (newDirection == backwards || !isValidDest(lookX, lookY)) {
-            if (set.size() == 3) {
-                newDirection = backwards;
-                break;
-            }
-            lookX = location.x;
-            lookY = location.y;
-            int random = (int) (Math.random() * 4) + 1;
-            if (random == 1) {
-                newDirection = Direction.L;
-                lookX -= Board.INCREMENT;
-            } else if (random == 2) {
-                newDirection = Direction.R;
-
-                lookX += Board.GRID_SIZE;
-            } else if (random == 3) {
-                newDirection = Direction.U;
-                lookY -= Board.INCREMENT;
-            } else if (random == 4) {
-                newDirection = Direction.D;
-                lookY += Board.GRID_SIZE;
-            }
-            if (newDirection != backwards) {
-                set.add(newDirection);
-            }
-        }
-        return newDirection;
-    }
-
-    /* This function is used for demoMode.  It is copied from the Ghost class.  See that for comments */
-    public void demoMove() {
-        last = location;
-        if (location.isGrid()) {
-            direction = newDirection();
-        }
-        moveOrTeleport(direction);
-        currDirection = direction;
-        frameCount++;
+    public void reset() {
+        currDirection = Direction.L;
+        direction = Direction.L;
+        desiredDirection = Direction.L;
+        this.location = Position.of(200, 300);
     }
 
     /* The move function moves the pacman for one frame in non demo mode */
     public void move() {
-        last = location;
+        final Position last = location;
 
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
@@ -100,45 +59,28 @@ public class Player extends Mover {
         }
         /* If we haven't moved, then move in the direction the pacman was headed anyway */
         if (Position.isEqualll(last, location)) {
-            moveOrTeleport(currDirection);
+            if (isValidDirection(currDirection, location)) {
+                location = currDirection.move(location, Board.INCREMENT);
+            } else {
+
+                switch (currDirection) {
+                    case L:
+                        if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
+                            location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
+                        }
+                        break;
+                    case R:
+                        if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
+                            location = location.setX(1 * Board.GRID_SIZE);
+                        }
+                        break;
+                }
+            }
         }
 
         /* If we did change direction, update currDirection to reflect that */
         else {
             currDirection = desiredDirection;
-        }
-
-        /* If we didn't move at all, set the stopped flag */
-        if (Position.isEqualll(last, location)) {
-            stopped = true;
-        }
-
-        /* Otherwise, clear the stopped flag and increment the frameCount for animation purposes*/
-        else {
-            stopped = false;
-            frameCount++;
-        }
-    }
-
-    private void moveOrTeleport(final Direction direction) {
-        if (isValidDirection(direction, location)) {
-            location = direction.move(location, Board.INCREMENT);
-        } else {
-
-            switch (direction) {
-                case L:
-                    if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
-                        location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
-                        teleport = true;
-                    }
-                    break;
-                case R:
-                    if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
-                        location = location.setX(1 * Board.GRID_SIZE);
-                        teleport = true;
-                    }
-                    break;
-            }
         }
     }
 
@@ -149,8 +91,56 @@ public class Player extends Mover {
         }
     }
 
-    public boolean hitGhost3(Ghost ghost) {
-        return location.x == ghost.location.x && Math.abs(location.y - ghost.location.y) < 10
-                || location.y == ghost.location.y && Math.abs(location.x - ghost.location.x) < 10;
+    public boolean hitGhost(Ghost ghost) {
+        return location.x == ghost.getLocation().x && Math.abs(location.y - ghost.getLocation().y) < 10
+                || location.y == ghost.getLocation().y && Math.abs(location.x - ghost.getLocation().x) < 10;
+    }
+
+    public int getPelletsEaten() {
+        return pelletsEaten;
+    }
+
+    public void incrementPelletsEaten() {
+        this.pelletsEaten += 1;
+    }
+
+    public Position getLocation() {
+        return location;
+    }
+
+    public Position getPellet() {
+        return pellet;
+    }
+
+    @Override
+    public void draw(final Graphics g) {
+        /* Draw the pacman */
+        if (frameCount < 5) {
+            /* Draw mouth closed */
+            g.drawImage(pacmanImage, getLocation().x, getLocation().y, Color.BLACK, null);
+        } else {
+            /* Draw mouth open in appropriate direction */
+            if (frameCount >= 10) {
+                frameCount = 0;
+            }
+
+            g.drawImage(getPacmanImage(), getLocation().x, getLocation().y, Color.BLACK, null);
+        }
+    }
+
+    private Image getPacmanImage() {
+
+        switch (currDirection) {
+            case L:
+                return pacmanLeftImage;
+            case R:
+                return pacmanRightImage;
+            case U:
+                return pacmanUpImage;
+            case D:
+                return pacmanDownImage;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 }

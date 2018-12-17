@@ -12,19 +12,14 @@ class Board extends JPanel {
     public static final int MAX = 400;
     public static final int INCREMENT = 4;
     /* Initialize the images*/
-    private final Image pacmanImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacman.jpg"));
-    private final Image pacmanUpImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanup.jpg"));
-    private final Image pacmanDownImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmandown.jpg"));
-    private final Image pacmanLeftImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanleft.jpg"));
-    private final Image pacmanRightImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanright.jpg"));
     private final Image ghost10 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost10.jpg"));
     private final Image ghost20 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost20.jpg"));
     private final Image ghost30 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost30.jpg"));
     private final Image ghost40 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost40.jpg"));
-    private final Image ghost11 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost11.jpg"));
-    private final Image ghost21 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost21.jpg"));
-    private final Image ghost31 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost31.jpg"));
-    private final Image ghost41 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost41.jpg"));
+    //    private final Image ghost11 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost11.jpg"));
+//    private final Image ghost21 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost21.jpg"));
+//    private final Image ghost31 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost31.jpg"));
+//    private final Image ghost41 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost41.jpg"));
     private final Image titleScreenImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/titleScreen.jpg"));
     private final Image gameOverImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/gameOver.jpg"));
     private final Image winScreenImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/winScreen.jpg"));
@@ -43,9 +38,6 @@ class Board extends JPanel {
     public int dying = 0;
     /* Score information */
     private int currScore = 0;
-    private int highScore;
-    /* if the high scores have been cleared, we have to update the top of the screen to reflect that */
-    private boolean clearHighScores = false;
     private int numLives = 2;
     private final GameMap gameMap = new GameMap();
 
@@ -56,7 +48,6 @@ class Board extends JPanel {
     public boolean overScreen = false;
     public int New = 0;
 
-    private Position lastPelletEaten = Position.of(0, 0);
     private final Supplier<Direction> directionSupplier;
 
     /* This is the font used for the menus */
@@ -70,10 +61,10 @@ class Board extends JPanel {
 
     private void init() {
         player = new Player(Position.of(10 * GRID_SIZE, 15 * GRID_SIZE), gameMap, directionSupplier);
-        ghost1 = new Ghost(Position.of(9 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
-        ghost2 = new Ghost(Position.of(10 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
-        ghost3 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
-        ghost4 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
+        ghost1 = new Ghost(Position.of(9 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost10);
+        ghost2 = new Ghost(Position.of(10 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost20);
+        ghost3 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost30);
+        ghost4 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost40);
     }
 
     /* Reset occurs on a new game*/
@@ -153,16 +144,6 @@ class Board extends JPanel {
             return;
         }
 
-        /* If need to update the high scores, redraw the top menu bar */
-        if (clearHighScores) {
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, 18);
-            g.setColor(Color.YELLOW);
-            g.setFont(font);
-            clearHighScores = false;
-            g.drawString("Score: " + currScore + "\t High Score: " + highScore, GRID_SIZE, 10);
-        }
-
         /* oops is set to true when pacman has lost a life */
 
         /* Game initialization */
@@ -175,9 +156,7 @@ class Board extends JPanel {
             drawLives(g);
 
             /* Draw the top menu bar*/
-            g.setColor(Color.YELLOW);
-            g.setFont(font);
-            g.drawString("Score: " + currScore + "\t High Score: " + highScore, GRID_SIZE, 10);
+            drawHighscore(g);
             New++;
         } else if (New == 2) {
             /* Second frame of new game */
@@ -193,12 +172,6 @@ class Board extends JPanel {
         }
 
         gameMap.draw(g);
-        /* Drawing optimization */
-        g.copyArea(player.location.x - GRID_SIZE, player.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
-        g.copyArea(ghost1.location.x - GRID_SIZE, ghost1.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
-        g.copyArea(ghost2.location.x - GRID_SIZE, ghost2.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
-        g.copyArea(ghost3.location.x - GRID_SIZE, ghost3.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
-        g.copyArea(ghost4.location.x - GRID_SIZE, ghost4.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
         boolean oops = detectCollision();
 
         /* Kill the pacman */
@@ -215,37 +188,25 @@ class Board extends JPanel {
 
         /* Delete the players and ghosts */
         g.setColor(Color.BLACK);
-        g.fillRect(player.last.x, player.last.y, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost1.last.x, ghost1.last.y, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost2.last.x, ghost2.last.y, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost3.last.x, ghost3.last.y, GRID_SIZE, GRID_SIZE);
-        g.fillRect(ghost4.last.x, ghost4.last.y, GRID_SIZE, GRID_SIZE);
 
         /* Eat pellets */
-        if (gameMap.getPellet(player.pellet) && New != 2 && New != 3) {
-            lastPelletEaten = player.pellet;
+        if (gameMap.getPellet(player.getPellet()) && New != 2 && New != 3) {
             /* Increment pellets eaten value to track for end game */
-            player.pelletsEaten++;
+            player.incrementPelletsEaten();
 
             /* Delete the pellet*/
-            gameMap.eatPellet(player.pellet);
+            gameMap.eatPellet(player.getPellet());
 
             /* Increment the score */
             currScore += 50;
-
-            /* Update the screen to reflect the new score */
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, 600, GRID_SIZE);
-            g.setColor(Color.YELLOW);
-            g.setFont(font);
-            g.drawString("Score: " + currScore + "\t High Score: " + highScore, GRID_SIZE, 10);
+            drawHighscore(g);
 
             /* If this was the last pellet */
-            if (player.pelletsEaten == 173) {
+            if (player.getPelletsEaten() == 173) {
                 /*Demo mode can't get a high score */
-                if (currScore > highScore) {
-                    updateScore(currScore);
-                }
+//                if (currScore > highScore) {
+//                    updateScore(currScore);
+//                }
                 winScreen = true;
                 return;
             }
@@ -257,76 +218,36 @@ class Board extends JPanel {
         handlePellet(g, ghost3);
         handlePellet(g, ghost4);
 
-
-        /*Draw the ghosts */
-        if (ghost1.frameCount < 5) {
-            /* Draw first frame of ghosts */
-            g.drawImage(ghost10, ghost1.location.x, ghost1.location.y, Color.BLACK, null);
-            g.drawImage(ghost20, ghost2.location.x, ghost2.location.y, Color.BLACK, null);
-            g.drawImage(ghost30, ghost3.location.x, ghost3.location.y, Color.BLACK, null);
-            g.drawImage(ghost40, ghost4.location.x, ghost4.location.y, Color.BLACK, null);
-            ghost1.frameCount++;
-        } else {
-            /* Draw second frame of ghosts */
-            g.drawImage(ghost11, ghost1.location.x, ghost1.location.y, Color.BLACK, null);
-            g.drawImage(ghost21, ghost2.location.x, ghost2.location.y, Color.BLACK, null);
-            g.drawImage(ghost31, ghost3.location.x, ghost3.location.y, Color.BLACK, null);
-            g.drawImage(ghost41, ghost4.location.x, ghost4.location.y, Color.BLACK, null);
-            if (ghost1.frameCount >= 10) {
-                ghost1.frameCount = 0;
-            } else {
-                ghost1.frameCount++;
-            }
-        }
-
-        /* Draw the pacman */
-        if (player.frameCount < 5) {
-            /* Draw mouth closed */
-            g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
-        } else {
-            /* Draw mouth open in appropriate direction */
-            if (player.frameCount >= 10) {
-                player.frameCount = 0;
-            }
-
-            g.drawImage(getPacmanImage(), player.location.x, player.location.y, Color.BLACK, null);
-        }
-
+        getGhosts().forEach(ghost -> ghost.draw(g));
+        player.draw(g);
         /* Draw the border around the game in case it was overwritten by ghost movement or something */
         g.setColor(Color.WHITE);
         g.drawRect(19, 19, 382, 382);
     }
 
-    private Image getPacmanImage() {
-
-        switch (player.currDirection) {
-            case L:
-                return pacmanLeftImage;
-            case R:
-                return pacmanRightImage;
-            case U:
-                return pacmanUpImage;
-            case D:
-                return pacmanDownImage;
-            default:
-                throw new IllegalArgumentException();
-        }
+    private void drawHighscore(final Graphics g) {
+        /* Update the screen to reflect the new score */
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, 600, 18);
+        g.setColor(Color.YELLOW);
+        g.setFont(font);
+        g.drawString("Score: " + currScore, GRID_SIZE, 10);
     }
 
     private void handleDying(final Graphics g) {
         /* Draw the pacman */
-        g.drawImage(pacmanImage, player.location.x, player.location.y, Color.BLACK, null);
+        g.drawImage(player.pacmanImage, player.getLocation().x, player.getLocation().y, Color.BLACK, null);
         g.setColor(Color.BLACK);
 
         /* Kill the pacman */
         if (dying == 4) {
-            g.fillRect(player.location.x, player.location.y, GRID_SIZE, 7);
+            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, 7);
         } else if (dying == 3) {
-            g.fillRect(player.location.x, player.location.y, GRID_SIZE, 14);
+            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, 14);
         } else if (dying == 2) {
-            g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
+            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, GRID_SIZE);
         } else if (dying == 1) {
-            g.fillRect(player.location.x, player.location.y, GRID_SIZE, GRID_SIZE);
+            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, GRID_SIZE);
         }
 
       /* Take .1 seconds on each frame of death, and then take 2 seconds
@@ -341,9 +262,9 @@ class Board extends JPanel {
             if (dying == 0) {
                 if (numLives == -1) {
                     /* Game over for player.  If relevant, update high score.  Set gameOver flag*/
-                    if (currScore > highScore) {
-                        updateScore(currScore);
-                    }
+//                    if (currScore > highScore) {
+//                        updateScore(currScore);
+//                    }
                     overScreen = true;
                 }
             }
@@ -357,8 +278,8 @@ class Board extends JPanel {
     }
 
     private void handlePellet(final Graphics g, final Ghost ghost) {
-        if (gameMap.getPellet(ghost.lastPellet)) {
-            fillPellet(ghost.lastPellet.x, ghost.lastPellet.y, g);
+        if (gameMap.getPellet(ghost.getPellet())) {
+            fillPellet(ghost.getPellet().x, ghost.getPellet().y, g);
         }
     }
 
@@ -368,7 +289,11 @@ class Board extends JPanel {
 
     private boolean detectCollision() {
         /* Detect collisions */
-        return Stream.of(ghost1, ghost2, ghost3, ghost4)
-                .anyMatch(g -> player.hitGhost3(g));
+        return getGhosts()
+                .anyMatch(g -> player.hitGhost(g));
+    }
+
+    private Stream<Ghost> getGhosts() {
+        return Stream.of(ghost1, ghost2, ghost3, ghost4);
     }
 }
