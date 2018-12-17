@@ -96,4 +96,8 @@ public class Ghost extends Mover implements Drawable {
     public void draw(final Graphics g) {
         g.drawImage(image, getLocation().x, getLocation().y, Color.BLACK, null);
     }
+
+    public boolean isOnPosition(final Position p) {
+        return getPellet().isOnPosition(p);
+    }
 }

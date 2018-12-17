@@ -7,7 +7,7 @@ import static de.moeth.pacman.Board.GRID_SIZE;
 class GameMap implements Drawable {
 
     private static final int PELLET_SIZE = 4;
-    private static final int GRID_WIDTH = 19;
+    static final int GRID_WIDTH = 19;
     /*Contains the game map, passed to player and ghosts */
     private final boolean[][] state;
 //    private final GameMap gameMap = new GameMap();

@@ -17,14 +17,15 @@ public class Pacman extends JApplet implements KeyListener {
     private long timer = -1;
 
     /* Create a new board */
-    private final Board b;
+    final Board b;
 
     /* This timer is used to do request new frames be drawn*/
     private final Timer frameTimer;
 
     /* This constructor creates the entire game essentially */
     public Pacman() {
-        final Supplier<Direction> directionSupplier = () -> Direction.random();
+//        final Supplier<Direction> directionSupplier = () -> Direction.random();
+        final Supplier<Direction> directionSupplier = new Yeah(this);
         b = new Board(directionSupplier);
         b.requestFocus();
 
@@ -56,6 +57,7 @@ public class Pacman extends JApplet implements KeyListener {
             }
         });
 
+
         /* Start the timer */
         frameTimer.start();
 
@@ -70,10 +72,6 @@ public class Pacman extends JApplet implements KeyListener {
         b.repaint(0, 0, 600, Board.GRID_SIZE);
         b.repaint(0, 420, 600, 40);
         b.repaint(b.player.getLocation().x - Board.GRID_SIZE, b.player.getLocation().y - Board.GRID_SIZE, 80, 80);
-//        b.repaint(b.ghost1.getLocation().x - Board.GRID_SIZE, b.ghost1.getLocation().y - Board.GRID_SIZE, 80, 80);
-//        b.repaint(b.ghost2.getLocation().x - Board.GRID_SIZE, b.ghost2.getLocation().y - Board.GRID_SIZE, 80, 80);
-//        b.repaint(b.ghost3.getLocation().x - Board.GRID_SIZE, b.ghost3.getLocation().y - Board.GRID_SIZE, 80, 80);
-//        b.repaint(b.ghost4.getLocation().x - Board.GRID_SIZE, b.ghost4.getLocation().y - Board.GRID_SIZE, 80, 80);
     }
 
     /* Steps the screen forward one frame */
@@ -134,31 +132,30 @@ public class Pacman extends JApplet implements KeyListener {
         if (b.stopped || New) {
             /*Temporarily stop advancing frames */
             frameTimer.stop();
+            dying();
 
-            /* If user is dying ... */
-            while (b.dying > 0) {
-                /* Play dying animation. */
-                stepFrame(false);
-            }
 
-            /* Move all game elements back to starting positions and orientations */
-            b.player.reset();
-            b.ghost1.setLocation(Position.of(180, 180));
-            b.ghost2.setLocation(Position.of(200, 180));
-            b.ghost3.setLocation(Position.of(220, 180));
-            b.ghost4.setLocation(Position.of(220, 180));
 
-            /* Advance a frame to display main state*/
-            b.repaint(0, 0, 600, 600);
 
             /*Start advancing frames once again*/
             b.stopped = false;
             frameTimer.start();
-        }
-        /* Otherwise we're in a normal state, advance one frame*/
-        else {
+        } else {
+            /* Otherwise we're in a normal state, advance one frame*/
             repaint();
         }
+    }
+
+    private void dying() {
+        /* Move all game elements back to starting positions and orientations */
+        b.player.reset();
+        b.ghost1.setLocation(Position.of(180, 180));
+        b.ghost2.setLocation(Position.of(200, 180));
+        b.ghost3.setLocation(Position.of(220, 180));
+        b.ghost4.setLocation(Position.of(220, 180));
+
+        /* Advance a frame to display main state*/
+        b.repaint(0, 0, 600, 600);
     }
 
     /* Handles user key presses*/

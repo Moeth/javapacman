@@ -5,12 +5,15 @@ import java.awt.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static de.moeth.pacman.GameMap.GRID_WIDTH;
+
 /*This board class contains the player, ghosts, pellets, and most of the game logic.*/
 class Board extends JPanel {
 
     public static final int GRID_SIZE = 20;
     public static final int MAX = 400;
     public static final int INCREMENT = 4;
+    public static final int STATE_COUNT = 4;
     /* Initialize the images*/
     private final Image ghost10 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost10.jpg"));
     private final Image ghost20 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost20.jpg"));
@@ -295,5 +298,27 @@ class Board extends JPanel {
 
     private Stream<Ghost> getGhosts() {
         return Stream.of(ghost1, ghost2, ghost3, ghost4);
+    }
+
+    double[] getPacmanState() {
+        final double[] result = new double[GRID_SIZE * GRID_SIZE * STATE_COUNT];
+        int i = 0;
+
+        for (int x = 0; x < GRID_WIDTH; x++) {
+            for (int y = 0; y < GRID_WIDTH; y++) {
+                Position p = Position.of(x, y);
+                result[i++] = gameMap.getState(p) ? 1 : 0;
+                result[i++] = gameMap.getPellet(p) ? 1 : 0;
+                result[i++] = getGhost(p) ? 1 : 0;
+                result[i++] = player.isOnPosition(p) ? 1 : 0;
+            }
+        }
+
+        return result;
+    }
+
+    private boolean getGhost(final Position p) {
+        return getGhosts()
+                .anyMatch(g -> g.isOnPosition(p));
     }
 }

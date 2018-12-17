@@ -143,4 +143,8 @@ public class Player extends Mover implements Drawable {
                 throw new IllegalArgumentException();
         }
     }
+
+    public boolean isOnPosition(final Position p) {
+        return getPellet().isOnPosition(p);
+    }
 }
