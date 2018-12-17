@@ -8,33 +8,12 @@ class GameMap implements Drawable {
 
     private static final int PELLET_SIZE = 4;
     static final int GRID_WIDTH = 19;
-    /*Contains the game map, passed to player and ghosts */
     private final boolean[][] state;
-//    private final GameMap gameMap = new GameMap();
-
-    /* Contains the state of all pellets*/
     private final boolean[][] pellets;
 
     public GameMap() {
         state = new boolean[GRID_WIDTH][GRID_WIDTH];
         pellets = new boolean[GRID_WIDTH][GRID_WIDTH];
-
-
-
-//        pellets[9][7] = false;
-//        pellets[8][8] = false;
-//        pellets[9][8] = false;
-//        pellets[10][8] = false;
-
-        /* Don't let the player go in the ghost box*/
-//        state[9][7] = false;
-
-//        state = new boolean[GRID_SIZE][GRID_SIZE];
-//        for (int i = 0; i < GRID_SIZE; i++) {
-//            for (int j = 0; j < GRID_SIZE; j++) {
-//                state[i][j] = false;
-//            }
-//        }
     }
 
     public boolean getState(Position position) {

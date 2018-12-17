@@ -23,9 +23,6 @@ class Board extends JPanel {
 //    private final Image ghost21 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost21.jpg"));
 //    private final Image ghost31 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost31.jpg"));
 //    private final Image ghost41 = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/ghost41.jpg"));
-    private final Image titleScreenImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/titleScreen.jpg"));
-    private final Image gameOverImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/gameOver.jpg"));
-    private final Image winScreenImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/winScreen.jpg"));
 
     /* Initialize the player and ghosts */
     public Player player;
@@ -34,34 +31,20 @@ class Board extends JPanel {
     public Ghost ghost3;
     public Ghost ghost4;
 
-    /* Timer is used for playing sound effects and animations */
-    private long timer = System.currentTimeMillis();
-    /* Dying is used to count frames in the dying animation.  If it's non-zero,
-       pacman is in the process of dying */
-    public int dying = 0;
     /* Score information */
     int currScore = 0;
     int numLives = 2;
     private final GameMap gameMap = new GameMap();
-
-    /* State flags*/
-    public boolean titleScreen = true;
-    public boolean winScreen = false;
-    public boolean overScreen = false;
-    public int New = 0;
-
-//    private final Supplier<Direction> directionSupplier;
 
     /* This is the font used for the menus */
     private final Font font = new Font("Monospaced", Font.BOLD, 12);
 
     /* Constructor initializes state flags etc.*/
     public Board() {
-//        this.directionSupplier = directionSupplier;
         newGame();
     }
 
-    private void newGame() {
+    void newGame() {
         numLives = 2;
         currScore = 0;
         gameMap.initMap();
@@ -71,10 +54,10 @@ class Board extends JPanel {
 
     private void resetPositions() {
         player = new Player(gameMap);
-        ghost1 = new Ghost(Position.of(9, 9), gameMap, ghost10);
-        ghost2 = new Ghost(Position.of(10, 9), gameMap, ghost20);
-        ghost3 = new Ghost(Position.of(11, 9), gameMap, ghost30);
-        ghost4 = new Ghost(Position.of(11, 9), gameMap, ghost40);
+        ghost1 = new Ghost(Position.of(8, 8), gameMap, ghost10);
+        ghost2 = new Ghost(Position.of(9, 8), gameMap, ghost20);
+        ghost3 = new Ghost(Position.of(10, 8), gameMap, ghost30);
+        ghost4 = new Ghost(Position.of(10, 8), gameMap, ghost40);
     }
 
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
@@ -86,75 +69,11 @@ class Board extends JPanel {
     /* This is the main function that draws one entire frame of the game */
     @Override
     public void paint(Graphics g) {
-    /* If we're playing the dying animation, don't update the entire screen.
-       Just kill the pacman*/
-        if (dying > 0) {
-            handleDying(g);
-            return;
-        }
-
-        if (titleScreen) {
-            /* If this is the title screen, draw the title screen and return */
-            fillImage(g, titleScreenImage);
-            New = 1;
-            return;
-        } else if (winScreen) {
-            /* If this is the win screen, draw the win screen and return */
-            fillImage(g, winScreenImage);
-            New = 1;
-            return;
-        } else if (overScreen) {
-            /* If this is the game over screen, draw the game over screen and return */
-            fillImage(g, gameOverImage);
-            New = 1;
-            return;
-        }
-
-        /* Game initialization */
-        if (New == 1) {
-            newGame();
-            New++;
-        }
-
         drawBoard(g);
         drawLives(g);
         drawHighscore(g);
 
         gameMap.draw(g);
-
-        /* Kill the pacman */
-        if (detectCollision()) {
-            /* 4 frames of death*/
-            dying = 4;
-            /*Decrement lives, update screen to reflect that.  And set appropriate flags and timers */
-            numLives--;
-            drawLives(g);
-            resetPositions();
-            timer = System.currentTimeMillis();
-        }
-
-        /* Delete the players and ghosts */
-        g.setColor(Color.BLACK);
-
-        /* Eat pellets */
-        if (gameMap.getPellet(player.getPellet())) {
-            player.incrementPelletsEaten();
-            gameMap.eatPellet(player.getPellet());
-
-            /* Increment the score */
-            currScore += 50;
-            drawHighscore(g);
-
-            /* If this was the last pellet */
-            if (player.getPelletsEaten() == 173) {
-                /*Demo mode can't get a high score */
-//                if (currScore > highScore) {
-//                    updateScore(currScore);
-//                }
-                winScreen = true;
-                return;
-            }
-        }
 
         getGhosts().forEach(ghost -> handlePellet(g, ghost));
         getGhosts().forEach(ghost -> ghost.draw(g));
@@ -164,56 +83,39 @@ class Board extends JPanel {
         g.drawRect(19, 19, 382, 382);
     }
 
+    void eatPellet() {
+        /* Eat pellets */
+        if (gameMap.getPellet(player.getPellet())) {
+            player.incrementPelletsEaten();
+            gameMap.eatPellet(player.getPellet());
+
+            currScore += 50;
+//            drawHighscore();
+
+            if (player.getPelletsEaten() == 173) {
+                /*Demo mode can't get a high score */
+//                if (currScore > highScore) {
+//                    updateScore(currScore);
+//                }
+//                winScreen = true;
+//                return true;
+            }
+        }
+    }
+
+    void checkCollision() {
+        if (detectCollision()) {
+            numLives--;
+            resetPositions();
+        }
+    }
+
     private void drawHighscore(final Graphics g) {
-        /* Update the screen to reflect the new score */
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, 600, 18);
         g.setColor(Color.YELLOW);
         g.setFont(font);
         g.drawString("Score: " + currScore, GRID_SIZE, 10);
-    }
-
-    private void handleDying(final Graphics g) {
-        /* Draw the pacman */
-        g.drawImage(player.pacmanImage, player.getDrawX(), player.getDrawY(), Color.BLACK, null);
-        g.setColor(Color.BLACK);
-
-        /* Kill the pacman */
-        if (dying == 4) {
-            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, 7);
-        } else if (dying == 3) {
-            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, 14);
-        } else if (dying == 2) {
-            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, GRID_SIZE);
-        } else if (dying == 1) {
-            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, GRID_SIZE);
-        }
-
-      /* Take .1 seconds on each frame of death, and then take 2 seconds
-         for the final frame to allow for the sound effect to end */
-        long currTime = System.currentTimeMillis();
-        long temp = dying == 1 ? 2000 : 100;
-        /* If it's time to draw a new death frame... */
-        if (currTime - timer >= temp) {
-            dying--;
-            timer = currTime;
-            /* If this was the last death frame...*/
-            if (dying == 0) {
-                if (numLives == -1) {
-                    /* Game over for player.  If relevant, update high score.  Set gameOver flag*/
-//                    if (currScore > highScore) {
-//                        updateScore(currScore);
-//                    }
-                    overScreen = true;
-                }
-            }
-        }
-    }
-
-    private void fillImage(final Graphics g, final Image image) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, 600, 600);
-        g.drawImage(image, 0, 0, Color.BLACK, null);
     }
 
     private void handlePellet(final Graphics g, final Ghost ghost) {
@@ -257,10 +159,6 @@ class Board extends JPanel {
 
         return result;
     }
-
-//    private boolean isValid() {
-//
-//    }
 
     private boolean getGhost(final Position p) {
         return getGhosts()

@@ -13,12 +13,9 @@ import static de.moeth.pacman.Direction.L;
 public class Ghost extends Mover implements Drawable {
 
     private final Image image;
-    /* Direction ghost is heading */
     private Direction direction;
-    /* The pellet the ghost is on top of */
     private Position pellet;
 
-    /*Constructor places ghost and updates states*/
     public Ghost(Position position, GameMap gameMap, final Image image) {
         super(gameMap);
         this.image = image;
@@ -26,10 +23,10 @@ public class Ghost extends Mover implements Drawable {
         pellet = position;
     }
 
-    /* Chooses a new direction randomly for the ghost to move */
     private Direction newDirection() {
         List<Direction> set = new ArrayList<>();
         set.addAll(Arrays.asList(Direction.values()));
+        set.remove(direction.backwards());
         Collections.shuffle(set);
         return set.stream()
                 .filter(d -> isValidDirection(d, pellet))
@@ -39,10 +36,7 @@ public class Ghost extends Mover implements Drawable {
 
     /* Random move function for ghost */
     public void move() {
-        /* If we can make a decision, pick a new direction randomly */
         direction = newDirection();
-
-        /* If that direction is valid, move that way */
         pellet = move(direction, pellet);
     }
 
