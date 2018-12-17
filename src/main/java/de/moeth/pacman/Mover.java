@@ -28,26 +28,17 @@ class Mover {
 
     Position move(Direction desiredDirection, final Position location) {
         if (isValidDirection(desiredDirection, location)) {
-            return desiredDirection.move(location, Board.INCREMENT);
+            return desiredDirection.move(location);
         }
         return location;
     }
 
     boolean isValidDirection(Direction desiredDirection, final Position location) {
-        switch (desiredDirection) {
-            case L:
-                return isValidDest(location.x - Board.INCREMENT, location.y);
-            case R:
-                return isValidDest(location.x + Board.GRID_SIZE, location.y);
-            case U:
-                return isValidDest(location.x, location.y - Board.INCREMENT);
-            case D:
-                return isValidDest(location.x, location.y + Board.GRID_SIZE);
-        }
-        return false;
+        Position move = desiredDirection.move(location);
+        return isValidDest(move);
     }
 
-    boolean isValidDest(int x, int y) {
-        return gameMap.isValidDest(x, y);
+    boolean isValidDest(final Position position) {
+        return gameMap.isValidDest(position);
     }
 }

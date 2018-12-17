@@ -22,24 +22,16 @@ public enum Direction {
         throw new IllegalArgumentException();
     }
 
-    public static boolean isOpposite(Direction desiredDirection, Direction currDirection) {
-        return desiredDirection.backwards() == currDirection;
-//        desiredDirection == L && currDirection == R ||
-//                desiredDirection == R && currDirection == L ||
-//                desiredDirection == U && currDirection == D ||
-//                desiredDirection == D && currDirection == U;
-    }
-
-    Position move(final Position location, final int increment) {
+    Position move(final Position location) {
         switch (this) {
             case L:
-                return location.move(-increment, 0);
+                return location.move(-1, 0);
             case R:
-                return location.move(increment, 0);
+                return location.move(1, 0);
             case U:
-                return location.move(0, -increment);
+                return location.move(0, -1);
             case D:
-                return location.move(0, increment);
+                return location.move(0, 1);
         }
         return location;
     }

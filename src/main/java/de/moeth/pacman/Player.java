@@ -1,10 +1,14 @@
 package de.moeth.pacman;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 
 /* This is the pacman object */
 public class Player extends Mover implements Drawable {
 
+    private final static Logger log = LoggerFactory.getLogger(Player.class);
     final Image pacmanImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacman.jpg"));
     private final Image pacmanUpImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmanup.jpg"));
     private final Image pacmanDownImage = Toolkit.getDefaultToolkit().getImage(Board.class.getResource("/img/pacmandown.jpg"));
@@ -17,35 +21,28 @@ public class Player extends Mover implements Drawable {
     public Direction currDirection;
     public Direction desiredDirection;
 
-    /* Keeps track of pellets eaten to determine end of game */
     private int pelletsEaten;
-    /* Current location */
-    private Position location;
-    /* Which pellet the pacman is on top of */
+    //    private Position location;
     private Position pellet;
-//    private final Supplier<Direction> directionSupplier;
 
-    /* Constructor places pacman in initial location and orientation */
-    public Player(Position position, GameMap gameMap) {
+    public Player(GameMap gameMap) {
         super(gameMap);
-//        this.directionSupplier = directionSupplier;
         pelletsEaten = 0;
-        pellet = Position.ofGrid(position);
-        location = position;
-        currDirection = Direction.L;
-        desiredDirection = Direction.L;
+//        pellet = Position.ofGrid(position);
+//        currDirection = Direction.L;
+//        desiredDirection = Direction.L;
+        reset();
     }
 
     public void reset() {
         currDirection = Direction.L;
         direction = Direction.L;
         desiredDirection = Direction.L;
-        this.location = Position.of(200, 300);
+        pellet = Position.of(9, 14);
     }
 
-    /* The move function moves the pacman for one frame in non demo mode */
     public void move() {
-        final Position last = location;
+//        final Position last = location;
 
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
@@ -53,46 +50,41 @@ public class Player extends Mover implements Drawable {
 //        if (location.isGrid()) {
 //            desiredDirection = directionSupplier.get();
 //        }
-        if (location.isGrid() || Direction.isOpposite(desiredDirection, currDirection)) {
-            location = move(desiredDirection, location);
-        }
-        /* If we haven't moved, then move in the direction the pacman was headed anyway */
-        if (Position.isEqualll(last, location)) {
-            if (isValidDirection(currDirection, location)) {
-                location = currDirection.move(location, Board.INCREMENT);
-            } else {
 
-                switch (currDirection) {
-                    case L:
-                        if (location.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
-                            location = location.setX(Board.MAX - Board.GRID_SIZE * 1);
-                        }
-                        break;
-                    case R:
-                        if (location.y == 9 * Board.GRID_SIZE && location.x > Board.MAX - Board.GRID_SIZE * 2) {
-                            location = location.setX(1 * Board.GRID_SIZE);
-                        }
-                        break;
+        if (isValidDirection(desiredDirection, pellet)) {
+            pellet = desiredDirection.move(pellet);
+//                    return;
                 }
-            }
-        }
 
-        /* If we did change direction, update currDirection to reflect that */
-        else {
-            currDirection = desiredDirection;
-        }
+//        log.info("move to: " + getPellet());
+//            }
+
+//            pellet = move(desiredDirection, pellet);
+//        }
+//        /* If we haven't moved, then move in the direction the pacman was headed anyway */
+//                switch (currDirection) {
+//                    case L:
+//                        if (pellet.y == 9 * Board.GRID_SIZE && location.x < 2 * Board.GRID_SIZE) {
+//                            pellet = location.setX(Board.MAX - Board.GRID_SIZE * 1);
+//                        }
+//                        break;
+//                    case R:
+//                        if (pellet.y == 9 * Board.GRID_SIZE && pellet.x > Board.MAX - Board.GRID_SIZE * 2) {
+//                            pellet = pellet.setX(1 * Board.GRID_SIZE);
+//                        }
+//                        break;
+//                }
+
+
     }
 
     /* Update what pellet the pacman is on top of */
     public void updatePellet() {
-        if (location.isGrid()) {
-            pellet = Position.ofGrid(location);
-        }
+
     }
 
     public boolean hitGhost(Ghost ghost) {
-        return location.x == ghost.getLocation().x && Math.abs(location.y - ghost.getLocation().y) < 10
-                || location.y == ghost.getLocation().y && Math.abs(location.x - ghost.getLocation().x) < 10;
+        return isOnPosition(ghost.getPellet());
     }
 
     public int getPelletsEaten() {
@@ -100,46 +92,50 @@ public class Player extends Mover implements Drawable {
     }
 
     public void incrementPelletsEaten() {
-        this.pelletsEaten += 1;
-    }
-
-    public Position getLocation() {
-        return location;
+        pelletsEaten += 1;
     }
 
     public Position getPellet() {
         return pellet;
     }
 
+    public int getDrawX() {
+        return getPellet().x * Board.GRID_SIZE + Board.GRID_SIZE;
+    }
+
+    public int getDrawY() {
+        return getPellet().y * Board.GRID_SIZE + Board.GRID_SIZE;
+    }
+
     @Override
     public void draw(final Graphics g) {
-        /* Draw the pacman */
+
+        g.drawImage(getPacmanImage(), getDrawX(), getDrawY(), Color.BLACK, null);
+    }
+
+    private Image getPacmanImage() {
+
         if (frameCount < 5) {
             /* Draw mouth closed */
-            g.drawImage(pacmanImage, getLocation().x, getLocation().y, Color.BLACK, null);
+            return pacmanImage;
         } else {
             /* Draw mouth open in appropriate direction */
             if (frameCount >= 10) {
                 frameCount = 0;
             }
 
-            g.drawImage(getPacmanImage(), getLocation().x, getLocation().y, Color.BLACK, null);
-        }
-    }
-
-    private Image getPacmanImage() {
-
-        switch (currDirection) {
-            case L:
-                return pacmanLeftImage;
-            case R:
-                return pacmanRightImage;
-            case U:
-                return pacmanUpImage;
-            case D:
-                return pacmanDownImage;
-            default:
-                throw new IllegalArgumentException();
+            switch (currDirection) {
+                case L:
+                    return pacmanLeftImage;
+                case R:
+                    return pacmanRightImage;
+                case U:
+                    return pacmanUpImage;
+                case D:
+                    return pacmanDownImage;
+                default:
+                    throw new IllegalArgumentException();
+            }
         }
     }
 

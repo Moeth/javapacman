@@ -103,8 +103,8 @@ public class Pacman extends JApplet implements KeyListener {
 //                Direction direction = directionSupplier.get();
                 final int startScore = getKIScore();
                 b.player.desiredDirection = direction;
-                stepFrame(false);
-                while (!b.player.getLocation().isGrid()) {
+//                stepFrame(false);
+//                while (!b.player.getLocation().isGrid()) {
                     stepFrame(false);
 //                    synchronized (this) {
 //                        try {
@@ -113,9 +113,9 @@ public class Pacman extends JApplet implements KeyListener {
 //                            e.printStackTrace();
 //                        }
 //                    }
-                }
-                Double result = Double.valueOf(getKIScore() - startScore);
-                log.info("score: " + result);
+//                }
+                Double result = Double.valueOf(getKIScore() - startScore - 1);
+                log.info("score: " + result + " " + b.player.getPellet());
                 return result;
             }
         };
@@ -212,7 +212,7 @@ public class Pacman extends JApplet implements KeyListener {
     public void repaint() {
         b.repaint(0, 0, 600, Board.GRID_SIZE);
         b.repaint(0, 420, 600, 40);
-        b.repaint(b.player.getLocation().x - Board.GRID_SIZE, b.player.getLocation().y - Board.GRID_SIZE, 80, 80);
+        b.repaint(b.player.getDrawX() - Board.GRID_SIZE, b.player.getDrawY() - Board.GRID_SIZE, 80, 80);
     }
 
     /* Steps the screen forward one frame */
@@ -284,10 +284,10 @@ public class Pacman extends JApplet implements KeyListener {
     private void dying() {
         /* Move all game elements back to starting positions and orientations */
         b.player.reset();
-        b.ghost1.setLocation(Position.of(180, 180));
-        b.ghost2.setLocation(Position.of(200, 180));
-        b.ghost3.setLocation(Position.of(220, 180));
-        b.ghost4.setLocation(Position.of(220, 180));
+        b.ghost1.setLocation(Position.of(8, 8));
+        b.ghost2.setLocation(Position.of(9, 8));
+        b.ghost3.setLocation(Position.of(10, 8));
+        b.ghost4.setLocation(Position.of(10, 8));
 
         /* Advance a frame to display main state*/
         b.repaint(0, 0, 600, 600);

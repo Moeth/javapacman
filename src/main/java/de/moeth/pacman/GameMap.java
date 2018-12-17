@@ -153,14 +153,10 @@ class GameMap implements Drawable {
         }
     }
 
-    public boolean isValidDest(int x, int y) {
-    /* The first statements check that the x and y are inbounds.  The last statement checks the map to
-       see if it's a valid location */
-        Position position = Position.of(x, y);
-        Position grid = Position.ofGrid(position);
+    public boolean isValidDest(final Position position) {
+//        Position grid = Position.ofGrid(position);
 
-        return position.isGridLine()
-                && position.between(GRID_SIZE, Board.MAX)
-                && getState(grid.x, grid.y);
+        return position.between(0, GRID_WIDTH)
+                && getState(position.x, position.y);
     }
 }

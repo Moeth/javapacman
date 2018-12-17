@@ -70,11 +70,11 @@ class Board extends JPanel {
     }
 
     private void resetPositions() {
-        player = new Player(Position.of(10 * GRID_SIZE, 15 * GRID_SIZE), gameMap);
-        ghost1 = new Ghost(Position.of(9 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost10);
-        ghost2 = new Ghost(Position.of(10 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost20);
-        ghost3 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost30);
-        ghost4 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap, ghost40);
+        player = new Player(gameMap);
+        ghost1 = new Ghost(Position.of(9, 9), gameMap, ghost10);
+        ghost2 = new Ghost(Position.of(10, 9), gameMap, ghost20);
+        ghost3 = new Ghost(Position.of(11, 9), gameMap, ghost30);
+        ghost4 = new Ghost(Position.of(11, 9), gameMap, ghost40);
     }
 
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
@@ -175,18 +175,18 @@ class Board extends JPanel {
 
     private void handleDying(final Graphics g) {
         /* Draw the pacman */
-        g.drawImage(player.pacmanImage, player.getLocation().x, player.getLocation().y, Color.BLACK, null);
+        g.drawImage(player.pacmanImage, player.getDrawX(), player.getDrawY(), Color.BLACK, null);
         g.setColor(Color.BLACK);
 
         /* Kill the pacman */
         if (dying == 4) {
-            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, 7);
+            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, 7);
         } else if (dying == 3) {
-            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, 14);
+            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, 14);
         } else if (dying == 2) {
-            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, GRID_SIZE);
+            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, GRID_SIZE);
         } else if (dying == 1) {
-            g.fillRect(player.getLocation().x, player.getLocation().y, GRID_SIZE, GRID_SIZE);
+            g.fillRect(player.getDrawX(), player.getDrawY(), GRID_SIZE, GRID_SIZE);
         }
 
       /* Take .1 seconds on each frame of death, and then take 2 seconds
@@ -242,12 +242,16 @@ class Board extends JPanel {
 
         for (int x = player.getPellet().x - SURROUND; x <= player.getPellet().x + SURROUND; x++) {
             for (int y = player.getPellet().y - SURROUND; y <= player.getPellet().y + SURROUND; y++) {
-                Position p = Position.of(x, y);
-                boolean valid = p.between(0, GRID_WIDTH);
-                result[i++] = valid && gameMap.getState(p) ? 1 : 0;
-                result[i++] = valid && gameMap.getPellet(p) ? 1 : 0;
-                result[i++] = valid && getGhost(p) ? 1 : 0;
+                if (x <= 0 && x < GRID_WIDTH && y <= 0 && y < GRID_WIDTH) {
+                    Position p = Position.of(x, y);
+                    boolean valid = p.between(0, GRID_WIDTH);
+                    result[i++] = valid && gameMap.getState(p) ? 1 : 0;
+                    result[i++] = valid && gameMap.getPellet(p) ? 1 : 0;
+                    result[i++] = valid && getGhost(p) ? 1 : 0;
 //                result[i++] = valid && player.isOnPosition(p) ? 1 : 0;
+                } else {
+                    i += 3;
+                }
             }
         }
 
@@ -300,5 +304,4 @@ class Board extends JPanel {
         g.setColor(Color.BLUE);
         drawLives(g);
     }
-
 }

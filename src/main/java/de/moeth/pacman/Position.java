@@ -2,8 +2,6 @@ package de.moeth.pacman;
 
 import lombok.ToString;
 
-import static de.moeth.pacman.Board.GRID_SIZE;
-
 @ToString
 public class Position {
 
@@ -13,22 +11,11 @@ public class Position {
     private Position(final int x, final int y) {
         this.x = x;
         this.y = y;
+//        Preconditions.checkArgument(between(0, GRID_WIDTH), "invalid "+this);
     }
 
     public static Position of(final int x, final int y) {
         return new Position(x, y);
-    }
-
-    public static Position ofGrid(Position location) {
-        return ofGrid(location.x, location.y);
-    }
-
-    private static Position ofGrid(final int x, final int y) {
-        return of(toGriddd(x), toGriddd(y));
-    }
-
-    public static int toGriddd(final int x) {
-        return x / GRID_SIZE - 1;
     }
 
     public Position move(final int x, final int y) {
@@ -39,31 +26,16 @@ public class Position {
         return of(x, y);
     }
 
-    public boolean isGrid() {
-        return isGrid(x) && isGrid(y);
-    }
-
-    public static boolean isGrid(int x) {
-        return x % GRID_SIZE == 0;
-    }
-
     public boolean between(int min, int max) {
         return min <= x && x < max
                 && min <= y && y < max;
     }
-    public boolean isGridLine() {
-        return isGrid(x) || isGrid(y);
-    }
-
-    public static boolean isEqualll(Position p1, Position p2) {
-        return p1.x == p2.x && p1.y == p2.y;
-    }
-
-    public static int toGrid(int p) {
-        return p / GRID_SIZE;
-    }
 
     public boolean isOnPosition(final Position p) {
-        return isEqualll(this, p);
+        return x == p.x && y == p.y;
+    }
+
+    public Position move(Direction direction) {
+        return direction.move(this);
     }
 }
