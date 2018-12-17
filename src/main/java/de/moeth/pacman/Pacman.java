@@ -95,27 +95,9 @@ public class Pacman extends JApplet {
 
     private void train() throws IOException {
 
-        final Function<Direction, Double> rewardFunction = new Function<Direction, Double>() {
-            @Override
-            public Double apply(final Direction direction) {
-                final int startScore = getKIScore();
-                b.player.desiredDirection = direction;
-                stepFrame();
-//                    synchronized (this) {
-//                        try {
-//                            this.wait(30);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-                Double result = Double.valueOf(getKIScore() - startScore - 1);
-                log.info("score: " + result + " " + b.player.getPellet());
-                return result;
-            }
-        };
+        final Function<Direction, Double> rewardFunction = direction -> doAction(direction);
 
-        final Yeah yeah = new Yeah(this, rewardFunction);
+        final Yeah yeah = new Yeah(this);
 
         DataManager manager = new DataManager(true);
 
@@ -136,5 +118,22 @@ public class Pacman extends JApplet {
 
     public void newGame() {
         b.newGame();
+    }
+
+    public Double doAction(Direction direction) {
+        final int startScore = getKIScore();
+        b.player.desiredDirection = direction;
+        stepFrame();
+//                    synchronized (this) {
+//                        try {
+//                            this.wait(30);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+        Double result = Double.valueOf(getKIScore() - startScore - 1);
+        log.info("score: " + result + " " + b.player.getPellet());
+        return result;
     }
 }
