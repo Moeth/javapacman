@@ -24,19 +24,31 @@ public class Position {
     }
 
     private static Position ofGrid(final int x, final int y) {
-        return Position.of(x / Board.GRID_SIZE - 1, y / Board.GRID_SIZE - 1);
+        return of(toGriddd(x), toGriddd(y));
+    }
+
+    public static int toGriddd(final int x) {
+        return x / GRID_SIZE - 1;
     }
 
     public Position move(final int x, final int y) {
-        return Position.of(this.x + x, this.y + y);
+        return of(this.x + x, this.y + y);
     }
 
     public Position setX(final int x) {
-        return Position.of(x, y);
+        return of(x, y);
     }
 
     public boolean isGrid() {
-        return x % Board.GRID_SIZE == 0 && y % Board.GRID_SIZE == 0;
+        return isGrid(x) && isGrid(y);
+    }
+
+    public static boolean isGrid(int x) {
+        return x % GRID_SIZE == 0;
+    }
+
+    public boolean isGridLine() {
+        return isGrid(x) || isGrid(y);
     }
 
     public static boolean isEqualll(Position p1, Position p2) {

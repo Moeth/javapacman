@@ -40,9 +40,9 @@ public class Ghost extends Mover {
 
     /* Chooses a new direction randomly for the ghost to move */
     private Direction newDirection() {
-        Direction backwards = U;
-        int lookX = location.x, lookY = location.y;
-        backwards = direction.backwards();
+        int lookX = location.x;
+        int lookY = location.y;
+        Direction backwards = direction.backwards();
 
         Direction newDirection = backwards;
         /* While we still haven't found a valid direction */

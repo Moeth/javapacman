@@ -47,12 +47,7 @@ class Mover {
         return false;
     }
 
-    /* Determines if a set of coordinates is a valid destination.*/
     boolean isValidDest(int x, int y) {
-    /* The first statements check that the x and y are inbounds.  The last statement checks the map to
-       see if it's a valid location */
-        int vvv = x / Board.GRID_SIZE - 1;
-        int gy = y / Board.GRID_SIZE - 1;
-        return (x % Board.GRID_SIZE == 0 || y % Board.GRID_SIZE == 0) && Board.GRID_SIZE <= x && x < Board.MAX && Board.GRID_SIZE <= y && y < Board.MAX && gameMap.getState(vvv, gy);
+        return gameMap.isValidDest(x, y);
     }
 }

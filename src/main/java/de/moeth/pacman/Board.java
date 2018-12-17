@@ -69,11 +69,11 @@ class Board extends JPanel {
     }
 
     private void init() {
-        player = new Player(Position.of(200, 300), gameMap, directionSupplier);
-        ghost1 = new Ghost(Position.of(180, 180), gameMap);
-        ghost2 = new Ghost(Position.of(200, 180), gameMap);
-        ghost3 = new Ghost(Position.of(220, 180), gameMap);
-        ghost4 = new Ghost(Position.of(220, 180), gameMap);
+        player = new Player(Position.of(10 * GRID_SIZE, 15 * GRID_SIZE), gameMap, directionSupplier);
+        ghost1 = new Ghost(Position.of(9 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
+        ghost2 = new Ghost(Position.of(10 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
+        ghost3 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
+        ghost4 = new Ghost(Position.of(11 * GRID_SIZE, 9 * GRID_SIZE), gameMap);
     }
 
     /* Reset occurs on a new game*/
@@ -116,74 +116,8 @@ class Board extends JPanel {
         g.setColor(Color.WHITE);
         g.drawRect(19, 19, 382, 382);
         g.setColor(Color.BLUE);
-
-        fooo(g, 40, 40, 60, GRID_SIZE);
-        fooo(g, 120, 40, 60, GRID_SIZE);
-        fooo(g, 200, GRID_SIZE, GRID_SIZE, 40);
-        fooo(g, 240, 40, 60, GRID_SIZE);
-        fooo(g, 320, 40, 60, GRID_SIZE);
-        fooo(g, 40, 80, 60, GRID_SIZE);
-        fooo(g, 160, 80, 100, GRID_SIZE);
-        fooo(g, 200, 80, GRID_SIZE, 60);
-        fooo(g, 320, 80, 60, GRID_SIZE);
-
-        fooo(g, GRID_SIZE, 120, 80, 60);
-        fooo(g, 320, 120, 80, 60);
-        fooo(g, GRID_SIZE, 200, 80, 60);
-        fooo(g, 320, 200, 80, 60);
-
-        fooo(g, 160, 160, 40, GRID_SIZE);
-        fooo(g, 220, 160, 40, GRID_SIZE);
-        fooo(g, 160, 180, GRID_SIZE, GRID_SIZE);
-        fooo(g, 160, 200, 100, GRID_SIZE);
-        fooo(g, 240, 180, GRID_SIZE, GRID_SIZE);
-        g.setColor(Color.BLUE);
-
-        fooo(g, 120, 120, 60, GRID_SIZE);
-        fooo(g, 120, 80, GRID_SIZE, 100);
-        fooo(g, 280, 80, GRID_SIZE, 100);
-        fooo(g, 240, 120, 60, GRID_SIZE);
-
-        fooo(g, 280, 200, GRID_SIZE, 60);
-        fooo(g, 120, 200, GRID_SIZE, 60);
-        fooo(g, 160, 240, 100, GRID_SIZE);
-        fooo(g, 200, 260, GRID_SIZE, 40);
-
-        fooo(g, 120, 280, 60, GRID_SIZE);
-        fooo(g, 240, 280, 60, GRID_SIZE);
-
-        fooo(g, 40, 280, 60, GRID_SIZE);
-        fooo(g, 80, 280, GRID_SIZE, 60);
-        fooo(g, 320, 280, 60, GRID_SIZE);
-        fooo(g, 320, 280, GRID_SIZE, 60);
-
-        fooo(g, GRID_SIZE, 320, 40, GRID_SIZE);
-        fooo(g, 360, 320, 40, GRID_SIZE);
-        fooo(g, 160, 320, 100, GRID_SIZE);
-        fooo(g, 200, 320, GRID_SIZE, 60);
-
-        fooo(g, 40, 360, 140, GRID_SIZE);
-        fooo(g, 240, 360, 140, GRID_SIZE);
-        fooo(g, 280, 320, GRID_SIZE, 40);
-        fooo(g, 120, 320, GRID_SIZE, 60);
+        gameMap.initMap();
         drawLives(g);
-    }
-
-    private void fooo(Graphics g, final int x, final int y, final int width, final int height) {
-        g.fillRect(x, y, width, height);
-        gameMap.updateMap(x, y, width, height);
-    }
-
-    /* Draws the pellets on the screen */
-    private void drawPellets(Graphics g) {
-        g.setColor(Color.YELLOW);
-        for (int i = 1; i < GRID_SIZE; i++) {
-            for (int j = 1; j < GRID_SIZE; j++) {
-                if (gameMap.getPellet(i - 1, j - 1)) {
-                    g.fillOval(i * GRID_SIZE + 8, j * GRID_SIZE + 8, INCREMENT, INCREMENT);
-                }
-            }
-        }
     }
 
     /* Draws one individual pellet.  Used to redraw pellets that ghosts have run over */
@@ -237,7 +171,7 @@ class Board extends JPanel {
             init();
             currScore = 0;
             drawBoard(g);
-            drawPellets(g);
+//            drawPellets(g);
             drawLives(g);
 
             /* Draw the top menu bar*/
@@ -258,12 +192,13 @@ class Board extends JPanel {
             New = 0;
         }
 
+        gameMap.draw(g);
         /* Drawing optimization */
-        g.copyArea(player.location.x - GRID_SIZE, player.location.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost1.location.x - GRID_SIZE, ghost1.location.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost2.location.x - GRID_SIZE, ghost2.location.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost3.location.x - GRID_SIZE, ghost3.location.y - GRID_SIZE, 80, 80, 0, 0);
-        g.copyArea(ghost4.location.x - GRID_SIZE, ghost4.location.y - GRID_SIZE, 80, 80, 0, 0);
+        g.copyArea(player.location.x - GRID_SIZE, player.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
+        g.copyArea(ghost1.location.x - GRID_SIZE, ghost1.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
+        g.copyArea(ghost2.location.x - GRID_SIZE, ghost2.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
+        g.copyArea(ghost3.location.x - GRID_SIZE, ghost3.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
+        g.copyArea(ghost4.location.x - GRID_SIZE, ghost4.location.y - GRID_SIZE, 4 * GRID_SIZE, 4 * GRID_SIZE, 0, 0);
         boolean oops = detectCollision();
 
         /* Kill the pacman */
@@ -354,25 +289,28 @@ class Board extends JPanel {
                 player.frameCount = 0;
             }
 
-            switch (player.currDirection) {
-                case L:
-                    g.drawImage(pacmanLeftImage, player.location.x, player.location.y, Color.BLACK, null);
-                    break;
-                case R:
-                    g.drawImage(pacmanRightImage, player.location.x, player.location.y, Color.BLACK, null);
-                    break;
-                case U:
-                    g.drawImage(pacmanUpImage, player.location.x, player.location.y, Color.BLACK, null);
-                    break;
-                case D:
-                    g.drawImage(pacmanDownImage, player.location.x, player.location.y, Color.BLACK, null);
-                    break;
-            }
+            g.drawImage(getPacmanImage(), player.location.x, player.location.y, Color.BLACK, null);
         }
 
         /* Draw the border around the game in case it was overwritten by ghost movement or something */
         g.setColor(Color.WHITE);
         g.drawRect(19, 19, 382, 382);
+    }
+
+    private Image getPacmanImage() {
+
+        switch (player.currDirection) {
+            case L:
+                return pacmanLeftImage;
+            case R:
+                return pacmanRightImage;
+            case U:
+                return pacmanUpImage;
+            case D:
+                return pacmanDownImage;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     private void handleDying(final Graphics g) {
