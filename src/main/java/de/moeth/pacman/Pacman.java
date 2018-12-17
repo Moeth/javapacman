@@ -1,16 +1,88 @@
 package de.moeth.pacman;/* Drew Schuster */
 
+import org.deeplearning4j.rl4j.learning.HistoryProcessor;
+import org.deeplearning4j.rl4j.learning.sync.qlearning.QLearning;
+import org.deeplearning4j.rl4j.learning.sync.qlearning.discrete.QLearningDiscreteDense;
+import org.deeplearning4j.rl4j.network.dqn.DQNFactoryStdConv;
+import org.deeplearning4j.rl4j.network.dqn.DQNFactoryStdDense;
+import org.deeplearning4j.rl4j.util.DataManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.function.Supplier;
+import java.io.IOException;
+import java.util.function.Function;
 
 /* This class contains the entire game... most of the game logic is in the Board class but this
    creates the gui and captures mouse and keyboard input, as well as controls the game states */
 public class Pacman extends JApplet implements KeyListener {
+
+    private final Logger log = LoggerFactory.getLogger(Pacman.class);
+    //    private static final IHistoryProcessor.Configuration ALE_HP = null;
+//
+    public static HistoryProcessor.Configuration ALE_HP =
+            new HistoryProcessor.Configuration(
+                    4,       //History length
+                    84,      //resize width
+                    110,     //resize height
+                    84,      //crop width
+                    84,      //crop height
+                    0,       //cropping x offset
+                    0,       //cropping y offset
+                    4        //skip mod (one frame is picked every x
+            );
+
+    public static QLearning.QLConfiguration ALE_QL =
+            new QLearning.QLConfiguration(
+                    123,      //Random seed
+                    10000,    //Max step By epoch
+                    8000000,  //Max step
+                    1000000,  //Max size of experience replay
+                    32,       //size of batches
+                    10000,    //target update (hard)
+                    500,      //num step noop warmup
+                    0.1,      //reward scaling
+                    0.99,     //gamma
+                    100.0,    //td-error clipping
+                    0.1f,     //min epsilon
+                    100000,   //num step for eps greedy anneal
+                    true      //double-dqn
+            );
+
+    public static DQNFactoryStdConv.Configuration ALE_NET_QL =
+            DQNFactoryStdConv.Configuration.builder()
+                    .learningRate(0.00025)
+                    .l2(0.000)
+                    .listeners(null)
+                    .updater(null)
+                    .build();
+
+//            new DQNFactoryStdConv.Configuration(
+//                    , //learning rate
+//                    ,   //l2 regularization
+//                    null, null
+//            );
+
+    public static DQNFactoryStdDense.Configuration ALE_NET_QL2 =
+            DQNFactoryStdDense.Configuration.builder()
+//                    .learningRate(0.00025)
+                    .numHiddenNodes(20)
+                    .numLayer(2)
+                    .l2(0.000)
+                    .listeners(null)
+                    .updater(null)
+                    .build();
+
+//                    (
+//                    0.00025, //learning rate
+//                    0,
+//                    0.000,   //l2 regularization
+//                    null, null
+//            );
+
 
     public static final int DELAY = 10;
     /* These timers are used to kill title, game over, and victory screens after a set idle period (5 seconds)*/
@@ -20,13 +92,36 @@ public class Pacman extends JApplet implements KeyListener {
     final Board b;
 
     /* This timer is used to do request new frames be drawn*/
-    private final Timer frameTimer;
+//    private final Timer frameTimer;
 
     /* This constructor creates the entire game essentially */
-    public Pacman() {
+    public Pacman() throws IOException {
 //        final Supplier<Direction> directionSupplier = () -> Direction.random();
-        final Supplier<Direction> directionSupplier = new Yeah(this);
-        b = new Board(directionSupplier);
+        final Function<Direction, Double> rewardFunction = new Function<Direction, Double>() {
+            @Override
+            public Double apply(final Direction direction) {
+//                Direction direction = directionSupplier.get();
+                final int startScore = getKIScore();
+                b.player.desiredDirection = direction;
+                stepFrame(false);
+                while (!b.player.getLocation().isGrid()) {
+                    stepFrame(false);
+//                    synchronized (this) {
+//                        try {
+//                            this.wait(30);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+                }
+                Double result = Double.valueOf(getKIScore() - startScore);
+                log.info("score: " + result);
+                return result;
+            }
+        };
+
+        final Yeah yeah = new Yeah(this, rewardFunction);
+        b = new Board();
         b.requestFocus();
 
         /* Create and set up window frame*/
@@ -50,19 +145,65 @@ public class Pacman extends JApplet implements KeyListener {
         stepFrame(true);
 
         /* Create a timer that calls stepFrame every 30 milliseconds */
-        frameTimer = new Timer(DELAY, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                stepFrame(false);
-            }
-        });
+//        frameTimer = new Timer(DELAY, new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                stepFrame(false);
+//            }
+//        });
+
+//        Direction direction = directionSupplier.get();
+//        b.player.desiredDirection = direction;
 
 
         /* Start the timer */
-        frameTimer.start();
+//        frameTimer.start();
 
         b.requestFocus();
+        DataManager manager = new DataManager(true);
+
+//        QLearningDiscreteConv dql = new QLearningDiscreteConv(yeah, ALE_NET_QL, ALE_HP, ALE_QL, manager);
+        DQNFactoryStdDense.Configuration dqnFactoryStdDense = DQNFactoryStdDense.Configuration.builder()
+//                    .learningRate(0.00025)
+                .numHiddenNodes(20)
+                .numLayer(5)
+                .l2(0.000)
+                .listeners(null)
+                .updater(null)
+                .build();
+        QLearningDiscreteDense dql = new QLearningDiscreteDense(yeah, dqnFactoryStdDense, ALE_QL, manager);
+
+        //start the training
+        dql.train();
+
+        while (true) {
+            dql.train();
+//            malmoCliffWalk();
+//            loadMalmoCliffWalk();
+        }
     }
+
+    private int getKIScore() {
+        return b.currScore + b.numLives * 10000;
+    }
+
+//    public QLearningDiscrete create(MDP<O, Integer, DiscreteSpace> mdp, IDQN dqn, HistoryProcessor.Configuration hpconf,
+//                                    QLearning.QLConfiguration conf, DataManager dataManager) {
+//        QLearningDiscrete qLearningDiscrete = new QLearningDiscrete(mdp, dqn, conf, dataManager, conf.getEpsilonNbStep() * hpconf.getSkipFrame());
+//        qLearningDiscrete.setHistoryProcessor(hpconf);
+//        return qLearningDiscrete;
+//
+//    }
+//
+//    public QLearningDiscreteConv create(MDP<O, Integer, DiscreteSpace> mdp, DQNFactory factory,
+//                                        HistoryProcessor.Configuration hpconf, QLearning.QLConfiguration conf, DataManager dataManager) {
+//        create(mdp, factory.buildDQN(hpconf.getShape(), mdp.getActionSpace().getSize()), hpconf, conf, dataManager);
+//    }
+//
+//    public QLearningDiscreteConv create(MDP<O, Integer, DiscreteSpace> mdp, DQNFactoryStdConv.Configuration netConf,
+//                                        HistoryProcessor.Configuration hpconf, QLearning.QLConfiguration conf, DataManager dataManager) {
+//        create(mdp, new DQNFactoryStdConv(netConf), hpconf, conf, dataManager);
+//    }
 
     /* This repaint function repaints only the parts of the screen that may have changed.
        Namely the area around every player ghost and the menu bars
@@ -89,7 +230,7 @@ public class Pacman extends JApplet implements KeyListener {
 
     /* New can either be specified by the New parameter in stepFrame function call or by the state
        of b.New.  Update New accordingly */
-        New = New || (b.New != 0);
+//        New = New || (b.New != 0);
 
 //        if (b.titleScreen) {
 //            b.repaint();
@@ -115,7 +256,7 @@ public class Pacman extends JApplet implements KeyListener {
 
 
         /* If we have a normal game state, move all pieces and update pellet status */
-        if (!New) {
+//        if (!New) {
       /* The pacman player has two functions, demoMove if we're in demo mode and move if we're in
          user playable mode.  Call the appropriate one here */
             b.player.move();
@@ -126,24 +267,18 @@ public class Pacman extends JApplet implements KeyListener {
             b.ghost3.move();
             b.ghost4.move();
             b.player.updatePellet();
-        }
+//        }
 
         /* We either have a new game or the user has died, either way we have to reset the board */
-        if (b.stopped || New) {
-            /*Temporarily stop advancing frames */
-            frameTimer.stop();
-            dying();
-
-
-
-
-            /*Start advancing frames once again*/
-            b.stopped = false;
-            frameTimer.start();
-        } else {
+//        if (New) {
+//            /*Temporarily stop advancing frames */
+//            frameTimer.stop();
+//            dying();
+//            frameTimer.start();
+//        } else {
             /* Otherwise we're in a normal state, advance one frame*/
             repaint();
-        }
+//        }
     }
 
     private void dying() {
@@ -189,7 +324,7 @@ public class Pacman extends JApplet implements KeyListener {
     }
 
     /* Main function simply creates a new pacman instance*/
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Pacman c = new Pacman();
     }
 }

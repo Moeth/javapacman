@@ -1,7 +1,6 @@
 package de.moeth.pacman;
 
 import java.awt.*;
-import java.util.function.Supplier;
 
 /* This is the pacman object */
 public class Player extends Mover implements Drawable {
@@ -24,12 +23,12 @@ public class Player extends Mover implements Drawable {
     private Position location;
     /* Which pellet the pacman is on top of */
     private Position pellet;
-    private final Supplier<Direction> directionSupplier;
+//    private final Supplier<Direction> directionSupplier;
 
     /* Constructor places pacman in initial location and orientation */
-    public Player(Position position, GameMap gameMap, final Supplier<Direction> directionSupplier) {
+    public Player(Position position, GameMap gameMap) {
         super(gameMap);
-        this.directionSupplier = directionSupplier;
+//        this.directionSupplier = directionSupplier;
         pelletsEaten = 0;
         pellet = Position.ofGrid(position);
         location = position;
@@ -51,9 +50,9 @@ public class Player extends Mover implements Drawable {
         /* Try to turn in the direction input by the user */
         /*Can only turn if we're in center of a grid*/
         /* Or if we're reversing*/
-        if (location.isGrid()) {
-            desiredDirection = directionSupplier.get();
-        }
+//        if (location.isGrid()) {
+//            desiredDirection = directionSupplier.get();
+//        }
         if (location.isGrid() || Direction.isOpposite(desiredDirection, currDirection)) {
             location = move(desiredDirection, location);
         }

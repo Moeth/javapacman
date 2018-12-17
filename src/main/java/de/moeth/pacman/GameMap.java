@@ -20,20 +20,7 @@ class GameMap implements Drawable {
         pellets = new boolean[GRID_WIDTH][GRID_WIDTH];
 
 
-        /* Clear state and pellets arrays */
-        for (int i = 0; i < GRID_WIDTH; i++) {
-            for (int j = 0; j < GRID_WIDTH; j++) {
-                state[i][j] = true;
-                pellets[i][j] = true;
-            }
-        }
 
-        /* Handle the weird spots with no pellets*/
-        for (int i = 5; i < 14; i++) {
-            for (int j = 5; j < 12; j++) {
-                pellets[i][j] = false;
-            }
-        }
 //        pellets[9][7] = false;
 //        pellets[8][8] = false;
 //        pellets[9][8] = false;
@@ -75,6 +62,21 @@ class GameMap implements Drawable {
     }
 
     public void initMap() {
+
+        /* Clear state and pellets arrays */
+        for (int i = 0; i < GRID_WIDTH; i++) {
+            for (int j = 0; j < GRID_WIDTH; j++) {
+                state[i][j] = true;
+                pellets[i][j] = true;
+            }
+        }
+
+        /* Handle the weird spots with no pellets*/
+        for (int i = 5; i < 14; i++) {
+            for (int j = 5; j < 12; j++) {
+                pellets[i][j] = false;
+            }
+        }
 
         updateMap2(2, 2, 3, 1);
         updateMap2(6, 2, 3, 1);
@@ -157,8 +159,8 @@ class GameMap implements Drawable {
         Position position = Position.of(x, y);
         Position grid = Position.ofGrid(position);
 
-        return (position.isGridLine())
-                && GRID_SIZE <= position.x && position.x < Board.MAX && GRID_SIZE <= position.y
-                && position.y < Board.MAX && getState(grid.x, grid.y);
+        return position.isGridLine()
+                && position.between(GRID_SIZE, Board.MAX)
+                && getState(grid.x, grid.y);
     }
 }

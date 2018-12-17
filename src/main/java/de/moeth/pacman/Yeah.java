@@ -1,6 +1,5 @@
 package de.moeth.pacman;
 
-import de.moeth.pacman.Yeah.GameScreen;
 import lombok.Value;
 import org.deeplearning4j.gym.StepReply;
 import org.deeplearning4j.rl4j.mdp.MDP;
@@ -9,34 +8,37 @@ import org.deeplearning4j.rl4j.space.DiscreteSpace;
 import org.deeplearning4j.rl4j.space.Encodable;
 import org.deeplearning4j.rl4j.space.ObservationSpace;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-import static de.moeth.pacman.Board.GRID_SIZE;
 import static de.moeth.pacman.Board.STATE_COUNT;
+import static de.moeth.pacman.Board.SURROUND;
 
 //FROM https://github.com/deeplearning4j/rl4j/blob/master/rl4j-ale/src/main/java/org/deeplearning4j/rl4j/mdp/ale/ALEMDP.java
-public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, DiscreteSpace> {
+public class Yeah implements MDP<Encodable, Integer, DiscreteSpace> {
 
     private final Pacman pacman;
     //    private final int[] actions;
     private final DiscreteSpace discreteSpace;
-    private final ObservationSpace<GameScreen> observationSpace;
+    private final ObservationSpace<Encodable> observationSpace;
     private final Configuration configuration;
     private final double scaleFactor = 1;
 
-    private final byte[] screenBuffer;
+    //    private final byte[] screenBuffer;
+    private final Function<Direction, Double> rewardFunction;
+
 
     //actions
 //    private List<Direction> actions = Arrays.asList(Direction.values());
 
-    public Yeah(final Pacman pacman) {
-        this(pacman, new Configuration(123, 0, 0, 0, true));
+    public Yeah(final Pacman pacman, final Function<Direction, Double> rewardFunction) {
+        this(pacman, new Configuration(123, 0, 0, 0, true), rewardFunction);
     }
 
-    public Yeah(final Pacman pacman, Configuration configuration) {
+    public Yeah(final Pacman pacman, Configuration configuration, final Function<Direction, Double> rewardFunction) {
         this.pacman = pacman;
 //        this.romFile = romFile;
         this.configuration = configuration;
+        this.rewardFunction = rewardFunction;
 //        ale = new ALEInterface();
         setupGame();
 
@@ -47,15 +49,16 @@ public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, Discr
 //        a.get(actions);
 
         discreteSpace = new DiscreteSpace(Direction.values().length);
-        int[] shape = {(int) GRID_SIZE, (int) GRID_SIZE, STATE_COUNT};
+//        int[] shape = {(int) GRID_SIZE, (int) GRID_SIZE, STATE_COUNT};
+        int[] shape = {(int) (2 * SURROUND + 1) * (2 * SURROUND + 1) * STATE_COUNT};
         observationSpace = new ArrayObservationSpace<>(shape);
-        screenBuffer = new byte[shape[0] * shape[1] * shape[2]];
+//        screenBuffer = new byte[shape[0] * shape[1] * shape[2]];
     }
 
-    @Override
-    public Direction get() {
-        return Direction.random();
-    }
+//    @Override
+//    public Direction get() {
+//        return Direction.random();
+//    }
 
 //    private void actions() {
 //        IntPointer a = configuration.minimalActionSet ? ale.getMinimalActionSet() : ale.getLegalActionSet();
@@ -89,10 +92,13 @@ public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, Discr
     }
 
     @Override
-    public GameScreen reset() {
+    public Encodable reset() {
 //        ale.reset_game();
 //        ale.getScreenRGB(screenBuffer);
-        return new GameScreen(screenBuffer);
+        double[] pacmanState = pacman.b.getPacmanState();
+        //        return new GameScreen(encodable);
+        return () -> pacmanState;
+//        throw new IllegalArgumentException();
     }
 
     @Override
@@ -101,8 +107,10 @@ public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, Discr
     }
 
     @Override
-    public StepReply<GameScreen> step(Integer action) {
-        double r = getReward(action) * scaleFactor;
+    public StepReply<Encodable> step(Integer action) {
+        Direction direction = Direction.values()[action];
+        Double reward = rewardFunction.apply(direction);
+        double r = reward * scaleFactor;
 //        log.info(ale.getEpisodeFrameNumber() + " " + r + " " + action + " ");
 //        ale.getScreenRGB(screenBuffer);
         double[] pacmanState = pacman.b.getPacmanState();
@@ -116,7 +124,7 @@ public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, Discr
     }
 
     @Override
-    public ObservationSpace<GameScreen> getObservationSpace() {
+    public ObservationSpace<Encodable> getObservationSpace() {
         return observationSpace;
     }
 
@@ -127,7 +135,7 @@ public class Yeah implements Supplier<Direction>, MDP<GameScreen, Integer, Discr
 
     @Override
     public Yeah newInstance() {
-        return new Yeah(pacman);
+        return new Yeah(pacman, rewardFunction);
     }
 
     @Value

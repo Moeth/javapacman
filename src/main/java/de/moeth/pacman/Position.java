@@ -47,6 +47,10 @@ public class Position {
         return x % GRID_SIZE == 0;
     }
 
+    public boolean between(int min, int max) {
+        return min <= x && x < max
+                && min <= y && y < max;
+    }
     public boolean isGridLine() {
         return isGrid(x) || isGrid(y);
     }
