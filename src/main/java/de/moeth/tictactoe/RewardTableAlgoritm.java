@@ -67,10 +67,12 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     }
 
     @Override
-    public double getReward(INDArray board, int action) {
-        return find(board, action)
-                .map(e -> e.reward)
-                .orElse(0.5 * random.nextDouble());
+    public INDArray getReward(final INDArray board) {
+        INDArray rand = Nd4j.rand(1, 9);
+        rewardEntries.stream()
+                .filter(e1 -> e1.board.equals(board))
+                .forEach(e -> rand.putScalar(e.action, e.reward));
+        return rand;
     }
 
     public int size() {

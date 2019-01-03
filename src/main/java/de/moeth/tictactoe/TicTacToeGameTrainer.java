@@ -1,7 +1,9 @@
 package de.moeth.tictactoe;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.google.common.base.Preconditions;
+import lombok.ToString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <b>Developed by KIT Solutions Pvt. Ltd.</b> (www.kitsol.com) on 24-Aug-16.
@@ -12,55 +14,58 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TicTacToeGameTrainer {
 
-    private static Log log = LogFactory.getLog(TicTacToeGameTrainer.class);
+    private static Logger log = LoggerFactory.getLogger(TicTacToeGameTrainer.class);
     private static final int PLAY_TOTAL_GAME = 100;
 
-    private int totalGameCounter = 0;
-    private int numberOfWinPlayer1 = 0;
-    private int numberOfWinPlayer2 = 0;
-    private int draw = 0;
     private final KIPlayer player1;
     private final KIPlayer player2;
 
-    private TicTacToeGameTrainer(final KIPlayer player1, final KIPlayer player2) {
-        this.player1 = player1;
-        this.player2 = player2;
+    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2) {
+        this.player1 = new KIPlayer(player1);
+        this.player2 = new KIPlayer(player2);
     }
 
     public static void main(String[] args) {
         try {
-            new TicTacToeGameTrainer(
-                    new KIPlayer(RewardTableAlgoritm.create("AllMoveWithReward1.txt")),
-                    new KIPlayer(RewardTableAlgoritm.create("AllMoveWithReward2.txt"))
-            ).train();
+            GameResult gameResult = new TicTacToeGameTrainer(
+                    RewardTableAlgoritm.create("AllMoveWithReward1.txt"),
+                    RewardTableAlgoritm.create("AllMoveWithReward2.txt")
+            ).train(10);
+
+            Preconditions.checkArgument(gameResult.draw == 10);
+
+            GameResult gameResult2 = new TicTacToeGameTrainer(
+                    RewardTableAlgoritm.create("AllMoveWithReward1.txt"),
+                    new NeuralNetAlgorithm()
+            ).train(100);
+
+            Preconditions.checkArgument(gameResult2.draw == 10);
         } catch (Exception e) {
-            log.error(e);
+            log.error("", e);
         }
     }
 
-    private void train() {
+    private GameResult train(final int playTotalGame) {
 
         // sets a player number for first player  it can be 1 or 2, i.e. X or O.
         int firstPlayerNumber = 0;
-        try {
-            while (totalGameCounter < PLAY_TOTAL_GAME) {
+        int totalGameCounter = 0;
+        GameResult gameResult = new GameResult();
+        while (totalGameCounter < playTotalGame) {
                 firstPlayerNumber %= 2;
                 firstPlayerNumber++;
 
-                play(firstPlayerNumber);
+            play(firstPlayerNumber, gameResult);
+            totalGameCounter++;
             }
             saveToFile();
-        } catch (Exception e) {
-//            throw new IllegalArgumentException("", e);
-            log.error(e);
-        }
+        return gameResult;
     }
 
-    private void play(final int tempMoveType) {
+    private void play(final int tempMoveType, GameResult gameResult) {
 
         log.info("train");
         Board board = new Board();
-        totalGameCounter++;
         board.printBoard();
 
         int moveType = tempMoveType;
@@ -73,21 +78,9 @@ public class TicTacToeGameTrainer {
         applyGameResults(board);
         // verifies current game decision (win or draw)
         int gameState = board.getGameDecision();
-        log.info("gameState " + gameState);
-
-        // if gameState != 0, means game is finished with a decision
-//        if (gameState != 0) {
-        if (gameState == 1) {           // player 1 won
-            numberOfWinPlayer1++;
-        } else if (gameState == 2) {  // player 2 won
-            numberOfWinPlayer2++;
-        } else {  // game is draw
-            draw++;
-        }
-        log.info("\nTotal Game :" + totalGameCounter
-                + "\n   Player 1:" + numberOfWinPlayer1
-                + "\n   Player 2:" + numberOfWinPlayer2
-                + "\n   XXDrawOO:" + draw + "\n"
+        gameResult.applyGameState(gameState);
+        log.info(
+                gameResult.toString() + "\n"
                 + "getProbatilityMap: " + player1.getAlgorithm().toString() + " : " + player2.getAlgorithm().toString());
     }
 
@@ -127,6 +120,28 @@ public class TicTacToeGameTrainer {
     private void saveToFile() {
         player1.saveToFile();
         player2.saveToFile();
+    }
+
+    @ToString
+    private static class GameResult {
+
+        private int numberOfWinPlayer1 = 0;
+        private int numberOfWinPlayer2 = 0;
+        private int draw = 0;
+
+        private void applyGameState(final int gameState) {
+            log.info("gameState " + gameState);
+
+            // if gameState != 0, means game is finished with a decision
+//        if (gameState != 0) {
+            if (gameState == 1) {           // player 1 won
+                numberOfWinPlayer1++;
+            } else if (gameState == 2) {  // player 2 won
+                numberOfWinPlayer2++;
+            } else {  // game is draw
+                draw++;
+            }
+        }
     }
 }
 

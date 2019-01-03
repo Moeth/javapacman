@@ -1,5 +1,6 @@
 package de.moeth.tictactoe;
 
+import com.google.common.base.Preconditions;
 import lombok.AllArgsConstructor;
 import lombok.ToString;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -21,9 +22,12 @@ public class KIPlayer {
     }
 
     public int getBestMove(final Board board) {
+        INDArray reward = algorithm.getReward(board.getBoard());
+        Preconditions.checkArgument(reward.rank() == 2);
         int bestAction = board.getPossibleActions()
                 .boxed()
-                .max(Comparator.comparingDouble(action -> algorithm.getReward(board.getBoard(), action)))
+//                .max(Comparator.comparingDouble(action -> algorithm.getReward(board.getBoard(), action)))
+                .max(Comparator.comparingDouble(action -> reward.getDouble(action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
         history.add(new HistoryEntry(board.getBoard(), bestAction));
@@ -60,4 +64,14 @@ public class KIPlayer {
         private final INDArray state;
         private final int action;
     }
+
+    @AllArgsConstructor
+    @ToString
+    private static class ActionWithReward {
+
+        private final INDArray state;
+        private final int action;
+    }
+
+
 }

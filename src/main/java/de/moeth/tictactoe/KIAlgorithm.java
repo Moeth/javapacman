@@ -4,7 +4,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public interface KIAlgorithm {
 
-    double getReward(INDArray board, int action);
+    INDArray getReward(INDArray board);
 
     void changeValue(INDArray state, int action, double reward);
 
