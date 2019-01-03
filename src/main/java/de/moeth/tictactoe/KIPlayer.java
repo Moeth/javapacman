@@ -13,17 +13,17 @@ import java.util.List;
 public class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
-    private final KIAlghorithm rewardTableAlghoritm;
+    private final KIAlgorithm algorithm;
     private final List<HistoryEntry> history = new ArrayList<>();
 
-    public KIPlayer(final KIAlghorithm rewardTableAlghoritm) {
-        this.rewardTableAlghoritm = rewardTableAlghoritm;
+    public KIPlayer(final KIAlgorithm algorithm) {
+        this.algorithm = algorithm;
     }
 
     public int getBestMove(final Board board) {
         int bestAction = board.getPossibleActions()
                 .boxed()
-                .max(Comparator.comparingDouble(action -> rewardTableAlghoritm.getReward(board.getBoard(), action)))
+                .max(Comparator.comparingDouble(action -> algorithm.getReward(board.getBoard(), action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
         history.add(new HistoryEntry(board.getBoard(), bestAction));
@@ -39,18 +39,18 @@ public class KIPlayer {
         double probabilityValue = reward;
         for (int p = history.size() - 1; p >= 0; p--) {
             HistoryEntry historyEntry = history.get(p);
-            rewardTableAlghoritm.changeValue(historyEntry.state, historyEntry.action, probabilityValue);
+            algorithm.changeValue(historyEntry.state, historyEntry.action, probabilityValue);
             probabilityValue *= 0.9;
         }
         history.clear();
     }
 
     public void saveToFile() {
-        rewardTableAlghoritm.storeData();
+        algorithm.storeData();
     }
 
-    public KIAlghorithm getRewardTableAlghoritm() {
-        return rewardTableAlghoritm;
+    public KIAlgorithm getAlgorithm() {
+        return algorithm;
     }
 
     @AllArgsConstructor

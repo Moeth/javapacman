@@ -11,9 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class RewardTableAlghoritm implements KIAlghorithm {
+public class RewardTableAlgoritm implements KIAlgorithm {
 
-    private static final Logger log = LoggerFactory.getLogger(RewardTableAlghoritm.class);
+    private static final Logger log = LoggerFactory.getLogger(RewardTableAlgoritm.class);
     private static final Random random = new Random();
     private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> {
         for (int i = 0; i < 9; i++) {
@@ -28,25 +28,25 @@ public class RewardTableAlghoritm implements KIAlghorithm {
     private final String filePath;
     private final List<RewardEntry> rewardEntries = new ArrayList<>();
 
-    public static RewardTableAlghoritm create(final String filePath) {
+    public static RewardTableAlgoritm create(final String filePath) {
 
-        RewardTableAlghoritm rewardTableAlghoritm = new RewardTableAlghoritm(filePath);
+        RewardTableAlgoritm rewardTableAlgoritm = new RewardTableAlgoritm(filePath);
         if (new File(filePath).exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     RewardEntry rewardEntry = RewardEntry.readLine(line);
-                    rewardTableAlghoritm.rewardEntries.add(rewardEntry);
+                    rewardTableAlgoritm.rewardEntries.add(rewardEntry);
                 }
                 log.info("load " + filePath);
             } catch (IOException e) {
                 throw new IllegalArgumentException("", e);
             }
         }
-        return rewardTableAlghoritm;
+        return rewardTableAlgoritm;
     }
 
-    private RewardTableAlghoritm(final String filePath) {
+    private RewardTableAlgoritm(final String filePath) {
         this.filePath = filePath;
     }
 

@@ -2,7 +2,7 @@ package de.moeth.tictactoe;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-public interface KIAlghorithm {
+public interface KIAlgorithm {
 
     double getReward(INDArray board, int action);
 
