@@ -13,17 +13,21 @@ import java.util.List;
 public class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
-    private final ProbatilityMap probatilityMap;
+    private final RewardTableAlghoritm rewardTableAlghoritm;
     private final List<HistoryEntry> history = new ArrayList<>();
 
     public KIPlayer(final String filePath) {
-        probatilityMap = ProbatilityMap.create(filePath);
+        rewardTableAlghoritm = RewardTableAlghoritm.create(filePath);
+    }
+
+    public KIPlayer(final RewardTableAlghoritm rewardTableAlghoritm) {
+        this.rewardTableAlghoritm = rewardTableAlghoritm;
     }
 
     public int getBestMove(final Board board) {
         int bestAction = board.getPossibleActions()
                 .boxed()
-                .max(Comparator.comparingDouble(action -> probatilityMap.getReward(board.getBoard(), action)))
+                .max(Comparator.comparingDouble(action -> rewardTableAlghoritm.getReward(board.getBoard(), action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
         history.add(new HistoryEntry(board.getBoard(), bestAction));
@@ -39,18 +43,18 @@ public class KIPlayer {
         double probabilityValue = reward;
         for (int p = history.size() - 1; p >= 0; p--) {
             HistoryEntry historyEntry = history.get(p);
-            probatilityMap.changeValue(historyEntry.state, historyEntry.action, probabilityValue);
+            rewardTableAlghoritm.changeValue(historyEntry.state, historyEntry.action, probabilityValue);
             probabilityValue *= 0.9;
         }
         history.clear();
     }
 
     public void saveToFile() {
-        probatilityMap.saveToFile();
+        rewardTableAlghoritm.saveToFile();
     }
 
-    public ProbatilityMap getProbatilityMap() {
-        return probatilityMap;
+    public RewardTableAlghoritm getRewardTableAlghoritm() {
+        return rewardTableAlghoritm;
     }
 
     @AllArgsConstructor

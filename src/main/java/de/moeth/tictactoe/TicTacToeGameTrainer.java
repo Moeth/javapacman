@@ -13,72 +13,64 @@ import org.apache.commons.logging.LogFactory;
 public class TicTacToeGameTrainer {
 
     private static Log log = LogFactory.getLog(TicTacToeGameTrainer.class);
+    private static final int PLAY_TOTAL_GAME = 100;
 
-    // counter to monitor number of games played as training proceeds.
-    private static int totalGameCounter = 0;
+    private int totalGameCounter = 0;
+    private int numberOfWinPlayer1 = 0;
+    private int numberOfWinPlayer2 = 0;
+    private int draw = 0;
+    private final KIPlayer player1;
+    private final KIPlayer player2;
 
-    // number of games that player 1 won
-    private static int numberOfWinPlayer1 = 0;
-
-    // number of games that player 2 won
-    private static int numberOfWinPlayer2 = 0;
-
-    // number of games to play during training.
-    private static final int playTotalGame = 1000;
-
-    // number of games played as draw games.
-    private static int draw = 0;
+    private TicTacToeGameTrainer(final KIPlayer player1, final KIPlayer player2) {
+        this.player1 = player1;
+        this.player2 = player2;
+    }
 
     public static void main(String[] args) {
+        try {
+            new TicTacToeGameTrainer(
+                    new KIPlayer("AllMoveWithReward1.txt"),
+                    new KIPlayer("AllMoveWithReward2.txt")
+            ).train();
+        } catch (Exception e) {
+            log.error(e);
+        }
+    }
 
-        TicTacToePlayer player = new TicTacToePlayer();
+    private void train() {
+
         // sets a player number for first player  it can be 1 or 2, i.e. X or O.
         int firstPlayerNumber = 0;
         try {
-            while (totalGameCounter < playTotalGame) {
+            while (totalGameCounter < PLAY_TOTAL_GAME) {
                 firstPlayerNumber %= 2;
                 firstPlayerNumber++;
 
-                play(player, firstPlayerNumber);
+                play(firstPlayerNumber);
             }
-            player.saveToFile();
+            saveToFile();
         } catch (Exception e) {
 //            throw new IllegalArgumentException("", e);
             log.error(e);
         }
     }
 
-    private static void play(final TicTacToePlayer player, final int tempMoveType) {
+    private void play(final int tempMoveType) {
 
         log.info("train");
-//                Thread.sleep(10);
-        // checks whether data file is fully loaded or not before moving further in training.
-//                if (player.isAILoad() == true) {
-
-        // create blank board.
         Board board = new Board();
-
-        // increase total games played counter by 1.
         totalGameCounter++;
-
-        // print board to console for logging purpose.
-        // we can comment this line if not required.
         board.printBoard();
 
-        // below while loop plays actual game automatically.
         int moveType = tempMoveType;
         while (board.getGameDecision() == 0) {
-            // gets next best board move by passing current board state.
-            board = player.getNextBestMove(board, moveType);
-
-            // prints board.
+            board = getNextBestMove(board, moveType);
             board.printBoard();
-
-            // setting moveType to particular player to request next game board
             moveType = moveType == 1 ? 2 : 1;
         }
 
-        player.applyGameResults(board);
+        applyGameResults(board);
         // verifies current game decision (win or draw)
         int gameState = board.getGameDecision();
         log.info("gameState " + gameState);
@@ -96,10 +88,45 @@ public class TicTacToeGameTrainer {
                 + "\n   Player 1:" + numberOfWinPlayer1
                 + "\n   Player 2:" + numberOfWinPlayer2
                 + "\n   XXDrawOO:" + draw + "\n"
-                + "getProbatilityMap: " + player.getPlayer1().getProbatilityMap().filledSize() + " : " + player.getPlayer2().getProbatilityMap().filledSize());
-        // exit while loop as current game is finished
-//            break;
-//        }
+                + "getProbatilityMap: " + player1.getRewardTableAlghoritm().filledSize() + " : " + player2.getRewardTableAlghoritm().filledSize());
+    }
+
+    private Board getNextBestMove(Board board, int playerNumber) {
+        int action = getBestMove(board, playerNumber);
+        return board.applyAction(playerNumber, action);
+    }
+
+    private int getBestMove(final Board board, final int playerNumber) {
+        if (playerNumber == 1) {
+            return player1.getBestMove(board);
+        } else if (playerNumber == 2) {
+            return player2.getBestMove(board);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private void applyGameResults(Board board) {
+        final int won = board.getGameDecision();
+        if (won == 1) {
+            log.info("Win player_1");
+            player1.updateReward(1); //Win player_1
+            player2.updateReward(-1);//loose player_2
+        } else if (won == 2) {
+            log.info("Win player_2");
+            player1.updateReward(-1);//loose player_1
+            player2.updateReward(1);//Win player_2
+        } else if (won == 3) {
+            player1.updateReward(-0.1);
+            player2.updateReward(-0.1);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private void saveToFile() {
+        player1.saveToFile();
+        player2.saveToFile();
     }
 }
 

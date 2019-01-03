@@ -1,5 +1,6 @@
 package de.moeth.tictactoe;
 
+import lombok.AllArgsConstructor;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -10,9 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ProbatilityMap {
+public class RewardTableAlghoritm {
 
-    private static final Logger log = LoggerFactory.getLogger(ProbatilityMap.class);
+    private static final Logger log = LoggerFactory.getLogger(RewardTableAlghoritm.class);
     private static final Random random = new Random();
     private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> {
         for (int i = 0; i < 9; i++) {
@@ -25,25 +26,25 @@ public class ProbatilityMap {
     private final String filePath;
     private final List<RewardEntry> rewardEntries = new ArrayList<>();
 
-    public static ProbatilityMap create(final String filePath) {
+    public static RewardTableAlghoritm create(final String filePath) {
 
-        ProbatilityMap probatilityMap = new ProbatilityMap(filePath);
+        RewardTableAlghoritm rewardTableAlghoritm = new RewardTableAlghoritm(filePath);
         if (new File(filePath).exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
                 String line;
                 while ((line = br.readLine()) != null) {
                     RewardEntry rewardEntry = RewardEntry.readLine(line);
-                    probatilityMap.rewardEntries.add(rewardEntry);
+                    rewardTableAlghoritm.rewardEntries.add(rewardEntry);
                 }
                 log.info("load " + filePath);
             } catch (IOException e) {
                 throw new IllegalArgumentException("", e);
             }
         }
-        return probatilityMap;
+        return rewardTableAlghoritm;
     }
 
-    private ProbatilityMap(final String filePath) {
+    private RewardTableAlghoritm(final String filePath) {
         this.filePath = filePath;
     }
 
@@ -94,17 +95,12 @@ public class ProbatilityMap {
         }
     }
 
+    @AllArgsConstructor
     private static class RewardEntry {
 
         private final INDArray board;
         private final int action;
         private double reward;
-
-        private RewardEntry(final INDArray board, final int action, final double reward) {
-            this.board = board;
-            this.action = action;
-            this.reward = reward;
-        }
 
         private static RewardEntry readLine(final String line) {
             INDArray input = Nd4j.zeros(1, 9);
