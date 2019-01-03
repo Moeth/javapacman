@@ -30,8 +30,8 @@ public class TicTacToeGameTrainer {
     public static void main(String[] args) {
         try {
             new TicTacToeGameTrainer(
-                    new KIPlayer("AllMoveWithReward1.txt"),
-                    new KIPlayer("AllMoveWithReward2.txt")
+                    new KIPlayer(RewardTableAlghoritm.create("AllMoveWithReward1.txt")),
+                    new KIPlayer(RewardTableAlghoritm.create("AllMoveWithReward2.txt"))
             ).train();
         } catch (Exception e) {
             log.error(e);
@@ -88,7 +88,7 @@ public class TicTacToeGameTrainer {
                 + "\n   Player 1:" + numberOfWinPlayer1
                 + "\n   Player 2:" + numberOfWinPlayer2
                 + "\n   XXDrawOO:" + draw + "\n"
-                + "getProbatilityMap: " + player1.getRewardTableAlghoritm().filledSize() + " : " + player2.getRewardTableAlghoritm().filledSize());
+                + "getProbatilityMap: " + player1.getRewardTableAlghoritm().toString() + " : " + player2.getRewardTableAlghoritm().toString());
     }
 
     private Board getNextBestMove(Board board, int playerNumber) {

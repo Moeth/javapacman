@@ -11,14 +11,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class RewardTableAlghoritm {
+public class RewardTableAlghoritm implements KIAlghorithm {
 
     private static final Logger log = LoggerFactory.getLogger(RewardTableAlghoritm.class);
     private static final Random random = new Random();
     private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> {
         for (int i = 0; i < 9; i++) {
             int compare = Double.compare(r1.board.getDouble(i), r2.board.getDouble(i));
-            if (compare != 0) return compare;
+            if (compare != 0) {
+                return compare;
+            }
         }
         return Double.compare(r1.action, r2.action);
     };
@@ -48,7 +50,8 @@ public class RewardTableAlghoritm {
         this.filePath = filePath;
     }
 
-    public void saveToFile() {
+    @Override
+    public void storeData() {
         try (FileWriter writer = new FileWriter(filePath)) {
             Collections.sort(rewardEntries, StateComparator);
             for (final RewardEntry rewardEntry : rewardEntries) {
@@ -63,8 +66,9 @@ public class RewardTableAlghoritm {
         }
     }
 
-    public double getReward(INDArray positionArray, int action) {
-        return find(positionArray, action)
+    @Override
+    public double getReward(INDArray board, int action) {
+        return find(board, action)
                 .map(e -> e.reward)
                 .orElse(0.5 * random.nextDouble());
     }
@@ -73,7 +77,7 @@ public class RewardTableAlghoritm {
         return rewardEntries.size();
     }
 
-    public long filledSize() {
+    private long filledSize() {
         return rewardEntries.stream()
                 .filter(s -> Math.abs(s.reward) > 0.001)
                 .count();
@@ -85,6 +89,7 @@ public class RewardTableAlghoritm {
                 .findFirst();
     }
 
+    @Override
     public void changeValue(final INDArray state, final int action, final double reward) {
         Optional<RewardEntry> rewardEntry = find(state, action);
         if (rewardEntry.isPresent()) {
@@ -93,6 +98,14 @@ public class RewardTableAlghoritm {
         } else {
             rewardEntries.add(new RewardEntry(state, action, reward));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "RewardTableAlghoritm{" +
+                "filePath='" + filePath + '\'' +
+                ", rewardEntries=" + filledSize() +
+                '}';
     }
 
     @AllArgsConstructor

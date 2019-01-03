@@ -13,14 +13,10 @@ import java.util.List;
 public class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
-    private final RewardTableAlghoritm rewardTableAlghoritm;
+    private final KIAlghorithm rewardTableAlghoritm;
     private final List<HistoryEntry> history = new ArrayList<>();
 
-    public KIPlayer(final String filePath) {
-        rewardTableAlghoritm = RewardTableAlghoritm.create(filePath);
-    }
-
-    public KIPlayer(final RewardTableAlghoritm rewardTableAlghoritm) {
+    public KIPlayer(final KIAlghorithm rewardTableAlghoritm) {
         this.rewardTableAlghoritm = rewardTableAlghoritm;
     }
 
@@ -50,10 +46,10 @@ public class KIPlayer {
     }
 
     public void saveToFile() {
-        rewardTableAlghoritm.saveToFile();
+        rewardTableAlghoritm.storeData();
     }
 
-    public RewardTableAlghoritm getRewardTableAlghoritm() {
+    public KIAlghorithm getRewardTableAlghoritm() {
         return rewardTableAlghoritm;
     }
 
