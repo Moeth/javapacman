@@ -1,9 +1,9 @@
 package de.moeth.tictactoe;
 
-import com.google.common.base.Preconditions;
-import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * <b>Developed by KIT Solutions Pvt. Ltd.</b> (www.kitsol.com) on 24-Aug-16.
@@ -19,59 +19,88 @@ public class TicTacToeGameTrainer {
 
     private final KIPlayer player1;
     private final KIPlayer player2;
+    private final boolean learn;
 
-    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2) {
+    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2, final boolean learn) {
         this.player1 = new KIPlayer(player1);
         this.player2 = new KIPlayer(player2);
+        this.learn = learn;
     }
 
     public static void main(String[] args) {
         try {
+//            do {
+            RewardTableAlgoritm player1 = RewardTableAlgoritm.create("AllMoveWithReward_1.txt");
+//            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
             GameResult gameResult = new TicTacToeGameTrainer(
-                    RewardTableAlgoritm.create("AllMoveWithReward1.txt"),
-                    RewardTableAlgoritm.create("AllMoveWithReward2.txt")
-            ).train(10);
+                    player1,
+                    player1,
+                    false).train(10);
+//            } while (ga)
 
-            Preconditions.checkArgument(gameResult.draw == 10);
+//            Preconditions.checkArgument(gameResult.draw == 10);
 
-            GameResult gameResult2 = new TicTacToeGameTrainer(
-                    RewardTableAlgoritm.create("AllMoveWithReward1.txt"),
-                    new NeuralNetAlgorithm()
-            ).train(100);
+            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
 
-            Preconditions.checkArgument(gameResult2.draw == 10);
+            double evaluate = 1;
+            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
+                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
+                evaluate = neuralNetAlgorithm.evaluate();
+            }
+////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
+////            player1.getDataAsTrainingData()
+//
+//            NeuralNetAlgorithm neuralNetAlgorithm2 = NeuralNetAlgorithm.create("player2");
+//            neuralNetAlgorithm2.train(player2.getDataAsTrainingData());
+//
+            for (int i = 0; i < 100; i++) {
+                GameResult gameResult2 = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true)
+                        .train(1000);
+            }
+//
+//            TicTacToeGameTrainer neural = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, false);
+//            GameResult gameResult3 = neural.train(1000);
+//            neural.train(100);
+
+            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
+            GameResult gameResult2 = comp.train(50000);
+//////
+//////            Preconditions.checkArgument(gameResult2.draw == 50);
+
+
         } catch (Exception e) {
             log.error("", e);
         }
     }
 
-    private GameResult train(final int playTotalGame) {
+    private GameResult train(final int playTotalGame) throws IOException {
 
         // sets a player number for first player  it can be 1 or 2, i.e. X or O.
         int firstPlayerNumber = 0;
-        int totalGameCounter = 0;
         GameResult gameResult = new GameResult();
-        while (totalGameCounter < playTotalGame) {
-                firstPlayerNumber %= 2;
-                firstPlayerNumber++;
+        while (gameResult.totalGameCounter < playTotalGame) {
+            firstPlayerNumber %= 2;
+            firstPlayerNumber++;
 
             play(firstPlayerNumber, gameResult);
-            totalGameCounter++;
+            if (gameResult.totalGameCounter % 10 == 0) {
+                saveToFile();
             }
-            saveToFile();
+        }
+        saveToFile();
         return gameResult;
     }
 
     private void play(final int tempMoveType, GameResult gameResult) {
 
-        log.info("train");
+//        log.info("train");
         Board board = new Board();
-        board.printBoard();
+//        board.printBoard();
 
         int moveType = tempMoveType;
         while (board.getGameDecision() == 0) {
             board = getNextBestMove(board, moveType);
-            board.printBoard();
+//            board.printBoard();
             moveType = moveType == 1 ? 2 : 1;
         }
 
@@ -79,9 +108,12 @@ public class TicTacToeGameTrainer {
         // verifies current game decision (win or draw)
         int gameState = board.getGameDecision();
         gameResult.applyGameState(gameState);
-        log.info(
-                gameResult.toString() + "\n"
-                + "getProbatilityMap: " + player1.getAlgorithm().toString() + " : " + player2.getAlgorithm().toString());
+        if (gameResult.totalGameCounter % 1 == 0) {
+            log.info(gameResult.toString());
+        }
+//        log.info(
+//                gameResult.toString() + "\n"
+//                        + "getProbatilityMap: " + player1.getAlgorithm().toString() + " : " + player2.getAlgorithm().toString());
     }
 
     private Board getNextBestMove(Board board, int playerNumber) {
@@ -91,46 +123,49 @@ public class TicTacToeGameTrainer {
 
     private int getBestMove(final Board board, final int playerNumber) {
         if (playerNumber == 1) {
-            return player1.getBestMove(board);
+            return player1.getBestMove(board, playerNumber);
         } else if (playerNumber == 2) {
-            return player2.getBestMove(board);
+            return player2.getBestMove(board, playerNumber);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
     private void applyGameResults(Board board) {
+        if (!learn) return;
         final int won = board.getGameDecision();
         if (won == 1) {
-            log.info("Win player_1");
+//            log.info("Win player_1");
             player1.updateReward(1); //Win player_1
-            player2.updateReward(-1);//loose player_2
+            player2.updateReward(0);//loose player_2
         } else if (won == 2) {
-            log.info("Win player_2");
-            player1.updateReward(-1);//loose player_1
+//            log.info("Win player_2");
+            player1.updateReward(0);//loose player_1
             player2.updateReward(1);//Win player_2
         } else if (won == 3) {
-            player1.updateReward(-0.1);
-            player2.updateReward(-0.1);
+//            log.info("Draw");
+            player1.updateReward(0.5);
+            player2.updateReward(0.5);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
-    private void saveToFile() {
+    private void saveToFile() throws IOException {
         player1.saveToFile();
         player2.saveToFile();
     }
 
-    @ToString
     private static class GameResult {
 
         private int numberOfWinPlayer1 = 0;
         private int numberOfWinPlayer2 = 0;
         private int draw = 0;
+        private int totalGameCounter = 0;
 
         private void applyGameState(final int gameState) {
-            log.info("gameState " + gameState);
+//            log.info("gameState " + gameState);
+            totalGameCounter++;
 
             // if gameState != 0, means game is finished with a decision
 //        if (gameState != 0) {
@@ -141,6 +176,15 @@ public class TicTacToeGameTrainer {
             } else {  // game is draw
                 draw++;
             }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("GameResult{numberOfWinPlayer1=%.2f, numberOfWinPlayer2=%.2f, draw=%.2f, totalGameCounter=%d}",
+                    100.0 * numberOfWinPlayer1 / totalGameCounter,
+                    100.0 * numberOfWinPlayer2 / totalGameCounter,
+                    100.0 * draw / totalGameCounter,
+                    totalGameCounter);
         }
     }
 }

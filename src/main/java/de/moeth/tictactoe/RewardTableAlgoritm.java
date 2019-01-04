@@ -1,5 +1,6 @@
 package de.moeth.tictactoe;
 
+import com.google.common.base.Preconditions;
 import lombok.AllArgsConstructor;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -9,21 +10,30 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class RewardTableAlgoritm implements KIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(RewardTableAlgoritm.class);
     private static final Random random = new Random();
-    private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> {
+    private static final Comparator<INDArray> StateComparator2 = (r1, r2) -> {
+        Preconditions.checkArgument(r1.equalShapes(r2));
+
+        Util.assertShape(r1, Board.BOARD_LEARNING_SHAPE);
+        Util.assertShape(r2, Board.BOARD_LEARNING_SHAPE);
         for (int i = 0; i < 9; i++) {
-            int compare = Double.compare(r1.board.getDouble(i), r2.board.getDouble(i));
-            if (compare != 0) {
-                return compare;
+//            Preconditions.checkArgument(r1.s);
+            for (int j = 0; j < 3; j++) {
+                for (int k = 0; k < 2; k++) {
+                    int compare = Double.compare(r1.getDouble(i, j, k), r2.getDouble(i, j, k));
+                    if (compare != 0) {
+                        return compare;
+                    }
+                }
             }
         }
-        return Double.compare(r1.action, r2.action);
+        return 0;
     };
+    private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> StateComparator2.compare(r1.board, r2.board);
 
     private final String filePath;
     private final List<RewardEntry> rewardEntries = new ArrayList<>();
@@ -51,7 +61,7 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     }
 
     @Override
-    public void storeData() {
+    public void storeData() throws IOException {
         try (FileWriter writer = new FileWriter(filePath)) {
             Collections.sort(rewardEntries, StateComparator);
             for (final RewardEntry rewardEntry : rewardEntries) {
@@ -60,19 +70,18 @@ public class RewardTableAlgoritm implements KIAlgorithm {
                 writer.append('\n');
             }
             writer.flush();
-            log.info("saved to " + filePath);
-        } catch (Exception i) {
-            log.error("saveToFile failed", i);
+            log.info(String.format("saved %d to %s", rewardEntries.size(), filePath));
         }
     }
 
     @Override
     public INDArray getReward(final INDArray board) {
-        INDArray rand = Nd4j.rand(1, 9);
-        rewardEntries.stream()
+        Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
+        return rewardEntries.stream()
                 .filter(e1 -> e1.board.equals(board))
-                .forEach(e -> rand.putScalar(e.action, e.reward));
-        return rand;
+                .findFirst()
+                .map(e -> e.action)
+                .orElseGet(() -> Nd4j.rand(Board.ACTION_SHAPE));
     }
 
     public int size() {
@@ -81,24 +90,37 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
     private long filledSize() {
         return rewardEntries.stream()
-                .filter(s -> Math.abs(s.reward) > 0.001)
+//                .filter(s -> Math.abs(s.reward) > 0.001)
                 .count();
     }
 
-    private Optional<RewardEntry> find(INDArray board, int action) {
+    private Optional<RewardEntry> find(INDArray board) {
+        Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
         return rewardEntries.stream()
-                .filter(e -> e.board.equals(board) && e.action == action)
+                .filter(e -> e.board.equals(board))
                 .findFirst();
     }
 
-    @Override
+    //    @Override
     public void changeValue(final INDArray state, final int action, final double reward) {
-        Optional<RewardEntry> rewardEntry = find(state, action);
+        Util.assertShape(state, Board.BOARD_LEARNING_SHAPE);
+        Optional<RewardEntry> rewardEntry = find(state);
         if (rewardEntry.isPresent()) {
             RewardEntry r = rewardEntry.get();
-            r.reward = 0.7 * r.reward + 0.3 * reward;
+            double old = r.action.getDouble(action);
+            r.action.putScalar(action, 0.7 * old + 0.3 * reward);
         } else {
-            rewardEntries.add(new RewardEntry(state, action, reward));
+            INDArray r = Nd4j.rand(Board.ACTION_SHAPE);
+            r.putScalar(action, reward);
+            Util.assertShape(r, Board.ACTION_SHAPE);
+            rewardEntries.add(new RewardEntry(state, r));
+        }
+    }
+
+    @Override
+    public void train(final Collection<TrainSingleEntry> trainData) {
+        for (TrainSingleEntry train : trainData) {
+            changeValue(train.getState(), train.getAction(), train.getReward());
         }
     }
 
@@ -110,34 +132,62 @@ public class RewardTableAlgoritm implements KIAlgorithm {
                 '}';
     }
 
+    public Collection<TrainWholeEntry> getDataAsTrainingData() {
+        List<TrainWholeEntry> collect = rewardEntries.stream()
+//                .map(e )
+//                .collect(Collectors.groupingBy(e -> e.board))
+//                .entrySet()
+//                .stream()
+                .map(e -> asdfasdf(e))
+                .collect(Collectors.toList());
+        Collections.shuffle(collect);
+        return collect;
+    }
+
+    private TrainWholeEntry asdfasdf(final RewardEntry e) {
+//        INDArray zeros = Nd4j.zeros(BOARD_SHAPE);
+//        e.getValue().stream().forEach(r -> zeros.putScalar(r.action, r.reward));
+        return new TrainWholeEntry(e.board, e.action);
+    }
+
     @AllArgsConstructor
     private static class RewardEntry {
 
         private final INDArray board;
-        private final int action;
-        private double reward;
+        private final INDArray action;
+//        private double reward;
 
         private static RewardEntry readLine(final String line) {
-            INDArray input = Nd4j.zeros(1, 9);
-            String[] nextLine = line.split(" ");
-            String tempLine1 = nextLine[0];
-            String testLine[] = tempLine1.split(":");
-            for (int i = 0; i < 9; i++) {
-                int number = Integer.parseInt(testLine[i]);
-                input.putScalar(new int[]{i}, number);
-            }
-            int action = Integer.parseInt(nextLine[1]);
-            double reward = Double.parseDouble(nextLine[2]);
-            return new RewardEntry(input, action, reward);
+            String[] nextLine = line.split("\t");
+            INDArray board = readArray(nextLine[0]);
+            INDArray action = readArray(nextLine[1]);
+            return new RewardEntry(board, action);
+        }
+
+        private static INDArray readArray(final String tempLine1) {
+//            try {
+//                byte[] bytes = Hex.decodeHex(tempLine1.toCharArray());
+//                return Nd4j.fromByteArray(bytes);
+//            } catch (DecoderException e) {
+//                throw new IOException("", e);
+//            }
+
+            String[] split = tempLine1.split("#");
+
+            double[] result = Util.gson.fromJson(split[1], double[].class);
+            int[] shape = Util.gson.fromJson(split[0], int[].class);
+
+            return Nd4j.create(result, shape, 'c');
         }
 
         private String writeLine() {
-            final String tempString = IntStream.range(0, 9)
-                    .map(i -> board.getInt(i))
-                    .mapToObj(i -> Integer.toString(i))
-                    .collect(Collectors.joining(":"));
+            return writeArray(board) + "\t" + writeArray(action);
+        }
 
-            return tempString + " " + action + " " + Double.toString(reward);
+        private String writeArray(INDArray array) {
+            return Util.gson.toJson(array.shape()) + "#" + Util.toString(array);
+
+//            return Hex.encodeHexString(Nd4j.toByteArray(array));
         }
     }
 }

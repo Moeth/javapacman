@@ -1,12 +1,11 @@
 package de.moeth.tictactoe;
 
 import com.google.common.base.Preconditions;
-import lombok.AllArgsConstructor;
-import lombok.ToString;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -21,8 +20,10 @@ public class KIPlayer {
         this.algorithm = algorithm;
     }
 
-    public int getBestMove(final Board board) {
-        INDArray reward = algorithm.getReward(board.getBoard());
+    public int getBestMove(final Board board, final int playerNumber) {
+        INDArray data = board.getBoard(playerNumber);
+        INDArray reward = algorithm.getReward(data);
+        Util.assertShape(reward, Board.ACTION_SHAPE);
         Preconditions.checkArgument(reward.rank() == 2);
         int bestAction = board.getPossibleActions()
                 .boxed()
@@ -30,7 +31,7 @@ public class KIPlayer {
                 .max(Comparator.comparingDouble(action -> reward.getDouble(action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
-        history.add(new HistoryEntry(board.getBoard(), bestAction));
+        history.add(new HistoryEntry(data, reward, bestAction));
         return bestAction;
     }
 
@@ -40,16 +41,21 @@ public class KIPlayer {
      */
     public void updateReward(final double reward) {
 
-        double probabilityValue = reward;
+        double realReward = reward;
+        List<KIAlgorithm.TrainSingleEntry> r = new ArrayList<>();
         for (int p = history.size() - 1; p >= 0; p--) {
             HistoryEntry historyEntry = history.get(p);
-            algorithm.changeValue(historyEntry.state, historyEntry.action, probabilityValue);
-            probabilityValue *= 0.9;
+//            algorithm.changeValue(historyEntry, realReward);
+
+            KIAlgorithm.TrainSingleEntry asdf = new KIAlgorithm.TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
+            r.add(asdf);
+            realReward *= 0.9;
         }
+        algorithm.train(r);
         history.clear();
     }
 
-    public void saveToFile() {
+    public void saveToFile() throws IOException {
         algorithm.storeData();
     }
 
@@ -57,21 +63,13 @@ public class KIPlayer {
         return algorithm;
     }
 
-    @AllArgsConstructor
-    @ToString
-    private static class HistoryEntry {
-
-        private final INDArray state;
-        private final int action;
-    }
-
-    @AllArgsConstructor
-    @ToString
-    private static class ActionWithReward {
-
-        private final INDArray state;
-        private final int action;
-    }
-
-
+//    @AllArgsConstructor
+//    @ToString
+//    @Getter
+//    class HistoryEntry {
+//
+//        private final INDArray state;
+//        private final INDArray reward;
+//        private final int action;
+//    }
 }

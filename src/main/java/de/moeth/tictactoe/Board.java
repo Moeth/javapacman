@@ -13,6 +13,9 @@ import java.util.stream.IntStream;
 public class Board {
 
     private static final Logger log = LoggerFactory.getLogger(Board.class);
+    public static final long[] BOARD_LEARNING_SHAPE = {3, 3, 2};
+    public static final long[] BOARD_SHAPE = {1, 9};
+    public static final long[] ACTION_SHAPE = {1, 9};
 
     private final INDArray board;
 
@@ -21,7 +24,7 @@ public class Board {
     }
 
     public Board() {
-        board = Nd4j.zeros(1, 9);
+        board = Nd4j.zeros(BOARD_SHAPE);
     }
 
     /**
@@ -52,14 +55,28 @@ public class Board {
 
     Board applyAction(int playerNumber, int action) {
         Preconditions.checkArgument(board.getDouble(action) == 0);
-        INDArray inputArray = Nd4j.zeros(1, 9);
+        INDArray inputArray = Nd4j.zeros(BOARD_SHAPE);
         Nd4j.copy(board, inputArray);
         inputArray.putScalar(new int[]{0, action}, playerNumber);
         return new Board(inputArray);
     }
 
-    public INDArray getBoard() {
-        return board;
+    public INDArray getBoard(int playerNumber) {
+        INDArray result = Nd4j.zeros(BOARD_LEARNING_SHAPE);
+        int k = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                int position = board.getInt(k);
+                if (position > 0) {
+                    int p = playerNumber == position ? 0 : 1;
+                    result.putScalar(i, j, p, 1);
+                }
+
+                k++;
+            }
+        }
+        Util.assertShape(result, BOARD_LEARNING_SHAPE);
+        return result;
     }
 
     public int getGameDecision() {
