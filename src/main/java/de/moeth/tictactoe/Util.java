@@ -21,4 +21,18 @@ public class Util {
     public static String toString(INDArray array) {
         return Util.gson.toJson(array.data().asDouble());
     }
+
+    public static void norm(INDArray array) {
+        Number norm2Number = array.norm1Number();
+        Preconditions.checkArgument(norm2Number.doubleValue() > 0.0);
+        array.divi(norm2Number);
+
+        assertNorm(array);
+    }
+
+    public static void assertNorm(final INDArray array) {
+        final Number norm2Number;
+        norm2Number = array.norm1Number();
+        Preconditions.checkArgument(Math.abs(norm2Number.doubleValue() - 1.0) < 0.0001, "norm2 " + norm2Number);
+    }
 }

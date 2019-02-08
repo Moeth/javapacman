@@ -14,6 +14,8 @@ import java.io.IOException;
  */
 public class TicTacToeGameTrainer {
 
+//    SentimentExampleIterator
+
     private static Logger log = LoggerFactory.getLogger(TicTacToeGameTrainer.class);
     private static final int PLAY_TOTAL_GAME = 100;
 
@@ -31,42 +33,42 @@ public class TicTacToeGameTrainer {
         try {
 //            do {
             RewardTableAlgoritm player1 = RewardTableAlgoritm.create("AllMoveWithReward_1.txt");
-//            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
-            GameResult gameResult = new TicTacToeGameTrainer(
-                    player1,
-                    player1,
-                    false).train(10);
+            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
+
+            //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
+//            GameResult gameResult = new TicTacToeGameTrainer(player1, player1, true)
+//                    .train(1000);
 //            } while (ga)
 
 //            Preconditions.checkArgument(gameResult.draw == 10);
 
-            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
+//            double evaluate = 1;
+//            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
+//                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
+//                evaluate = neuralNetAlgorithm.evaluate();
+//            }
 
-            double evaluate = 1;
-            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
-                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
-                evaluate = neuralNetAlgorithm.evaluate();
-            }
+            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
+            comp.train(50000);
+
+
 ////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
 ////            player1.getDataAsTrainingData()
 //
 //            NeuralNetAlgorithm neuralNetAlgorithm2 = NeuralNetAlgorithm.create("player2");
 //            neuralNetAlgorithm2.train(player2.getDataAsTrainingData());
 //
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 2; i++) {
                 GameResult gameResult2 = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true)
-                        .train(1000);
+                        .train(10000);
             }
 //
 //            TicTacToeGameTrainer neural = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, false);
 //            GameResult gameResult3 = neural.train(1000);
 //            neural.train(100);
 
-            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
-            GameResult gameResult2 = comp.train(50000);
 //////
 //////            Preconditions.checkArgument(gameResult2.draw == 50);
-
 
         } catch (Exception e) {
             log.error("", e);
@@ -137,10 +139,10 @@ public class TicTacToeGameTrainer {
         if (won == 1) {
 //            log.info("Win player_1");
             player1.updateReward(1); //Win player_1
-            player2.updateReward(0);//loose player_2
+            player2.updateReward(-1);//loose player_2
         } else if (won == 2) {
 //            log.info("Win player_2");
-            player1.updateReward(0);//loose player_1
+            player1.updateReward(-1);//loose player_1
             player2.updateReward(1);//Win player_2
         } else if (won == 3) {
 //            log.info("Draw");

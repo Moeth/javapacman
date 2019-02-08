@@ -38,7 +38,7 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
 
     private final String name;
     private final MultiLayerNetwork multiLayerNetwork;
-    private final List<DataSet> dataSets = new ArrayList<>();
+    private List<DataSet> dataSets = new ArrayList<>();
 
     private NeuralNetAlgorithm(final String name, final MultiLayerNetwork multiLayerNetwork) {
         this.name = name;
@@ -93,18 +93,22 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         trainData.stream().map(this::createDataSet).forEach(dataSets::add);
 
         Collections.shuffle(dataSets);
-        multiLayerNetwork.fit(new ListDataSetIterator(dataSets, 50));
+        multiLayerNetwork.fit(new ListDataSetIterator(dataSets, 50), 10);
     }
 
     @Override
     public void train(final Collection<TrainSingleEntry> trainData) {
-        dataSets.clear();
+        if (dataSets.size() > 10) {
+            dataSets = dataSets.subList(0, 10);
+        }
         trainData.stream().map(this::createDataSet).forEach(dataSets::add);
-
+//        if (dataSets.size() > 100) {
         Collections.shuffle(dataSets);
 //        multiLayerNetwork.fit(new ListDataSetIterator(dataSets, 50));
         dataSets.forEach(d -> multiLayerNetwork.fit(d));
         log.info("train " + dataSets.size());
+//            dataSets.clear();
+//        }
 //        evaluate(listDataSetIterator);
     }
 
@@ -120,17 +124,18 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
     }
 
     private DataSet createDataSet(final TrainSingleEntry train) {
-//        INDArray labels = train.getResult().dup().putScalar(train.getAction(), train.getReward());
-        INDArray labels = zeroo(train.getAction(), train.getReward());
+        INDArray labels = train.getRewardChange();
+        Util.norm(labels);
+
         //        INDArray labels = historyEntry.getReward().mul(reward);
 //            Util.assertShape(labels, Board.S);
 
         INDArray features = train.getState().reshape(SHAPE);
-        INDArray featuresMask = Nd4j.ones(18).reshape(18);
-        INDArray labelsMask = zeroo(train.getAction(), 1);
+//        INDArray featuresMask = Nd4j.ones(18).reshape(18);
+//        INDArray labelsMask = zeroo(train.getAction(), 1);
 
         Util.assertShape(labels, Board.ACTION_SHAPE);
-        Util.assertShape(labelsMask, Board.ACTION_SHAPE);
+//        Util.assertShape(labelsMask, Board.ACTION_SHAPE);
         Util.assertShape(features, SHAPE);
 //        Util.assertShape(featuresMask, SHAPE);
 //        return new DataSet(train.getState().reshape(SHAPE), labels);
@@ -249,7 +254,7 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
 //        multiLayerNetwork.save(new File("mnsit.json"), true);
     }
 
-    private static final int HIDDEN_LAYER_CONT = 4;
+    private static final int HIDDEN_LAYER_CONT = 3;
     private static final int HIDDEN_LAYER_WIDTH = 100;
 
     private static MultiLayerNetwork buildTheNeuralNetwork() {
@@ -365,7 +370,7 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         MultiLayerNetwork network = new MultiLayerNetwork(multiLayerConfiguration);
         network.init();
 
-        network.setListeners(new ScoreIterationListener(10));
+        network.setListeners(new ScoreIterationListener(100));
 
 // pass a training listener that reports score every 10 iterations
 //        network.addListeners(new ScoreIterationListener(10));

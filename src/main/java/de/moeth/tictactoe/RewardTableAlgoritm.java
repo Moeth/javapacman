@@ -101,26 +101,33 @@ public class RewardTableAlgoritm implements KIAlgorithm {
                 .findFirst();
     }
 
-    //    @Override
-    public void changeValue(final INDArray state, final int action, final double reward) {
-        Util.assertShape(state, Board.BOARD_LEARNING_SHAPE);
-        Optional<RewardEntry> rewardEntry = find(state);
-        if (rewardEntry.isPresent()) {
-            RewardEntry r = rewardEntry.get();
-            double old = r.action.getDouble(action);
-            r.action.putScalar(action, 0.7 * old + 0.3 * reward);
-        } else {
-            INDArray r = Nd4j.rand(Board.ACTION_SHAPE);
-            r.putScalar(action, reward);
-            Util.assertShape(r, Board.ACTION_SHAPE);
-            rewardEntries.add(new RewardEntry(state, r));
-        }
-    }
-
     @Override
     public void train(final Collection<TrainSingleEntry> trainData) {
         for (TrainSingleEntry train : trainData) {
-            changeValue(train.getState(), train.getAction(), train.getReward());
+            train(train);
+        }
+    }
+
+    private void train(final TrainSingleEntry train) {
+        Util.assertShape(train.getState(), Board.BOARD_LEARNING_SHAPE);
+        Optional<RewardEntry> rewardEntry = find(train.getState());
+        if (rewardEntry.isPresent()) {
+            RewardEntry r = rewardEntry.get();
+//            r.action.muli(0.7).addi(train.getRewardChange().muli(0.3));
+            r.action.addi(train.getRewardChange().muli(3));
+            Util.norm(r.action);
+            Util.assertNorm(r.action);
+
+//            double old = r.action.getDouble(train.getAction());
+//            r.action.putScalar(train.getAction(), 0.7 * old + 0.3 * train.getReward());
+        } else {
+            INDArray r = train.getRewardChange();
+//            INDArray r = Nd4j.rand(Board.ACTION_SHAPE);
+//            r.putScalar(train.getAction(), train.getReward());
+            Util.assertShape(r, Board.ACTION_SHAPE);
+            Util.norm(r);
+            Util.assertNorm(r);
+            rewardEntries.add(new RewardEntry(train.getState(), r));
         }
     }
 
@@ -181,6 +188,7 @@ public class RewardTableAlgoritm implements KIAlgorithm {
         }
 
         private String writeLine() {
+            Util.norm(action);
             return writeArray(board) + "\t" + writeArray(action);
         }
 

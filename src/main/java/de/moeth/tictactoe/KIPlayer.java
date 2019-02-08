@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 public class KIPlayer {
 
@@ -25,6 +26,7 @@ public class KIPlayer {
         INDArray reward = algorithm.getReward(data);
         Util.assertShape(reward, Board.ACTION_SHAPE);
         Preconditions.checkArgument(reward.rank() == 2);
+        int abs = (int) Math.abs(new Random().nextGaussian());
         int bestAction = board.getPossibleActions()
                 .boxed()
 //                .max(Comparator.comparingDouble(action -> algorithm.getReward(board.getBoard(), action)))
@@ -49,7 +51,7 @@ public class KIPlayer {
 
             KIAlgorithm.TrainSingleEntry asdf = new KIAlgorithm.TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
             r.add(asdf);
-            realReward *= 0.9;
+            realReward *= 0.99;
         }
         algorithm.train(r);
         history.clear();
@@ -63,13 +65,4 @@ public class KIPlayer {
         return algorithm;
     }
 
-//    @AllArgsConstructor
-//    @ToString
-//    @Getter
-//    class HistoryEntry {
-//
-//        private final INDArray state;
-//        private final INDArray reward;
-//        private final int action;
-//    }
 }
