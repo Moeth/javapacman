@@ -20,7 +20,7 @@ public class ArrayMap implements Storable {
 
     private final long[] keyShape;
     private final long[] valueShape;
-    private final List<RewardEntry> rewardEntries = new ArrayList<>();
+    private final List<RewardEntry> entries = new ArrayList<>();
 
     public ArrayMap(final long[] keyShape, final long[] valueShape) {
         this.keyShape = keyShape.clone();
@@ -33,15 +33,15 @@ public class ArrayMap implements Storable {
             String line;
             while ((line = br.readLine()) != null) {
                 RewardEntry rewardEntry = RewardEntry.readLine(line);
-                rewardEntries.add(rewardEntry);
+                entries.add(rewardEntry);
             }
         }
     }
 
     @Override
     public void write(final Writer writer) throws IOException {
-//            Collections.sort(rewardEntries, StateComparator);
-        for (final RewardEntry rewardEntry : rewardEntries) {
+        sort(Util.IND_ARRAY_COMPARATOR);
+        for (final RewardEntry rewardEntry : entries) {
             writer.append(rewardEntry.writeLine());
             writer.append('\r');
             writer.append('\n');
@@ -49,21 +49,21 @@ public class ArrayMap implements Storable {
     }
 
     public void sort(Comparator<INDArray> comparator) {
-        Collections.sort(rewardEntries, (r1, r2) -> comparator.compare(r1.key, r2.key));
+        Collections.sort(entries, (r1, r2) -> comparator.compare(r1.key, r2.key));
     }
 
     public int size() {
-        return rewardEntries.size();
+        return entries.size();
     }
 
     public Stream<? extends Map.Entry<INDArray, INDArray>> stream() {
-        return rewardEntries.stream();
+        return entries.stream();
     }
 
     public void add(final INDArray key, INDArray value) {
         Util.assertShape(key, keyShape);
         Util.assertShape(value, valueShape);
-        rewardEntries.add(new RewardEntry(key, value));
+        entries.add(new RewardEntry(key, value));
     }
 
     private Optional<? extends Map.Entry<INDArray, INDArray>> find(INDArray key) {

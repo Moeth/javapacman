@@ -1,8 +1,8 @@
 package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
-import de.moeth.tictactoe.HistoryEntry;
 import de.moeth.tictactoe.Util;
+import de.moeth.tictactoe.history.ActionHistory;
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -68,7 +68,7 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         return multiLayerNetwork.output(board.reshape(SHAPE));
     }
 
-    public void changeValue(final HistoryEntry historyEntry, final double reward) {
+    public void changeValue(final ActionHistory.HistoryEntry historyEntry, final double reward) {
         INDArray result = zeroo(historyEntry.getAction(), reward);
         DataSet dataSet = new DataSet(historyEntry.getState(), result);
         dataSets.add(dataSet);

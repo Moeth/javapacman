@@ -8,6 +8,7 @@ import java.util.Collection;
 public interface KIAlgorithm {
 
     INDArray getReward(INDArray board);
+//    int getAction(INDArray board);
 
     void train(Collection<TrainSingleEntry> trainData);
 

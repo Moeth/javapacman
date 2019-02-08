@@ -1,8 +1,8 @@
 package de.moeth.tictactoe;
 
+import de.moeth.tictactoe.algorithm.DecisionTreeAlgorithm;
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
 import de.moeth.tictactoe.algorithm.NeuralNetAlgorithm;
-import de.moeth.tictactoe.algorithm.RewardTableAlgoritm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class TicTacToeGameTrainer {
     public static void main(String[] args) {
         try {
 //            do {
-            RewardTableAlgoritm player1 = RewardTableAlgoritm.create("AllMoveWithReward_1.txt");
+            DecisionTreeAlgorithm player1 = DecisionTreeAlgorithm.create("AllMoveWithReward_1.txt");
             NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
 
             //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");

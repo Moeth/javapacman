@@ -3,12 +3,12 @@ package de.moeth.tictactoe;
 import com.google.common.base.Preconditions;
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
 import de.moeth.tictactoe.algorithm.TrainSingleEntry;
+import de.moeth.tictactoe.history.ActionHistory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
@@ -17,7 +17,8 @@ class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
     private final KIAlgorithm algorithm;
-    private final List<HistoryEntry> history = new ArrayList<>();
+    //    private final List<ActionHistory.HistoryEntry> history = new ArrayList<>();
+    private final ActionHistory actionHistory = new ActionHistory();
 
     public KIPlayer(final KIAlgorithm algorithm) {
         this.algorithm = algorithm;
@@ -34,7 +35,7 @@ class KIPlayer {
                 .max(Comparator.comparingDouble(action -> reward.getDouble(action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
-        history.add(new HistoryEntry(data, reward, bestAction));
+        actionHistory.addEntry(data, reward, bestAction);
         return bestAction;
     }
 
@@ -44,17 +45,8 @@ class KIPlayer {
      */
     public void updateReward(final double reward) {
 
-        double realReward = reward;
-        List<TrainSingleEntry> r = new ArrayList<>();
-        for (int p = history.size() - 1; p >= 0; p--) {
-            HistoryEntry historyEntry = history.get(p);
-
-            TrainSingleEntry asdf = new TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
-            r.add(asdf);
-            realReward *= 0.99;
-        }
+        List<TrainSingleEntry> r = actionHistory.updateReward(reward);
         algorithm.train(r);
-        history.clear();
     }
 
     public void saveToFile() throws IOException {

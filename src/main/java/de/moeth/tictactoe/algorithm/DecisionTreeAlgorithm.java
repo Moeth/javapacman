@@ -1,6 +1,5 @@
 package de.moeth.tictactoe.algorithm;
 
-import com.google.common.base.Preconditions;
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.Util;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -8,56 +7,28 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RewardTableAlgoritm implements KIAlgorithm {
+public class DecisionTreeAlgorithm implements KIAlgorithm {
 
-    private static final Logger log = LoggerFactory.getLogger(RewardTableAlgoritm.class);
-    private static final Random random = new Random();
-    private static final Comparator<INDArray> StateComparator2 = (r1, r2) -> {
-        Preconditions.checkArgument(r1.equalShapes(r2));
+    private static final Logger log = LoggerFactory.getLogger(DecisionTreeAlgorithm.class);
 
-        Util.assertShape(r1, Board.BOARD_LEARNING_SHAPE);
-        Util.assertShape(r2, Board.BOARD_LEARNING_SHAPE);
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 3; j++) {
-                for (int k = 0; k < 2; k++) {
-                    int compare = Double.compare(r1.getDouble(i, j, k), r2.getDouble(i, j, k));
-                    if (compare != 0) {
-                        return compare;
-                    }
-                }
-            }
-        }
-        return 0;
-    };
-
-    private final String filePath;
     private final ArrayMap arrayMap = new ArrayMap(Board.BOARD_LEARNING_SHAPE, Board.ACTION_SHAPE);
+    private final String filePath;
 
-    public static RewardTableAlgoritm create(final String filePath) {
-
-        RewardTableAlgoritm rewardTableAlgoritm = new RewardTableAlgoritm(filePath);
-        if (new File(filePath).exists()) {
-            try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-                rewardTableAlgoritm.arrayMap.read(br);
-                log.info("load " + filePath);
-            } catch (IOException e) {
-                throw new IllegalArgumentException("", e);
-            }
-        }
-        return rewardTableAlgoritm;
+    public static DecisionTreeAlgorithm create(final String filePath) throws IOException {
+        return new DecisionTreeAlgorithm(filePath);
     }
 
-    private RewardTableAlgoritm(final String filePath) {
+    private DecisionTreeAlgorithm(final String filePath) {
         this.filePath = filePath;
     }
 
     @Override
     public void storeData() throws IOException {
-        arrayMap.sort(StateComparator2);
         try (FileWriter writer = new FileWriter(filePath)) {
             arrayMap.write(writer);
             writer.flush();
@@ -109,7 +80,7 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     @Override
     public String toString() {
         return "RewardTableAlghoritm{" +
-                "filePath='" + filePath + '\'' +
+//                "filePath='" + getFilePath() + '\'' +
                 ", rewardEntries=" + filledSize() +
                 '}';
     }
@@ -125,4 +96,14 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     private TrainWholeEntry asdfasdf(final Map.Entry<INDArray, INDArray> e) {
         return new TrainWholeEntry(e.getKey(), e.getValue());
     }
+
+//    @Override
+//    public void read(final Reader reader) throws IOException {
+//        arrayMap.read(reader);
+//    }
+//
+//    @Override
+//    public void write(final Writer writer) throws IOException {
+//        arrayMap.write(writer);
+//    }
 }
