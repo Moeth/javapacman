@@ -14,8 +14,9 @@ public class Board {
 
     private static final Logger log = LoggerFactory.getLogger(Board.class);
     public static final long[] BOARD_LEARNING_SHAPE = {3, 3, 2};
-    private static final long[] BOARD_SHAPE = {1, 9};
-    public static final long[] ACTION_SHAPE = {1, 9};
+    public static final int ACTIONS = 9;
+    private static final long[] BOARD_SHAPE = {1, ACTIONS};
+    public static final long[] ACTION_SHAPE = {1, ACTIONS};
 
     private final INDArray board;
 
@@ -43,11 +44,15 @@ public class Board {
 
     public IntStream getPossibleActions() {
         return IntStream.range(0, (int) board.length())
-                .filter(i -> board.getDouble(i) == 0);
+                .filter(i -> isAllowedAction(i));
     }
 
-    Board applyAction(int playerNumber, int action) {
-        Preconditions.checkArgument(board.getDouble(action) == 0);
+    public boolean isAllowedAction(int action) {
+        return board.getDouble(action) == 0;
+    }
+
+    public Board applyAction(int playerNumber, int action) {
+        Preconditions.checkArgument(isAllowedAction(action));
         INDArray inputArray = Nd4j.zeros(BOARD_SHAPE);
         Nd4j.copy(board, inputArray);
         inputArray.putScalar(new int[]{0, action}, playerNumber);
@@ -107,7 +112,7 @@ public class Board {
         if (isSame(boardPosition3, boardPosition5, boardPosition7)) {
             return boardPosition3;
         }
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < ACTIONS; i++) {
             if (board.getInt(i) == 0) {
                 return 0;
             }

@@ -2,6 +2,7 @@ package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.Util;
+import de.moeth.tictactoe.history.ActionHistory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
 
     private final ArrayMap arrayMap = new ArrayMap(Board.BOARD_LEARNING_SHAPE, Board.ACTION_SHAPE);
     private final String filePath;
+    private final ActionHistory actionHistory = new ActionHistory();
 
     public static DecisionTreeAlgorithm create(final String filePath) throws IOException {
         return new DecisionTreeAlgorithm(filePath);
@@ -37,7 +39,13 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
     }
 
     @Override
-    public INDArray getReward(final INDArray board) {
+    public int getBestAction(final Board board, final int playerNumber) {
+        Integer action = AlgorithmUtil.rewardToAction(board, getReward(board.getBoard(playerNumber)));
+        actionHistory.addEntry(board.getBoard(playerNumber), action);
+        return action;
+    }
+
+    private INDArray getReward(final INDArray board) {
         Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
         return arrayMap.findValue(board)
                 .orElseGet(() -> Nd4j.rand(Board.ACTION_SHAPE));
@@ -52,11 +60,16 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
                 .count();
     }
 
-    @Override
+    //    @Override
     public void train(final Collection<TrainSingleEntry> trainData) {
         for (TrainSingleEntry train : trainData) {
             train(train);
         }
+    }
+
+    @Override
+    public void updateReward(final double reward) {
+        train(actionHistory.updateReward(reward));
     }
 
     private void train(final TrainSingleEntry train) {

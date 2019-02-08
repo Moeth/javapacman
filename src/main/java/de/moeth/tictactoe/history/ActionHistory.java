@@ -16,8 +16,8 @@ public class ActionHistory {
     private static final Logger log = LoggerFactory.getLogger(ActionHistory.class);
     private final List<HistoryEntry> history = new ArrayList<>();
 
-    public void addEntry(final INDArray data, final INDArray reward, final int bestAction) {
-        history.add(new ActionHistory.HistoryEntry(data, reward, bestAction));
+    public void addEntry(final INDArray data, final int bestAction) {
+        history.add(new ActionHistory.HistoryEntry(data, bestAction));
     }
 
     public List<TrainSingleEntry> updateReward(final double reward) {
@@ -35,13 +35,17 @@ public class ActionHistory {
         return r;
     }
 
+    public void clear() {
+        history.clear();
+    }
+
     @AllArgsConstructor
     @ToString
     @Getter
     public static class HistoryEntry {
 
         private final INDArray state;
-        private final INDArray reward;
+        //        private final INDArray reward;
         private final int action;
     }
 }

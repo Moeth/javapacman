@@ -1,16 +1,16 @@
 package de.moeth.tictactoe.algorithm;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
+import de.moeth.tictactoe.Board;
 
 import java.io.IOException;
-import java.util.Collection;
 
 public interface KIAlgorithm {
 
-    INDArray getReward(INDArray board);
-//    int getAction(INDArray board);
+    public int getBestAction(final Board board, final int playerNumber);
 
-    void train(Collection<TrainSingleEntry> trainData);
+//    void train(Collection<TrainSingleEntry> trainData);
+
+    public void updateReward(final double reward);
 
     void storeData() throws IOException;
 }

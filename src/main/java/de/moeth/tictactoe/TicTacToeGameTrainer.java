@@ -2,7 +2,7 @@ package de.moeth.tictactoe;
 
 import de.moeth.tictactoe.algorithm.DecisionTreeAlgorithm;
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
-import de.moeth.tictactoe.algorithm.NeuralNetAlgorithm;
+import de.moeth.tictactoe.algorithm.NeuralNetStateAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,47 +36,58 @@ public class TicTacToeGameTrainer {
         try {
 //            do {
             DecisionTreeAlgorithm player1 = DecisionTreeAlgorithm.create("AllMoveWithReward_1.txt");
-            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
+//            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
+            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("player1");
+            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
+            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).train(100);
+            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
+            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
+            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
 
-            //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
-//            GameResult gameResult = new TicTacToeGameTrainer(player1, player1, true)
-//                    .train(1000);
-//            } while (ga)
-
-//            Preconditions.checkArgument(gameResult.draw == 10);
-
-//            double evaluate = 1;
-//            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
-//                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
-//                evaluate = neuralNetAlgorithm.evaluate();
+            //
+//            //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
+////            GameResult gameResult = new TicTacToeGameTrainer(player1, player1, true)
+////                    .train(1000);
+////            } while (ga)
+//
+////            Preconditions.checkArgument(gameResult.draw == 10);
+//
+////            double evaluate = 1;
+////            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
+////                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
+////                evaluate = neuralNetAlgorithm.evaluate();
+////            }
+//
+//            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
+//            comp.train(50000);
+//
+//////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
+//////            player1.getDataAsTrainingData()
+////
+////            NeuralNetAlgorithm neuralNetAlgorithm2 = NeuralNetAlgorithm.create("player2");
+////            neuralNetAlgorithm2.train(player2.getDataAsTrainingData());
+////
+//            for (int i = 0; i < 2; i++) {
+//                GameResult gameResult2 = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true)
+//                        .train(10000);
 //            }
-
-            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
-            comp.train(50000);
-
-////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
-////            player1.getDataAsTrainingData()
+////
+////            TicTacToeGameTrainer neural = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, false);
+////            GameResult gameResult3 = neural.train(1000);
+////            neural.train(100);
 //
-//            NeuralNetAlgorithm neuralNetAlgorithm2 = NeuralNetAlgorithm.create("player2");
-//            neuralNetAlgorithm2.train(player2.getDataAsTrainingData());
-//
-            for (int i = 0; i < 2; i++) {
-                GameResult gameResult2 = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true)
-                        .train(10000);
-            }
-//
-//            TicTacToeGameTrainer neural = new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, false);
-//            GameResult gameResult3 = neural.train(1000);
-//            neural.train(100);
-
-//////
-//////            Preconditions.checkArgument(gameResult2.draw == 50);
+////////
+////////            Preconditions.checkArgument(gameResult2.draw == 50);
 
         } catch (Exception e) {
             log.error("", e);
         }
     }
 
+    private static void train(final KIAlgorithm player1, final KIAlgorithm player2, int times) throws IOException {
+        TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, player2, true);
+        comp.train(times);
+    }
     private GameResult train(final int playTotalGame) throws IOException {
 
         // sets a player number for first player  it can be 1 or 2, i.e. X or O.
@@ -86,7 +97,15 @@ public class TicTacToeGameTrainer {
             firstPlayerNumber %= 2;
             firstPlayerNumber++;
 
-            play(firstPlayerNumber, gameResult);
+            //        log.info("train");
+            int gameState = play2(firstPlayerNumber, false);
+            gameResult.applyGameState(gameState);
+            if (gameResult.totalGameCounter % 1 == 0) {
+                log.info(gameResult.toString());
+            }
+//        log.info(
+//                gameResult.toString() + "\n"
+//                        + "getProbatilityMap: " + player1.getAlgorithm().toString() + " : " + player2.getAlgorithm().toString());
             if (gameResult.totalGameCounter % 10 == 0) {
                 saveToFile();
             }
@@ -95,29 +114,24 @@ public class TicTacToeGameTrainer {
         return gameResult;
     }
 
-    private void play(final int tempMoveType, GameResult gameResult) {
-
-//        log.info("train");
+    private int play2(final int tempMoveType, final boolean printBoard) {
         Board board = new Board();
-//        board.printBoard();
+        if (printBoard) {
+            board.printBoard();
+        }
 
         int moveType = tempMoveType;
         while (board.getGameDecision() == 0) {
             board = getNextBestMove(board, moveType);
-//            board.printBoard();
+            if (printBoard) {
+                board.printBoard();
+            }
             moveType = moveType == 1 ? 2 : 1;
         }
 
         applyGameResults(board);
         // verifies current game decision (win or draw)
-        int gameState = board.getGameDecision();
-        gameResult.applyGameState(gameState);
-        if (gameResult.totalGameCounter % 1 == 0) {
-            log.info(gameResult.toString());
-        }
-//        log.info(
-//                gameResult.toString() + "\n"
-//                        + "getProbatilityMap: " + player1.getAlgorithm().toString() + " : " + player2.getAlgorithm().toString());
+        return board.getGameDecision();
     }
 
     private Board getNextBestMove(Board board, int playerNumber) {
