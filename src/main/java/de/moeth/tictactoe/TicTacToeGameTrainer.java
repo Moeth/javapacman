@@ -54,7 +54,6 @@ public class TicTacToeGameTrainer {
             TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
             comp.train(50000);
 
-
 ////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
 ////            player1.getDataAsTrainingData()
 //
@@ -137,7 +136,9 @@ public class TicTacToeGameTrainer {
     }
 
     private void applyGameResults(Board board) {
-        if (!learn) return;
+        if (!learn) {
+            return;
+        }
         final int won = board.getGameDecision();
         if (won == 1) {
 //            log.info("Win player_1");
@@ -169,16 +170,16 @@ public class TicTacToeGameTrainer {
         private int totalGameCounter = 0;
 
         private void applyGameState(final int gameState) {
-//            log.info("gameState " + gameState);
             totalGameCounter++;
 
-            // if gameState != 0, means game is finished with a decision
-//        if (gameState != 0) {
-            if (gameState == 1) {           // player 1 won
+            if (gameState == 1) {
+                // player 1 won
                 numberOfWinPlayer1++;
-            } else if (gameState == 2) {  // player 2 won
+            } else if (gameState == 2) {
+                // player 2 won
                 numberOfWinPlayer2++;
-            } else {  // game is draw
+            } else {
+                // game is draw
                 draw++;
             }
         }

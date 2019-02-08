@@ -2,6 +2,7 @@ package de.moeth.tictactoe;
 
 import com.google.common.base.Preconditions;
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
+import de.moeth.tictactoe.algorithm.TrainSingleEntry;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +45,11 @@ class KIPlayer {
     public void updateReward(final double reward) {
 
         double realReward = reward;
-        List<KIAlgorithm.TrainSingleEntry> r = new ArrayList<>();
+        List<TrainSingleEntry> r = new ArrayList<>();
         for (int p = history.size() - 1; p >= 0; p--) {
             HistoryEntry historyEntry = history.get(p);
 
-            KIAlgorithm.TrainSingleEntry asdf = new KIAlgorithm.TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
+            TrainSingleEntry asdf = new TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
             r.add(asdf);
             realReward *= 0.99;
         }

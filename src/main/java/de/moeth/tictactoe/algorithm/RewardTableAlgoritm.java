@@ -3,7 +3,6 @@ package de.moeth.tictactoe.algorithm;
 import com.google.common.base.Preconditions;
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.Util;
-import lombok.AllArgsConstructor;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -34,21 +33,16 @@ public class RewardTableAlgoritm implements KIAlgorithm {
         }
         return 0;
     };
-    private static final Comparator<RewardEntry> StateComparator = (r1, r2) -> StateComparator2.compare(r1.board, r2.board);
 
     private final String filePath;
-    private final List<RewardEntry> rewardEntries = new ArrayList<>();
+    private final ArrayMap arrayMap = new ArrayMap(Board.BOARD_LEARNING_SHAPE, Board.ACTION_SHAPE);
 
     public static RewardTableAlgoritm create(final String filePath) {
 
         RewardTableAlgoritm rewardTableAlgoritm = new RewardTableAlgoritm(filePath);
         if (new File(filePath).exists()) {
             try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    RewardEntry rewardEntry = RewardEntry.readLine(line);
-                    rewardTableAlgoritm.rewardEntries.add(rewardEntry);
-                }
+                rewardTableAlgoritm.arrayMap.read(br);
                 log.info("load " + filePath);
             } catch (IOException e) {
                 throw new IllegalArgumentException("", e);
@@ -63,42 +57,28 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
     @Override
     public void storeData() throws IOException {
+        arrayMap.sort(StateComparator2);
         try (FileWriter writer = new FileWriter(filePath)) {
-            Collections.sort(rewardEntries, StateComparator);
-            for (final RewardEntry rewardEntry : rewardEntries) {
-                writer.append(rewardEntry.writeLine());
-                writer.append('\r');
-                writer.append('\n');
-            }
+            arrayMap.write(writer);
             writer.flush();
-            log.info(String.format("saved %d to %s", rewardEntries.size(), filePath));
+            log.info(String.format("saved %d to %s", arrayMap.size(), filePath));
         }
     }
 
     @Override
     public INDArray getReward(final INDArray board) {
         Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
-        return rewardEntries.stream()
-                .filter(e1 -> e1.board.equals(board))
-                .findFirst()
-                .map(e -> e.action)
+        return arrayMap.findValue(board)
                 .orElseGet(() -> Nd4j.rand(Board.ACTION_SHAPE));
     }
 
     public int size() {
-        return rewardEntries.size();
+        return arrayMap.size();
     }
 
     private long filledSize() {
-        return rewardEntries.stream()
+        return arrayMap.stream()
                 .count();
-    }
-
-    private Optional<RewardEntry> find(INDArray board) {
-        Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
-        return rewardEntries.stream()
-                .filter(e -> e.board.equals(board))
-                .findFirst();
     }
 
     @Override
@@ -110,18 +90,19 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
     private void train(final TrainSingleEntry train) {
         Util.assertShape(train.getState(), Board.BOARD_LEARNING_SHAPE);
-        Optional<RewardEntry> rewardEntry = find(train.getState());
+        Optional<INDArray> rewardEntry = arrayMap.findValue(train.getState());
         if (rewardEntry.isPresent()) {
-            RewardEntry r = rewardEntry.get();
-            r.action.addi(train.getRewardChange().muli(3));
-            Util.norm(r.action);
-            Util.assertNorm(r.action);
+//            ArrayMap.RewardEntry r = rewardEntry.get();
+            final INDArray value = rewardEntry.get();
+            value.addi(train.getRewardChange().muli(3));
+            Util.norm(value);
+            Util.assertNorm(value);
         } else {
             INDArray r = train.getRewardChange();
             Util.assertShape(r, Board.ACTION_SHAPE);
             Util.norm(r);
             Util.assertNorm(r);
-            rewardEntries.add(new RewardEntry(train.getState(), r));
+            arrayMap.add(train.getState(), r);
         }
     }
 
@@ -134,55 +115,14 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     }
 
     public Collection<TrainWholeEntry> getDataAsTrainingData() {
-        List<TrainWholeEntry> collect = rewardEntries.stream()
+        List<TrainWholeEntry> collect = arrayMap.stream()
                 .map(e -> asdfasdf(e))
                 .collect(Collectors.toList());
         Collections.shuffle(collect);
         return collect;
     }
 
-    private TrainWholeEntry asdfasdf(final RewardEntry e) {
-        return new TrainWholeEntry(e.board, e.action);
-    }
-
-    @AllArgsConstructor
-    private static class RewardEntry {
-
-        private final INDArray board;
-        private final INDArray action;
-
-        private static RewardEntry readLine(final String line) {
-            String[] nextLine = line.split("\t");
-            INDArray board = readArray(nextLine[0]);
-            INDArray action = readArray(nextLine[1]);
-            return new RewardEntry(board, action);
-        }
-
-        private static INDArray readArray(final String tempLine1) {
-
-            String[] split = tempLine1.split("#");
-
-            double[] result = Util.gson.fromJson(split[1], double[].class);
-            int[] shape = Util.gson.fromJson(split[0], int[].class);
-
-            return Nd4j.create(result, shape, 'c');
-        }
-
-        private String writeLine() {
-            Util.norm(action);
-            return writeArray(board) + "\t" + writeArray(action);
-        }
-
-        private String writeArray(INDArray array) {
-            return Util.gson.toJson(array.shape()) + "#" + Util.toString(array);
-        }
-
-        public INDArray getAction() {
-            return action;
-        }
-
-        public INDArray getBoard() {
-            return board;
-        }
+    private TrainWholeEntry asdfasdf(final Map.Entry<INDArray, INDArray> e) {
+        return new TrainWholeEntry(e.getKey(), e.getValue());
     }
 }
