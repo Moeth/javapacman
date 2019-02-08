@@ -1,6 +1,8 @@
-package de.moeth.tictactoe;
+package de.moeth.tictactoe.algorithm;
 
 import com.google.common.base.Preconditions;
+import de.moeth.tictactoe.Board;
+import de.moeth.tictactoe.Util;
 import lombok.AllArgsConstructor;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -21,7 +23,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
         Util.assertShape(r1, Board.BOARD_LEARNING_SHAPE);
         Util.assertShape(r2, Board.BOARD_LEARNING_SHAPE);
         for (int i = 0; i < 9; i++) {
-//            Preconditions.checkArgument(r1.s);
             for (int j = 0; j < 3; j++) {
                 for (int k = 0; k < 2; k++) {
                     int compare = Double.compare(r1.getDouble(i, j, k), r2.getDouble(i, j, k));
@@ -90,7 +91,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
     private long filledSize() {
         return rewardEntries.stream()
-//                .filter(s -> Math.abs(s.reward) > 0.001)
                 .count();
     }
 
@@ -113,17 +113,11 @@ public class RewardTableAlgoritm implements KIAlgorithm {
         Optional<RewardEntry> rewardEntry = find(train.getState());
         if (rewardEntry.isPresent()) {
             RewardEntry r = rewardEntry.get();
-//            r.action.muli(0.7).addi(train.getRewardChange().muli(0.3));
             r.action.addi(train.getRewardChange().muli(3));
             Util.norm(r.action);
             Util.assertNorm(r.action);
-
-//            double old = r.action.getDouble(train.getAction());
-//            r.action.putScalar(train.getAction(), 0.7 * old + 0.3 * train.getReward());
         } else {
             INDArray r = train.getRewardChange();
-//            INDArray r = Nd4j.rand(Board.ACTION_SHAPE);
-//            r.putScalar(train.getAction(), train.getReward());
             Util.assertShape(r, Board.ACTION_SHAPE);
             Util.norm(r);
             Util.assertNorm(r);
@@ -141,10 +135,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
     public Collection<TrainWholeEntry> getDataAsTrainingData() {
         List<TrainWholeEntry> collect = rewardEntries.stream()
-//                .map(e )
-//                .collect(Collectors.groupingBy(e -> e.board))
-//                .entrySet()
-//                .stream()
                 .map(e -> asdfasdf(e))
                 .collect(Collectors.toList());
         Collections.shuffle(collect);
@@ -152,8 +142,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
     }
 
     private TrainWholeEntry asdfasdf(final RewardEntry e) {
-//        INDArray zeros = Nd4j.zeros(BOARD_SHAPE);
-//        e.getValue().stream().forEach(r -> zeros.putScalar(r.action, r.reward));
         return new TrainWholeEntry(e.board, e.action);
     }
 
@@ -162,7 +150,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
         private final INDArray board;
         private final INDArray action;
-//        private double reward;
 
         private static RewardEntry readLine(final String line) {
             String[] nextLine = line.split("\t");
@@ -172,12 +159,6 @@ public class RewardTableAlgoritm implements KIAlgorithm {
         }
 
         private static INDArray readArray(final String tempLine1) {
-//            try {
-//                byte[] bytes = Hex.decodeHex(tempLine1.toCharArray());
-//                return Nd4j.fromByteArray(bytes);
-//            } catch (DecoderException e) {
-//                throw new IOException("", e);
-//            }
 
             String[] split = tempLine1.split("#");
 
@@ -194,8 +175,14 @@ public class RewardTableAlgoritm implements KIAlgorithm {
 
         private String writeArray(INDArray array) {
             return Util.gson.toJson(array.shape()) + "#" + Util.toString(array);
+        }
 
-//            return Hex.encodeHexString(Nd4j.toByteArray(array));
+        public INDArray getAction() {
+            return action;
+        }
+
+        public INDArray getBoard() {
+            return board;
         }
     }
 }

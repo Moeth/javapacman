@@ -1,5 +1,8 @@
-package de.moeth.tictactoe;
+package de.moeth.tictactoe.algorithm;
 
+import de.moeth.tictactoe.Board;
+import de.moeth.tictactoe.HistoryEntry;
+import de.moeth.tictactoe.Util;
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -33,8 +36,8 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(NeuralNetAlgorithm.class);
     private static final int ACTION_COUNT = 9;
-    public static final int RNG_SEED = 123;
-    public static final long[] SHAPE = {1, 18};
+    private static final int RNG_SEED = 123;
+    private static final long[] SHAPE = {1, 18};
 
     private final String name;
     private final MultiLayerNetwork multiLayerNetwork;
@@ -46,14 +49,12 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
     }
 
     public static NeuralNetAlgorithm load(String name) {
-//        multiLayerNetwork = buildTheNeuralNetwork();
         try {
             MultiLayerNetwork multiLayerNetwork = ModelSerializer.restoreMultiLayerNetwork(name);
             return new NeuralNetAlgorithm(name, multiLayerNetwork);
         } catch (IOException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(e);
         }
-//        ModelSerializer.writeModel(multiLayerNetwork, "multiLayerNetwork", true);
     }
 
     public static NeuralNetAlgorithm create(String name) {
@@ -67,10 +68,8 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         return multiLayerNetwork.output(board.reshape(SHAPE));
     }
 
-    //    @Override
     public void changeValue(final HistoryEntry historyEntry, final double reward) {
         INDArray result = zeroo(historyEntry.getAction(), reward);
-//        INDArray result = historyEntry.getReward().mul(reward);
         DataSet dataSet = new DataSet(historyEntry.getState(), result);
         dataSets.add(dataSet);
 
@@ -78,15 +77,12 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         ListDataSetIterator listDataSetIterator = new ListDataSetIterator(dataSets, 50);
         log.info("train " + dataSets.size());
         multiLayerNetwork.fit(listDataSetIterator);
-//        multiLayerNetwork.fit(historyEntry.getState(), result);
     }
 
     public void trainWhole(final Collection<TrainWholeEntry> trainData) {
         dataSets.clear();
         convert(trainData);
-//        dataSets.forEach(d -> multiLayerNetwork.fit(d));
         log.info("train " + dataSets.size());
-//        evaluate(listDataSetIterator);
     }
 
     private void convert(final Collection<TrainWholeEntry> trainData) {
@@ -102,17 +98,10 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
             dataSets = dataSets.subList(0, 10);
         }
         trainData.stream().map(this::createDataSet).forEach(dataSets::add);
-//        if (dataSets.size() > 100) {
         Collections.shuffle(dataSets);
-//        multiLayerNetwork.fit(new ListDataSetIterator(dataSets, 50));
         dataSets.forEach(d -> multiLayerNetwork.fit(d));
         log.info("train " + dataSets.size());
-//            dataSets.clear();
-//        }
-//        evaluate(listDataSetIterator);
     }
-
-//    public void clear
 
     private DataSet createDataSet(final TrainWholeEntry train) {
         INDArray features = train.getState().reshape(SHAPE);
@@ -127,20 +116,11 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         INDArray labels = train.getRewardChange();
         Util.norm(labels);
 
-        //        INDArray labels = historyEntry.getReward().mul(reward);
-//            Util.assertShape(labels, Board.S);
-
         INDArray features = train.getState().reshape(SHAPE);
-//        INDArray featuresMask = Nd4j.ones(18).reshape(18);
-//        INDArray labelsMask = zeroo(train.getAction(), 1);
 
         Util.assertShape(labels, Board.ACTION_SHAPE);
-//        Util.assertShape(labelsMask, Board.ACTION_SHAPE);
         Util.assertShape(features, SHAPE);
-//        Util.assertShape(featuresMask, SHAPE);
-//        return new DataSet(train.getState().reshape(SHAPE), labels);
         return new DataSet(features, labels);
-//        return new DataSet(features, labels, featuresMask, labelsMask);
     }
 
     private INDArray zeroo(final long index, final double value) {
@@ -154,63 +134,11 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         ModelSerializer.writeModel(multiLayerNetwork, name, true);
     }
 
-//    public static void main(String[] args) throws IOException {
-//
-//        ///////////////////////////////////////////
-////        Prepare data for loading
-//        ///////////////////////////////////////////
-//
-//        int batchSize = 16; // how many examples to simultaneously train in the network
-//        EmnistDataSetIterator.Set emnistSet = EmnistDataSetIterator.Set.MNIST;
-//        EmnistDataSetIterator emnistTrain = new EmnistDataSetIterator(emnistSet, batchSize, true);
-//        EmnistDataSetIterator emnistTest = new EmnistDataSetIterator(emnistSet, batchSize, false);
-//
-/////////////////////////////////////////////
-////        Train the model
-//        ///////////////////////////////////////////
-//
-//        log.info("Train the model");
-//
-//// fit a dataset for a single epoch
-//        network.fit(emnistTrain);
-//
-//
-//// fit for multiple epochs
-//// int numEpochs = 2
-//// network.fit(new MultipleEpochsIterator(numEpochs, emnistTrain))
-//
-/////////////////////////////////////////////
-////        Evaluate the model
-/////////////////////////////////////////////
-//
-//        log.info("Evaluate the model");
-//        // evaluate basic performance
-//        Evaluation eval = network.evaluate(emnistTest);
-//        eval.accuracy();
-//        eval.precision();
-//        eval.recall();
-//
-//// evaluate ROC and calculate the Area Under Curve
-//        ROCMultiClass roc = network.evaluateROCMultiClass(emnistTest);
-//        roc.calculateAverageAUC();
-//
-//        int classIndex = 0;
-//        roc.calculateAUC(classIndex);
-//
-//// optionally, you can print all stats from the evaluations
-//        System.out.print(eval.stats());
-//        System.out.print(roc.stats());
-//        network.save(new File("mnsit.json"), true);
-//    }
-
     public double evaluate() {
         Collections.shuffle(dataSets);
-//        ListDataSetIterator iterator = new ListDataSetIterator(dataSets, 50);
-//        evaluate(iterator);
 
         Collections.shuffle(dataSets);
         double ddd = dataSets
-//                .subList(0, 5)
                 .stream()
                 .map(d -> {
                     INDArray reward = multiLayerNetwork.output(d.getFeatures());

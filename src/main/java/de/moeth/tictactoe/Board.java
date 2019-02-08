@@ -14,12 +14,12 @@ public class Board {
 
     private static final Logger log = LoggerFactory.getLogger(Board.class);
     public static final long[] BOARD_LEARNING_SHAPE = {3, 3, 2};
-    public static final long[] BOARD_SHAPE = {1, 9};
+    private static final long[] BOARD_SHAPE = {1, 9};
     public static final long[] ACTION_SHAPE = {1, 9};
 
     private final INDArray board;
 
-    public Board(final INDArray board) {
+    private Board(final INDArray board) {
         this.board = board;
     }
 
@@ -27,12 +27,6 @@ public class Board {
         board = Nd4j.zeros(BOARD_SHAPE);
     }
 
-    /**
-     * Prints the board on a console as given below
-     * 0 0 1
-     * 2 0 0
-     * 0 0 1
-     */
     public void printBoard() {
         int k = 0;
         StringBuilder boardString = new StringBuilder("\n");
@@ -44,7 +38,6 @@ public class Board {
             }
             boardString.append("\n");
         }
-//        boardString.append("------------\n");
         log.info(boardString.toString());
     }
 

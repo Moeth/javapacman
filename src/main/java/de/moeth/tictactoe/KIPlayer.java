@@ -1,6 +1,7 @@
 package de.moeth.tictactoe;
 
 import com.google.common.base.Preconditions;
+import de.moeth.tictactoe.algorithm.KIAlgorithm;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-public class KIPlayer {
+class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
     private final KIAlgorithm algorithm;
@@ -29,7 +30,6 @@ public class KIPlayer {
         int abs = (int) Math.abs(new Random().nextGaussian());
         int bestAction = board.getPossibleActions()
                 .boxed()
-//                .max(Comparator.comparingDouble(action -> algorithm.getReward(board.getBoard(), action)))
                 .max(Comparator.comparingDouble(action -> reward.getDouble(action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
 
@@ -47,7 +47,6 @@ public class KIPlayer {
         List<KIAlgorithm.TrainSingleEntry> r = new ArrayList<>();
         for (int p = history.size() - 1; p >= 0; p--) {
             HistoryEntry historyEntry = history.get(p);
-//            algorithm.changeValue(historyEntry, realReward);
 
             KIAlgorithm.TrainSingleEntry asdf = new KIAlgorithm.TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
             r.add(asdf);

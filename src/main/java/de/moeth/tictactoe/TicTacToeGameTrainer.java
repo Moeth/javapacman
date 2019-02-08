@@ -1,5 +1,8 @@
 package de.moeth.tictactoe;
 
+import de.moeth.tictactoe.algorithm.KIAlgorithm;
+import de.moeth.tictactoe.algorithm.NeuralNetAlgorithm;
+import de.moeth.tictactoe.algorithm.RewardTableAlgoritm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,7 @@ public class TicTacToeGameTrainer {
 
 //    SentimentExampleIterator
 
-    private static Logger log = LoggerFactory.getLogger(TicTacToeGameTrainer.class);
+    private static final Logger log = LoggerFactory.getLogger(TicTacToeGameTrainer.class);
     private static final int PLAY_TOTAL_GAME = 100;
 
     private final KIPlayer player1;

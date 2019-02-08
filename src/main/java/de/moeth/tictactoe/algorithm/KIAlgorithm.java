@@ -1,5 +1,7 @@
-package de.moeth.tictactoe;
+package de.moeth.tictactoe.algorithm;
 
+import de.moeth.tictactoe.Board;
+import de.moeth.tictactoe.Util;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -13,7 +15,6 @@ public interface KIAlgorithm {
 
     INDArray getReward(INDArray board);
 
-    //    void changeValue(HistoryEntry historyEntry, double reward);
     void train(Collection<TrainSingleEntry> trainData);
 
     void storeData() throws IOException;
@@ -24,19 +25,12 @@ public interface KIAlgorithm {
     class TrainSingleEntry {
 
         private final INDArray state;
-        //        private final INDArray result;
         private final int action;
         private final double reward;
 
-        public INDArray getRewardChange() {
-//            Preconditions.checkArgument(reward >= 0);
-//            Preconditions.checkArgument(reward <= 1);
-//        INDArray labels = train.getResult().dup().putScalar(train.getAction(), train.getReward());
+        INDArray getRewardChange() {
             INDArray result = Nd4j.zeros(Board.ACTION_SHAPE);
             result.putScalar(action, reward);
-//            for (int i = 0; i < 9; i++) {
-//                result.putScalar(i, i == action ? reward : 1 - reward);
-//            }
             Util.norm(result);
             return result;
         }
@@ -49,7 +43,5 @@ public interface KIAlgorithm {
 
         private final INDArray state;
         private final INDArray result;
-//        private final int action;
-//        private final double reward;
     }
 }

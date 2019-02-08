@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class Util {
 
     private static final Logger log = LoggerFactory.getLogger(Util.class);
-    public final static Gson gson = new Gson();
+    public static final Gson gson = new Gson();
 
     public static void assertShape(INDArray indArray, long[] shape) {
         long[] current = indArray.shape();
@@ -19,7 +19,7 @@ public class Util {
     }
 
     public static String toString(INDArray array) {
-        return Util.gson.toJson(array.data().asDouble());
+        return gson.toJson(array.data().asDouble());
     }
 
     public static void norm(INDArray array) {
@@ -31,8 +31,7 @@ public class Util {
     }
 
     public static void assertNorm(final INDArray array) {
-        final Number norm2Number;
-        norm2Number = array.norm1Number();
+        final Number norm2Number = array.norm1Number();
         Preconditions.checkArgument(Math.abs(norm2Number.doubleValue() - 1.0) < 0.0001, "norm2 " + norm2Number);
     }
 }
