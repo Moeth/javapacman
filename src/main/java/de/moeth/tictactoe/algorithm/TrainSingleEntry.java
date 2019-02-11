@@ -1,7 +1,6 @@
 package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
-import de.moeth.tictactoe.Util;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -20,7 +19,7 @@ public class TrainSingleEntry {
     INDArray getRewardChange() {
         INDArray result = Nd4j.zeros(Board.ACTION_SHAPE);
         result.putScalar(action, reward);
-        Util.norm(result);
+//        Util.norm(result);
         return result;
     }
 }

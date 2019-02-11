@@ -103,7 +103,7 @@ public class ArrayMap implements Storable {
         }
 
         private String writeLine() {
-            Util.norm(value);
+//            Util.norm(value);
             return writeArray(key) + "\t" + writeArray(value);
         }
 

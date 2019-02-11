@@ -2,6 +2,7 @@ package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.history.ActionHistory;
+import org.deeplearning4j.datasets.iterator.ExistingDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -18,14 +19,15 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.Adam;
+import org.nd4j.linalg.learning.config.AdaGrad;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class NeuralNetStateAlgorithm implements KIAlgorithm {
 
@@ -62,7 +64,6 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
 
         INDArray rewards = Nd4j.rand(Board.ACTION_SHAPE);
         for (int action = 0; action < Board.ACTIONS; action++) {
-
             double reward = reward(board, playerNumber, action);
             rewards.putScalar(action, reward);
         }
@@ -81,20 +82,41 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
         }
 
         INDArray state = board.applyAction(playerNumber, action).getBoard(playerNumber);
-        INDArray output = multiLayerNetwork.output(state.reshape(SHAPE));
+        INDArray output = output(state);
         return output.getDouble(0);
     }
 
     //    @Override
-    private void train(final Collection<TrainSingleEntry> trainData) {
+    private void train(final List<TrainSingleEntry> trainData) {
 //        if (dataSets.size() > 10) {
 //            dataSets = dataSets.subList(0, 10);
 //        }
 
-        trainData.stream().map(this::createDataSet).forEach(d -> multiLayerNetwork.fit(d));
-//        Collections.shuffle(dataSets);
+//        trainData.forEach(d -> {
+//            INDArray output = output(d.getState());
+//            log.info(d.getState()+" -> "+output);
+//        });
+        List<INDArray> preLearn = trainData.stream().map(d -> output(d.getState())).collect(Collectors.toList());
+        List<DataSet> collect = trainData.stream().map(this::createDataSet)
+                .collect(Collectors.toList());
+        multiLayerNetwork.fit(new ExistingDataSetIterator(collect));
+
+        List<INDArray> learn = trainData.stream().map(d -> output(d.getState())).collect(Collectors.toList());
+        for (int i = 0; i < trainData.size(); i++) {
+            log.info(String.format("%s -> %s (%s)", preLearn.get(i), learn.get(i), trainData.get(i).getReward()));
+        }
+//        trainData.forEach(d -> {
+//            INDArray output = output(d.getState());
+//            log.info(d.getState()+" -> "+output+" "+d.getReward());
+//        });
+
+        //        Collections.shuffle(dataSets);
 //        dataSets.forEach(d -> multiLayerNetwork.fit(d));
-        log.info("train " + trainData.size());
+//        log.info("train " + trainData.size());
+    }
+
+    private INDArray output(INDArray state) {
+        return multiLayerNetwork.output(state.reshape(SHAPE));
     }
 
     @Override
@@ -168,15 +190,17 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
 //        multiLayerNetwork.save(new File("mnsit.json"), true);
     }
 
-    private static final int HIDDEN_LAYER_CONT = 8;
+    private static final int HIDDEN_LAYER_CONT = 3;
     private static final int HIDDEN_LAYER_WIDTH = 500;
 
     private static MultiLayerNetwork buildTheNeuralNetwork() {
 
         NeuralNetConfiguration.ListBuilder listBuilder = new NeuralNetConfiguration.Builder()
                 .seed(RNG_SEED)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .updater(new Adam())
+                .optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT)
+//                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+//                .updater(new Adam())
+                .updater(new AdaGrad())
 //                .updater(new Nesterovs(0.01, 0.9))
                 .l2(0.01)
 //                .l2(0.001)

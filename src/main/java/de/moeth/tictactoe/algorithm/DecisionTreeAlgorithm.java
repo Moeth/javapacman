@@ -78,14 +78,14 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
         if (rewardEntry.isPresent()) {
 //            ArrayMap.RewardEntry r = rewardEntry.get();
             final INDArray value = rewardEntry.get();
-            value.addi(train.getRewardChange().muli(3));
-            Util.norm(value);
-            Util.assertNorm(value);
+            value.addi(train.getRewardChange());
+//            Util.norm(value);
+//            Util.assertNorm(value);
         } else {
             INDArray r = train.getRewardChange();
             Util.assertShape(r, Board.ACTION_SHAPE);
-            Util.norm(r);
-            Util.assertNorm(r);
+//            Util.norm(r);
+//            Util.assertNorm(r);
             arrayMap.add(train.getState(), r);
         }
     }

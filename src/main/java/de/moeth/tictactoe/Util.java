@@ -40,15 +40,18 @@ public class Util {
     }
 
     public static void norm(INDArray array) {
-        Number norm2Number = array.norm1Number();
-        Preconditions.checkArgument(norm2Number.doubleValue() > 0.0);
+        double norm2Number = Math.abs(array.norm2Number().doubleValue());
+//        if (norm2Number == 0.0) {
+//            return;
+//        }
+        Preconditions.checkArgument(norm2Number > 0.0, array + " is null");
         array.divi(norm2Number);
 
         assertNorm(array);
     }
 
     public static void assertNorm(final INDArray array) {
-        final Number norm2Number = array.norm1Number();
+        final Number norm2Number = array.norm2Number();
         Preconditions.checkArgument(Math.abs(norm2Number.doubleValue() - 1.0) < 0.0001, "norm2 " + norm2Number);
     }
 }

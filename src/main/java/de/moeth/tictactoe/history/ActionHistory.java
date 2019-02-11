@@ -29,7 +29,7 @@ public class ActionHistory {
 
             TrainSingleEntry asdf = new TrainSingleEntry(historyEntry.getState(), historyEntry.getAction(), realReward);
             r.add(asdf);
-            realReward *= 0.99;
+            realReward -= 0.1;
         }
         history.clear();
         return r;

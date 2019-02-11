@@ -2,7 +2,7 @@ package de.moeth.tictactoe;
 
 import de.moeth.tictactoe.algorithm.DecisionTreeAlgorithm;
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
-import de.moeth.tictactoe.algorithm.NeuralNetStateAlgorithm;
+import de.moeth.tictactoe.algorithm.NeuralNetAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,24 +25,27 @@ public class TicTacToeGameTrainer {
     private final KIPlayer player1;
     private final KIPlayer player2;
     private final boolean learn;
+    private final boolean printBoard;
 
-    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2, final boolean learn) {
+    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2, final boolean learn, final boolean printBoard) {
         this.player1 = new KIPlayer(player1);
         this.player2 = new KIPlayer(player2);
         this.learn = learn;
+        this.printBoard = printBoard;
     }
 
     public static void main(String[] args) {
         try {
 //            do {
             DecisionTreeAlgorithm player1 = DecisionTreeAlgorithm.create("AllMoveWithReward_1.txt");
-//            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
-            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("player1");
-            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
-            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).train(100);
-            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
-            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
-            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true).play2(1, true);
+            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
+//            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("player1");
+//            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
+            new TicTacToeGameTrainer(neuralNetAlgorithm, player1, true, false).train(5000);
+//            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true, true).train(5000);
+//            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
+//            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
+//            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
 
             //
 //            //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
@@ -84,10 +87,6 @@ public class TicTacToeGameTrainer {
         }
     }
 
-    private static void train(final KIAlgorithm player1, final KIAlgorithm player2, int times) throws IOException {
-        TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, player2, true);
-        comp.train(times);
-    }
     private GameResult train(final int playTotalGame) throws IOException {
 
         // sets a player number for first player  it can be 1 or 2, i.e. X or O.
@@ -98,7 +97,7 @@ public class TicTacToeGameTrainer {
             firstPlayerNumber++;
 
             //        log.info("train");
-            int gameState = play2(firstPlayerNumber, false);
+            int gameState = play2(firstPlayerNumber);
             gameResult.applyGameState(gameState);
             if (gameResult.totalGameCounter % 1 == 0) {
                 log.info(gameResult.toString());
@@ -114,7 +113,7 @@ public class TicTacToeGameTrainer {
         return gameResult;
     }
 
-    private int play2(final int tempMoveType, final boolean printBoard) {
+    private int play2(final int tempMoveType) {
         Board board = new Board();
         if (printBoard) {
             board.printBoard();
@@ -164,8 +163,8 @@ public class TicTacToeGameTrainer {
             player2.updateReward(1);//Win player_2
         } else if (won == 3) {
 //            log.info("Draw");
-            player1.updateReward(0.5);
-            player2.updateReward(0.5);
+            player1.updateReward(0);
+            player2.updateReward(0);
         } else {
             throw new IllegalArgumentException();
         }

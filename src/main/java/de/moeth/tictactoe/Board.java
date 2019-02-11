@@ -37,7 +37,9 @@ public class Board {
                 boardString.append("  " + position);
                 k++;
             }
-            boardString.append("\n");
+            if (i < 2) {
+                boardString.append("\n");
+            }
         }
         log.info(boardString.toString());
     }
