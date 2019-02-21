@@ -10,10 +10,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DecisionTreeAlgorithm implements KIAlgorithm {
+public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(DecisionTreeAlgorithm.class);
 
@@ -31,11 +33,20 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
 
     @Override
     public void storeData() throws IOException {
-        try (FileWriter writer = new FileWriter(filePath)) {
+        String bak = filePath + ".bak";
+        try (FileWriter writer = new FileWriter(bak)) {
             arrayMap.write(writer);
             writer.flush();
 //            log.info(String.format("saved %d to %s", arrayMap.size(), filePath));
         }
+        File dest = new File(filePath);
+        dest.delete();
+        new File(bak).renameTo(dest);
+    }
+
+    @Override
+    Optional<INDArray> output(final INDArray state) {
+        return arrayMap.findValue(state);
     }
 
     @Override
@@ -46,7 +57,7 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
 
     private INDArray getReward(final INDArray board) {
         Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
-        return arrayMap.findValue(board)
+        return output(board)
                 .orElseGet(() -> Nd4j.rand(Board.ACTION_SHAPE));
     }
 
@@ -60,6 +71,11 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
     }
 
     @Override
+    public void trainWhole(final List<TrainWholeEntry> trainData) {
+        throw new IllegalArgumentException();
+    }
+
+    //    @Override
     public void train(final List<TrainSingleEntry> trainData) {
         for (TrainSingleEntry train : trainData) {
             train(train);
@@ -68,19 +84,29 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
 
     private void train(final TrainSingleEntry train) {
         Util.assertShape(train.getState(), Board.BOARD_LEARNING_SHAPE);
-        Optional<INDArray> rewardEntry = arrayMap.findValue(train.getState());
+        Optional<INDArray> rewardEntry = output(train.getState());
+        int action = train.getAction();
         if (rewardEntry.isPresent()) {
 //            ArrayMap.RewardEntry r = rewardEntry.get();
             final INDArray value = rewardEntry.get();
-            value.addi(train.getRewardChange());
+            double before = value.getDouble(action);
+            double value1 = (before + train.getReward()) / 2;
+            value.putScalar(action, value1);
+//            INDArray result = Nd4j.zeros(Board.ACTION_SHAPE);
+//            result.putScalar(train.getAction(), train.getReward());
+//        Util.norm(result);
+//            value.addi(result)
+//                    .divi(2);
 //            Util.norm(value);
 //            Util.assertNorm(value);
         } else {
-            INDArray r = train.getRewardChange();
-            Util.assertShape(r, Board.ACTION_SHAPE);
+            INDArray result = Nd4j.zeros(Board.ACTION_SHAPE);
+            result.putScalar(action, train.getReward());
+//        Util.norm(result);
+            Util.assertShape(result, Board.ACTION_SHAPE);
 //            Util.norm(r);
 //            Util.assertNorm(r);
-            arrayMap.add(train.getState(), r);
+            arrayMap.add(train.getState(), result);
         }
     }
 
@@ -92,19 +118,16 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
                 '}';
     }
 
-    public Collection<TrainWholeEntry> getDataAsTrainingData222() {
+    @Override
+    public List<TrainWholeEntry> getTrainWholeData() {
         List<TrainWholeEntry> collect = arrayMap.stream()
-                .map(e -> asdfasdf(e))
+                .map(e -> new TrainWholeEntry(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
         Collections.shuffle(collect);
         return collect;
     }
 
-    private TrainWholeEntry asdfasdf(final Map.Entry<INDArray, INDArray> e) {
-        return new TrainWholeEntry(e.getKey(), e.getValue());
-    }
-
-    @Override
+    //    @Override
     public List<TrainSingleEntry> getDataAsTrainingData() {
         List<TrainSingleEntry> collect = arrayMap.stream()
                 .map(e -> TrainSingleEntry.convert(e.getKey(), e.getValue()))
@@ -113,13 +136,4 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
         return collect;
     }
 
-    //    @Override
-//    public void read(final Reader reader) throws IOException {
-//        arrayMap.read(reader);
-//    }
-//
-//    @Override
-//    public void write(final Writer writer) throws IOException {
-//        arrayMap.write(writer);
-//    }
 }

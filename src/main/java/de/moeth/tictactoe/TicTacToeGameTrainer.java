@@ -37,13 +37,17 @@ public class TicTacToeGameTrainer {
     public static void main(String[] args) {
         try {
 //            do {
-            KIAlgorithm neuralNetAlgorithm = new TrainingHistory(new EGreedy(NeuralNetAlgorithm.create("neuralNetAlgorithm"), 1.0, 0.01, 100), 20);
-            KIAlgorithm decisionTreeAlgorithm = new EGreedy(DecisionTreeAlgorithm.create("DecisionTreeAlgorithm.txt"), 1.0, 0.01, 100);
-            neuralNetAlgorithm.train(decisionTreeAlgorithm.getDataAsTrainingData());
+            NeuralNetAlgorithm neuralNetAlgorithm1 = NeuralNetAlgorithm.create("neuralNetAlgorithm");
+            KIAlgorithm neuralNetAlgorithm = new TrainingHistory(new EGreedy(neuralNetAlgorithm1, 1.0, 0.001, 100), 20);
+            KIAlgorithm decisionTreeAlgorithm = new EGreedy(DecisionTreeAlgorithm.create("DecisionTreeAlgorithm.txt"), 1.0, 0.001, 100);
+//            new TicTacToeGameTrainer(decisionTreeAlgorithm, decisionTreeAlgorithm, true, false, 50).train(50000);
+//            new TicTacToeGameTrainer(decisionTreeAlgorithm, decisionTreeAlgorithm, true, false, 10).train(5000);
 
+            neuralNetAlgorithm1.trainWhole(decisionTreeAlgorithm.getTrainWholeData());
+            neuralNetAlgorithm1.evaluate(decisionTreeAlgorithm.getTrainWholeData());
 //            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("decisionTreeAlgorithm");
 //            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
-            new TicTacToeGameTrainer(neuralNetAlgorithm, decisionTreeAlgorithm, true, false, 10).train(500000);
+            new TicTacToeGameTrainer(neuralNetAlgorithm1, decisionTreeAlgorithm, false, false, 10).train(500000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true, true).train(5000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);

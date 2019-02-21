@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public abstract class StoringAlghorithm implements KIAlgorithm, Storable {
+public abstract class StoringAlghorithm extends AbstractKIAlgorithm implements Storable {
 
     private static final Logger log = LoggerFactory.getLogger(StoringAlghorithm.class);
 

@@ -7,13 +7,15 @@ import java.util.List;
 
 public interface KIAlgorithm {
 
-    public int getBestAction(final Board board, final int playerNumber);
+    int getBestAction(Board board, int playerNumber);
 
-    void train(List<TrainSingleEntry> trainData);
+    void train(List<TrainSingleEntry> trainSingleEntries);
 
-//    public void updateReward(final double reward);
+    void trainWhole(List<TrainWholeEntry> trainData);
 
-    public List<TrainSingleEntry> getDataAsTrainingData();
+    List<TrainWholeEntry> getTrainWholeData();
 
     void storeData() throws IOException;
+
+    void evaluate(List<TrainWholeEntry> dataAsTrainingData);
 }

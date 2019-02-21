@@ -17,7 +17,7 @@ public class EGreedy extends Delegator {
     private final double count;
     private double current = 0;
 
-    public EGreedy(final KIAlgorithm kiAlgorithm, final double start, final double end, final double count) {
+    public EGreedy(final AbstractKIAlgorithm kiAlgorithm, final double start, final double end, final double count) {
         super(kiAlgorithm);
         Preconditions.checkArgument(start >= end);
         Preconditions.checkArgument(count > 0);
@@ -28,7 +28,7 @@ public class EGreedy extends Delegator {
 
     @Override
     public int getBestAction(final Board board, final int playerNumber) {
-        double value = start - (start - end) * (current / count);
+        double value = start - (start - end) * (Math.min(current, count) / count);
         if (RANDOM.nextDouble() < value) {
             int bestAction = RANDOM.nextInt(Board.ACTIONS);
             while (!board.isAllowedAction(bestAction)) {

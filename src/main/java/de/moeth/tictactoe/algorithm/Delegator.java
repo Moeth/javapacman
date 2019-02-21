@@ -1,18 +1,20 @@
 package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
-public class Delegator implements KIAlgorithm {
+public class Delegator extends AbstractKIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(Delegator.class);
-    private final KIAlgorithm kiAlgorithm;
+    private final AbstractKIAlgorithm kiAlgorithm;
 
-    public Delegator(final KIAlgorithm kiAlgorithm) {
+    public Delegator(final AbstractKIAlgorithm kiAlgorithm) {
         this.kiAlgorithm = kiAlgorithm;
     }
 
@@ -25,11 +27,21 @@ public class Delegator implements KIAlgorithm {
     }
 
     @Override
-    public List<TrainSingleEntry> getDataAsTrainingData() {
-        return kiAlgorithm.getDataAsTrainingData();
+    public void trainWhole(final List<TrainWholeEntry> trainData) {
+        kiAlgorithm.trainWhole(trainData);
+    }
+
+    @Override
+    public List<TrainWholeEntry> getTrainWholeData() {
+        return kiAlgorithm.getTrainWholeData();
     }
 
     public void storeData() throws IOException {
         kiAlgorithm.storeData();
+    }
+
+    @Override
+    Optional<INDArray> output(final INDArray state) {
+        return kiAlgorithm.output(state);
     }
 }

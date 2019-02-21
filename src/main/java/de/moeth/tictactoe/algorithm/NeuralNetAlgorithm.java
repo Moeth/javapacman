@@ -24,9 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class NeuralNetAlgorithm implements KIAlgorithm {
+public class NeuralNetAlgorithm extends AbstractKIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(NeuralNetAlgorithm.class);
     private static final int ACTION_COUNT = 9;
@@ -61,20 +62,35 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         return action;
     }
 
+    @Override
+    public void trainWhole(final List<TrainWholeEntry> trainData) {
+        log.info("train " + trainData.size());
+        List<DataSet> collect = trainData.stream()
+                .map(trainWholeEntry -> new DataSet(mapState(trainWholeEntry.getState()), trainWholeEntry.getResult()))
+                .collect(Collectors.toList());
+        multiLayerNetwork.fit(new MultipleEpochsIterator(5, new ExistingDataSetIterator(collect)));
+    }
+
+    @Override
+    public List<TrainWholeEntry> getTrainWholeData() {
+//        return null;
+        throw new IllegalArgumentException();
+    }
+
     private INDArray getReward(final INDArray board) {
         Util.assertShape(board, Board.BOARD_LEARNING_SHAPE);
 
         return multiLayerNetwork.output(mapState(board));
     }
 
-    @Override
+    //    @Override
     public void train(final List<TrainSingleEntry> trainData) {
-        List<INDArray> preLearn = trainData.stream().map(d -> output(d.getState())).collect(Collectors.toList());
+        List<INDArray> preLearn = trainData.stream().map(d -> outputIntern(d.getState())).collect(Collectors.toList());
         List<DataSet> collect = trainData.stream().map(this::createDataSet)
                 .collect(Collectors.toList());
         multiLayerNetwork.fit(new MultipleEpochsIterator(5, new ExistingDataSetIterator(collect)));
 
-        List<INDArray> learn = trainData.stream().map(d -> output(d.getState())).collect(Collectors.toList());
+        List<INDArray> learn = trainData.stream().map(d -> outputIntern(d.getState())).collect(Collectors.toList());
         double sum = 0;
         for (int i = 0; i < trainData.size(); i++) {
 //            diff =
@@ -101,19 +117,23 @@ public class NeuralNetAlgorithm implements KIAlgorithm {
         }
     }
 
-    @Override
+    //    @Override
     public List<TrainSingleEntry> getDataAsTrainingData() {
         throw new IllegalArgumentException();
     }
 
-    private INDArray output(INDArray state) {
+    Optional<INDArray> output(INDArray state) {
+        return Optional.of(outputIntern(state));
+    }
+
+    private INDArray outputIntern(INDArray state) {
         return multiLayerNetwork.output(mapState(state));
     }
 
     private DataSet createDataSet(final TrainSingleEntry train) {
         INDArray features = mapState(train.getState());
 
-        INDArray output = output(train.getState());
+        INDArray output = outputIntern(train.getState());
         output.putScalar(train.getAction(), train.getReward());
 //        output.addi(train.getRewardChange());
 //        Util.norm(output);

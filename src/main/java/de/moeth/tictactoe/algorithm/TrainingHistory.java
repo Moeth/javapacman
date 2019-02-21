@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TrainingHistory extends Delegator implements KIAlgorithm {
+public class TrainingHistory extends Delegator {
 
     private static final Logger log = LoggerFactory.getLogger(TrainingHistory.class);
     private List<TrainSingleEntry> entries = new ArrayList<>();
     private final int size;
 
-    public TrainingHistory(final KIAlgorithm kiAlgorithm, final int size) {
+    public TrainingHistory(final AbstractKIAlgorithm kiAlgorithm, final int size) {
         super(kiAlgorithm);
         this.size = size;
     }
