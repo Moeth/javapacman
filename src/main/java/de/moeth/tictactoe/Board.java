@@ -54,7 +54,7 @@ public class Board {
     }
 
     public Board applyAction(int playerNumber, int action) {
-        Preconditions.checkArgument(isAllowedAction(action));
+        Preconditions.checkArgument(isAllowedAction(action), action + " is not allowed");
         INDArray inputArray = Nd4j.zeros(BOARD_SHAPE);
         Nd4j.copy(board, inputArray);
         inputArray.putScalar(new int[]{0, action}, playerNumber);

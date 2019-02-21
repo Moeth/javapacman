@@ -1,8 +1,6 @@
 package de.moeth.tictactoe;
 
-import de.moeth.tictactoe.algorithm.DecisionTreeAlgorithm;
-import de.moeth.tictactoe.algorithm.KIAlgorithm;
-import de.moeth.tictactoe.algorithm.NeuralNetAlgorithm;
+import de.moeth.tictactoe.algorithm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,22 +24,26 @@ public class TicTacToeGameTrainer {
     private final KIPlayer player2;
     private final boolean learn;
     private final boolean printBoard;
+    private final int showStats;
 
-    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2, final boolean learn, final boolean printBoard) {
+    private TicTacToeGameTrainer(final KIAlgorithm player1, final KIAlgorithm player2, final boolean learn, final boolean printBoard, final int showStats) {
         this.player1 = new KIPlayer(player1);
         this.player2 = new KIPlayer(player2);
         this.learn = learn;
         this.printBoard = printBoard;
+        this.showStats = showStats;
     }
 
     public static void main(String[] args) {
         try {
 //            do {
-            DecisionTreeAlgorithm player1 = DecisionTreeAlgorithm.create("AllMoveWithReward_1.txt");
-            NeuralNetAlgorithm neuralNetAlgorithm = NeuralNetAlgorithm.create("player1");
-//            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("player1");
+            KIAlgorithm neuralNetAlgorithm = new TrainingHistory(new EGreedy(NeuralNetAlgorithm.create("neuralNetAlgorithm"), 1.0, 0.01, 100), 20);
+            KIAlgorithm decisionTreeAlgorithm = new EGreedy(DecisionTreeAlgorithm.create("DecisionTreeAlgorithm.txt"), 1.0, 0.01, 100);
+            neuralNetAlgorithm.train(decisionTreeAlgorithm.getDataAsTrainingData());
+
+//            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("decisionTreeAlgorithm");
 //            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
-            new TicTacToeGameTrainer(neuralNetAlgorithm, player1, true, false).train(5000);
+            new TicTacToeGameTrainer(neuralNetAlgorithm, decisionTreeAlgorithm, true, false, 10).train(500000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true, true).train(5000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
@@ -49,7 +51,7 @@ public class TicTacToeGameTrainer {
 
             //
 //            //            RewardTableAlgoritm player2 = RewardTableAlgoritm.create("AllMoveWithReward_2.txt");
-////            GameResult gameResult = new TicTacToeGameTrainer(player1, player1, true)
+////            GameResult gameResult = new TicTacToeGameTrainer(decisionTreeAlgorithm, decisionTreeAlgorithm, true)
 ////                    .train(1000);
 ////            } while (ga)
 //
@@ -57,15 +59,15 @@ public class TicTacToeGameTrainer {
 //
 ////            double evaluate = 1;
 ////            for (int i = 0; i < 1 && evaluate > 0.01; i++) {
-////                neuralNetAlgorithm.trainWhole(player1.getDataAsTrainingData());
+////                neuralNetAlgorithm.trainWhole(decisionTreeAlgorithm.getDataAsTrainingData());
 ////                evaluate = neuralNetAlgorithm.evaluate();
 ////            }
 //
-//            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(player1, neuralNetAlgorithm, true);
+//            TicTacToeGameTrainer comp = new TicTacToeGameTrainer(decisionTreeAlgorithm, neuralNetAlgorithm, true);
 //            comp.train(50000);
 //
-//////            neuralNetAlgorithm.evaluate(player1.getDataAsTrainingData());
-//////            player1.getDataAsTrainingData()
+//////            neuralNetAlgorithm.evaluate(decisionTreeAlgorithm.getDataAsTrainingData());
+//////            decisionTreeAlgorithm.getDataAsTrainingData()
 ////
 ////            NeuralNetAlgorithm neuralNetAlgorithm2 = NeuralNetAlgorithm.create("player2");
 ////            neuralNetAlgorithm2.train(player2.getDataAsTrainingData());
@@ -99,7 +101,7 @@ public class TicTacToeGameTrainer {
             //        log.info("train");
             int gameState = play2(firstPlayerNumber);
             gameResult.applyGameState(gameState);
-            if (gameResult.totalGameCounter % 1 == 0) {
+            if (gameResult.totalGameCounter % showStats == 0) {
                 log.info(gameResult.toString());
             }
 //        log.info(

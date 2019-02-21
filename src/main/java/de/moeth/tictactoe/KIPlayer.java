@@ -1,6 +1,7 @@
 package de.moeth.tictactoe;
 
 import de.moeth.tictactoe.algorithm.KIAlgorithm;
+import de.moeth.tictactoe.history.ActionHistory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +11,7 @@ class KIPlayer {
 
     private static final Logger log = LoggerFactory.getLogger(KIPlayer.class);
     private final KIAlgorithm algorithm;
-    //    private final List<ActionHistory.HistoryEntry> history = new ArrayList<>();
-//    private final ActionHistory actionHistory = new ActionHistory();
+    private final ActionHistory actionHistory = new ActionHistory();
 
     public KIPlayer(final KIAlgorithm algorithm) {
         this.algorithm = algorithm;
@@ -20,7 +20,7 @@ class KIPlayer {
     public int getBestMove(final Board board, final int playerNumber) {
 
         int bestAction = algorithm.getBestAction(board, playerNumber);
-
+        actionHistory.addEntry(board.getBoard(playerNumber), bestAction);
 
         return bestAction;
     }
@@ -30,7 +30,8 @@ class KIPlayer {
      * It uses "Temporal Difference" formula to calculate probability of each game move.
      */
     public void updateReward(final double reward) {
-        algorithm.updateReward(reward);
+        algorithm.train(actionHistory.updateReward(reward));
+//        algorithm.updateReward(reward);
     }
 
     public void saveToFile() throws IOException {

@@ -2,12 +2,12 @@ package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.Util;
-import de.moeth.tictactoe.history.ActionHistory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -19,14 +19,14 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
 
     private final ArrayMap arrayMap = new ArrayMap(Board.BOARD_LEARNING_SHAPE, Board.ACTION_SHAPE);
     private final String filePath;
-    private final ActionHistory actionHistory = new ActionHistory();
 
     public static DecisionTreeAlgorithm create(final String filePath) throws IOException {
         return new DecisionTreeAlgorithm(filePath);
     }
 
-    private DecisionTreeAlgorithm(final String filePath) {
+    private DecisionTreeAlgorithm(final String filePath) throws IOException {
         this.filePath = filePath;
+        arrayMap.read(new File(filePath));
     }
 
     @Override
@@ -34,14 +34,13 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
         try (FileWriter writer = new FileWriter(filePath)) {
             arrayMap.write(writer);
             writer.flush();
-            log.info(String.format("saved %d to %s", arrayMap.size(), filePath));
+//            log.info(String.format("saved %d to %s", arrayMap.size(), filePath));
         }
     }
 
     @Override
     public int getBestAction(final Board board, final int playerNumber) {
         Integer action = AlgorithmUtil.rewardToAction(board, getReward(board.getBoard(playerNumber)));
-        actionHistory.addEntry(board.getBoard(playerNumber), action);
         return action;
     }
 
@@ -60,16 +59,11 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
                 .count();
     }
 
-    //    @Override
-    public void train(final Collection<TrainSingleEntry> trainData) {
+    @Override
+    public void train(final List<TrainSingleEntry> trainData) {
         for (TrainSingleEntry train : trainData) {
             train(train);
         }
-    }
-
-    @Override
-    public void updateReward(final double reward) {
-        train(actionHistory.updateReward(reward));
     }
 
     private void train(final TrainSingleEntry train) {
@@ -98,7 +92,7 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
                 '}';
     }
 
-    public Collection<TrainWholeEntry> getDataAsTrainingData() {
+    public Collection<TrainWholeEntry> getDataAsTrainingData222() {
         List<TrainWholeEntry> collect = arrayMap.stream()
                 .map(e -> asdfasdf(e))
                 .collect(Collectors.toList());
@@ -110,7 +104,16 @@ public class DecisionTreeAlgorithm implements KIAlgorithm {
         return new TrainWholeEntry(e.getKey(), e.getValue());
     }
 
-//    @Override
+    @Override
+    public List<TrainSingleEntry> getDataAsTrainingData() {
+        List<TrainSingleEntry> collect = arrayMap.stream()
+                .map(e -> TrainSingleEntry.convert(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
+        Collections.shuffle(collect);
+        return collect;
+    }
+
+    //    @Override
 //    public void read(final Reader reader) throws IOException {
 //        arrayMap.read(reader);
 //    }

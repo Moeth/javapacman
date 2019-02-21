@@ -1,7 +1,6 @@
 package de.moeth.tictactoe.algorithm;
 
 import de.moeth.tictactoe.Board;
-import de.moeth.tictactoe.history.ActionHistory;
 import org.deeplearning4j.datasets.iterator.ExistingDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -39,7 +38,6 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
     private final String name;
     private final MultiLayerNetwork multiLayerNetwork;
     //    private List<DataSet> dataSets = new ArrayList<>();
-    private final ActionHistory actionHistory = new ActionHistory();
 
     private NeuralNetStateAlgorithm(final String name, final MultiLayerNetwork multiLayerNetwork) {
         this.name = name;
@@ -72,7 +70,6 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
                 .boxed()
                 .max(Comparator.comparingDouble(action -> rewards.getDouble(action)))
                 .orElseThrow(() -> new IllegalArgumentException("asdf"));
-        actionHistory.addEntry(board.getBoard(playerNumber), bestAction);
         return bestAction;
     }
 
@@ -86,8 +83,8 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
         return output.getDouble(0);
     }
 
-    //    @Override
-    private void train(final List<TrainSingleEntry> trainData) {
+    @Override
+    public void train(final List<TrainSingleEntry> trainData) {
 //        if (dataSets.size() > 10) {
 //            dataSets = dataSets.subList(0, 10);
 //        }
@@ -115,14 +112,13 @@ public class NeuralNetStateAlgorithm implements KIAlgorithm {
 //        log.info("train " + trainData.size());
     }
 
-    private INDArray output(INDArray state) {
-        return multiLayerNetwork.output(state.reshape(SHAPE));
+    @Override
+    public List<TrainSingleEntry> getDataAsTrainingData() {
+        throw new IllegalArgumentException();
     }
 
-    @Override
-    public void updateReward(final double reward) {
-        train(actionHistory.updateReward(reward));
-        actionHistory.clear();
+    private INDArray output(INDArray state) {
+        return multiLayerNetwork.output(state.reshape(SHAPE));
     }
 
     private DataSet createDataSet(final TrainSingleEntry train) {
