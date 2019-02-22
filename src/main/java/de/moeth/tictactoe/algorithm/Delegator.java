@@ -12,9 +12,9 @@ import java.util.Optional;
 public class Delegator extends AbstractKIAlgorithm {
 
     private static final Logger log = LoggerFactory.getLogger(Delegator.class);
-    private final AbstractKIAlgorithm kiAlgorithm;
+    private final KIAlgorithm kiAlgorithm;
 
-    public Delegator(final AbstractKIAlgorithm kiAlgorithm) {
+    public Delegator(final KIAlgorithm kiAlgorithm) {
         this.kiAlgorithm = kiAlgorithm;
     }
 
@@ -46,7 +46,7 @@ public class Delegator extends AbstractKIAlgorithm {
     }
 
     @Override
-    Optional<INDArray> output(final INDArray state) {
+    public Optional<INDArray> output(final INDArray state) {
         return kiAlgorithm.output(state);
     }
 }

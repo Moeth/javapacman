@@ -5,6 +5,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface KIAlgorithm {
 
@@ -21,4 +22,6 @@ public interface KIAlgorithm {
     void storeData() throws IOException;
 
     void evaluate(List<TrainWholeEntry> dataAsTrainingData);
+
+    Optional<INDArray> output(INDArray state);
 }

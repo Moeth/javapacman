@@ -127,7 +127,7 @@ public class NeuralNetAlgorithm extends AbstractKIAlgorithm {
         throw new IllegalArgumentException();
     }
 
-    Optional<INDArray> output(INDArray state) {
+    public Optional<INDArray> output(INDArray state) {
         return Optional.of(outputIntern(state));
     }
 

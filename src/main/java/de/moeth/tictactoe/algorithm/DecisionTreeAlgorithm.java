@@ -45,7 +45,7 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
     }
 
     @Override
-    Optional<INDArray> output(final INDArray state) {
+    public Optional<INDArray> output(final INDArray state) {
         return arrayMap.findValue(state);
     }
 

@@ -35,5 +35,5 @@ public abstract class AbstractKIAlgorithm implements KIAlgorithm {
         log.info("diff " + diff);
     }
 
-    abstract Optional<INDArray> output(final INDArray state);
+    public abstract Optional<INDArray> output(final INDArray state);
 }

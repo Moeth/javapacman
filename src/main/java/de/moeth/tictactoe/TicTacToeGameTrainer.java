@@ -38,7 +38,8 @@ public class TicTacToeGameTrainer {
         try {
 //            do {
             NeuralNetAlgorithm neuralNetAlgorithm1 = NeuralNetAlgorithm.create("neuralNetAlgorithm");
-            KIAlgorithm neuralNetAlgorithm = new TrainingHistory(new EGreedy(neuralNetAlgorithm1, 1.0, 0.001, 100), 20);
+//            KIAlgorithm neuralNetAlgorithm = new TrainingHistory(new EGreedy(neuralNetAlgorithm1, 1.0, 0.001, 100), 20);
+            KIAlgorithm neuralNetAlgorithm = new NoTraining(neuralNetAlgorithm1);
             KIAlgorithm decisionTreeAlgorithm = new EGreedy(DecisionTreeAlgorithm.create("DecisionTreeAlgorithm.txt"), 1.0, 0.001, 100);
 //            new TicTacToeGameTrainer(decisionTreeAlgorithm, decisionTreeAlgorithm, true, false, 50).train(50000);
 //            new TicTacToeGameTrainer(decisionTreeAlgorithm, decisionTreeAlgorithm, true, false, 10).train(5000);
@@ -47,7 +48,8 @@ public class TicTacToeGameTrainer {
             neuralNetAlgorithm1.evaluate(decisionTreeAlgorithm.getTrainWholeData());
 //            NeuralNetStateAlgorithm neuralNetAlgorithm = NeuralNetStateAlgorithm.create("decisionTreeAlgorithm");
 //            NeuralNetStateAlgorithm neuralNetAlgorithm2 = NeuralNetStateAlgorithm.create("player2");
-            new TicTacToeGameTrainer(neuralNetAlgorithm1, decisionTreeAlgorithm, false, false, 10).train(500000);
+            double explorationRate = 0.5;
+            new TicTacToeGameTrainer(new ActionExploration(neuralNetAlgorithm, explorationRate), new ActionExploration(decisionTreeAlgorithm, explorationRate), false, false, 10).train(500000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm, true, true).train(5000);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);
 //            new TicTacToeGameTrainer(neuralNetAlgorithm, neuralNetAlgorithm2, true, true).play2(1);

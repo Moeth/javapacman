@@ -130,7 +130,7 @@ public class NeuralNetStateAlgorithm extends AbstractKIAlgorithm {
         return multiLayerNetwork.output(state.reshape(SHAPE));
     }
 
-    Optional<INDArray> output(INDArray state) {
+    public Optional<INDArray> output(INDArray state) {
         return Optional.of(outputIntern(state));
     }
 
