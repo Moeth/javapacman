@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
-import java.util.Random;
 import java.util.stream.LongStream;
 
 public class AlgorithmUtil {
@@ -20,7 +19,7 @@ public class AlgorithmUtil {
 //        INDArray reward = algorithm.getReward(data);
         Util.assertShape(reward, Board.ACTION_SHAPE);
         Preconditions.checkArgument(reward.rank() == 2);
-        int abs = (int) Math.abs(new Random().nextGaussian());
+//        int abs = (int) Math.abs(new Random().nextGaussian());
         return board.getPossibleActions()
                 .boxed()
                 .max(Comparator.comparingDouble(action -> reward.getDouble(action)))

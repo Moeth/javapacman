@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,18 +59,17 @@ public class NeuralNetStateAlgorithm extends AbstractKIAlgorithm {
 
     @Override
     public int getBestAction(final Board board, final int playerNumber) {
+        return AlgorithmUtil.rewardToAction(board, getReward(board, playerNumber));
+    }
 
+    @Override
+    public INDArray getReward(final Board board, final int playerNumber) {
         INDArray rewards = Nd4j.rand(Board.ACTION_SHAPE);
         for (int action = 0; action < Board.ACTIONS; action++) {
             double reward = reward(board, playerNumber, action);
             rewards.putScalar(action, reward);
         }
-
-        Integer bestAction = board.getPossibleActions()
-                .boxed()
-                .max(Comparator.comparingDouble(action -> rewards.getDouble(action)))
-                .orElseThrow(() -> new IllegalArgumentException("asdf"));
-        return bestAction;
+        return rewards;
     }
 
     @Override

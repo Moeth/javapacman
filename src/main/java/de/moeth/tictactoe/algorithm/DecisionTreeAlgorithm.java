@@ -51,8 +51,13 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
 
     @Override
     public int getBestAction(final Board board, final int playerNumber) {
-        Integer action = AlgorithmUtil.rewardToAction(board, getReward(board.getBoard(playerNumber)));
+        Integer action = AlgorithmUtil.rewardToAction(board, getReward(board, playerNumber));
         return action;
+    }
+
+    @Override
+    public INDArray getReward(final Board board, final int playerNumber) {
+        return getReward(board.getBoard(playerNumber));
     }
 
     private INDArray getReward(final INDArray board) {

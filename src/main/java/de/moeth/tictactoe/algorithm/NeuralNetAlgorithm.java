@@ -57,9 +57,14 @@ public class NeuralNetAlgorithm extends AbstractKIAlgorithm {
 
     @Override
     public int getBestAction(final Board board, final int playerNumber) {
-        Integer action = AlgorithmUtil.rewardToAction(board, getReward(board.getBoard(playerNumber)));
+        Integer action = AlgorithmUtil.rewardToAction(board, getReward(board, playerNumber));
         Preconditions.checkArgument(board.isAllowedAction(action));
         return action;
+    }
+
+    @Override
+    public INDArray getReward(final Board board, final int playerNumber) {
+        return getReward(board.getBoard(playerNumber));
     }
 
     @Override

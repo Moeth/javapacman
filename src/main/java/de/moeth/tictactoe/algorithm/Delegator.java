@@ -22,6 +22,11 @@ public class Delegator extends AbstractKIAlgorithm {
         return kiAlgorithm.getBestAction(board, playerNumber);
     }
 
+    @Override
+    public INDArray getReward(final Board board, final int playerNumber) {
+        return kiAlgorithm.getReward(board, playerNumber);
+    }
+
     public void train(final List<TrainSingleEntry> trainData) {
         kiAlgorithm.train(trainData);
     }
