@@ -30,11 +30,9 @@ public class ArrayMap implements Storable {
     @Override
     public void read(final Reader reader) throws IOException {
         try (BufferedReader br = new BufferedReader(reader)) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                RewardEntry rewardEntry = RewardEntry.readLine(line);
-                entries.add(rewardEntry);
-            }
+            br.lines()
+                    .map(RewardEntry::readLine)
+                    .forEach(entries::add);
         }
     }
 
@@ -43,12 +41,11 @@ public class ArrayMap implements Storable {
         sort(Util.IND_ARRAY_COMPARATOR);
         for (final RewardEntry rewardEntry : entries) {
             writer.append(rewardEntry.writeLine());
-            writer.append('\r');
             writer.append('\n');
         }
     }
 
-    public void sort(Comparator<INDArray> comparator) {
+    private void sort(Comparator<INDArray> comparator) {
         Collections.sort(entries, (r1, r2) -> comparator.compare(r1.key, r2.key));
     }
 
