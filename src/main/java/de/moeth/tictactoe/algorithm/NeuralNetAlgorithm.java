@@ -162,8 +162,8 @@ public class NeuralNetAlgorithm extends AbstractKIAlgorithm {
         ModelSerializer.writeModel(multiLayerNetwork, name, true);
     }
 
-    private static final int HIDDEN_LAYER_CONT = 2;
-    private static final int HIDDEN_LAYER_WIDTH = 100;
+    private static final int HIDDEN_LAYER_CONT = 8;
+    private static final int HIDDEN_LAYER_WIDTH = 1000;
 
     private static MultiLayerNetwork buildTheNeuralNetwork() {
 

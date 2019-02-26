@@ -22,6 +22,7 @@ public class Board {
 
     private Board(final INDArray board) {
         this.board = board;
+        Util.assertShape(board, BOARD_SHAPE);
     }
 
     public Board() {
@@ -77,6 +78,26 @@ public class Board {
         }
         Util.assertShape(result, BOARD_LEARNING_SHAPE);
         return result;
+    }
+
+    public static Board createFromLearningData(INDArray learningData) {
+        Util.assertShape(learningData, BOARD_LEARNING_SHAPE);
+        INDArray result = Nd4j.zeros(BOARD_SHAPE);
+        int k = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                final int finalI = i;
+                final int finalJ = j;
+                int v = IntStream.range(0, 2)
+                        .filter(p -> learningData.getFloat(new int[]{finalI, finalJ, p}) > 0)
+                        .findFirst()
+                        .orElse(0);
+                result.putScalar(k, v);
+                k++;
+            }
+        }
+        Util.assertShape(result, BOARD_SHAPE);
+        return new Board(result);
     }
 
     public int getGameDecision() {

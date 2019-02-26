@@ -9,7 +9,7 @@ public class NoTraining extends Delegator {
 
     private static final Logger log = LoggerFactory.getLogger(NoTraining.class);
 
-    public NoTraining(final AbstractKIAlgorithm kiAlgorithm) {
+    public NoTraining(final KIAlgorithm kiAlgorithm) {
         super(kiAlgorithm);
     }
 

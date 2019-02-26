@@ -19,13 +19,7 @@ public class AlgorithmUtil {
     public static final Random RANDOM = new Random();
 
     public static Integer rewardToAction(final Board board, INDArray reward, double explorationRate) {
-        Util.assertShape(reward, Board.ACTION_SHAPE);
-        Preconditions.checkArgument(reward.rank() == 2);
-        Comparator<Integer> objectComparator = Comparator.comparingDouble(reward::getDouble);
-        List<Integer> possibleActions = board.getPossibleActions()
-                .boxed()
-                .sorted(objectComparator.reversed())
-                .collect(Collectors.toList());
+        List<Integer> possibleActions = getSortedActions(board, reward);
 
         Preconditions.checkArgument(!possibleActions.isEmpty());
         for (Integer action : possibleActions) {
@@ -43,6 +37,26 @@ public class AlgorithmUtil {
                 .boxed()
                 .max(Comparator.comparingDouble(reward::getDouble))
                 .orElseThrow(() -> new IllegalArgumentException("No Action"));
+    }
+
+    public static int getPosition(final Board board, final INDArray reward, final Integer action) {
+        List<Integer> possibleActions = getSortedActions(board, reward);
+        for (int i = 0; i < Board.ACTIONS; i++) {
+            if (possibleActions.get(i).equals(action)) {
+                return i;
+            }
+        }
+        return Board.ACTIONS;
+    }
+
+    private static List<Integer> getSortedActions(final Board board, final INDArray reward) {
+        Util.assertShape(reward, Board.ACTION_SHAPE);
+        Preconditions.checkArgument(reward.rank() == 2);
+        Comparator<Integer> objectComparator = Comparator.comparingDouble(reward::getDouble);
+        return board.getPossibleActions()
+                .boxed()
+                .sorted(objectComparator.reversed())
+                .collect(Collectors.toList());
     }
 
     public static long shadeToNodeCount(long[] shape) {

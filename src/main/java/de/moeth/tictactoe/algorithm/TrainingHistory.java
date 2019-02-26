@@ -13,7 +13,7 @@ public class TrainingHistory extends Delegator {
     private List<TrainSingleEntry> entries = new ArrayList<>();
     private final int size;
 
-    public TrainingHistory(final AbstractKIAlgorithm kiAlgorithm, final int size) {
+    public TrainingHistory(final KIAlgorithm kiAlgorithm, final int size) {
         super(kiAlgorithm);
         this.size = size;
     }

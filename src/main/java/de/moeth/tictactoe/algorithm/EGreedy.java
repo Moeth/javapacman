@@ -17,7 +17,7 @@ public class EGreedy extends Delegator {
     private final double count;
     private double current = 0;
 
-    public EGreedy(final AbstractKIAlgorithm kiAlgorithm, final double start, final double end, final double count) {
+    public EGreedy(final KIAlgorithm kiAlgorithm, final double start, final double end, final double count) {
         super(kiAlgorithm);
         Preconditions.checkArgument(start >= end);
         Preconditions.checkArgument(count > 0);

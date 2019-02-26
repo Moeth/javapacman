@@ -1,5 +1,6 @@
 package de.moeth.tictactoe.algorithm;
 
+import com.google.common.base.Preconditions;
 import de.moeth.tictactoe.Board;
 import de.moeth.tictactoe.Util;
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -21,13 +22,17 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
 
     private final ArrayMap arrayMap = new ArrayMap(Board.BOARD_LEARNING_SHAPE, Board.ACTION_SHAPE);
     private final String filePath;
+    private final double learningRate;
 
-    public static DecisionTreeAlgorithm create(final String filePath) throws IOException {
-        return new DecisionTreeAlgorithm(filePath);
+    public static DecisionTreeAlgorithm create(final String filePath, double learningRate) throws IOException {
+        return new DecisionTreeAlgorithm(filePath, learningRate);
     }
 
-    private DecisionTreeAlgorithm(final String filePath) throws IOException {
+    private DecisionTreeAlgorithm(final String filePath, final double learningRate) throws IOException {
         this.filePath = filePath;
+        this.learningRate = learningRate;
+        Preconditions.checkArgument(learningRate >= 0);
+        Preconditions.checkArgument(learningRate <= 1);
         arrayMap.read(new File(filePath));
     }
 
@@ -66,10 +71,6 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
                 .orElseGet(() -> Nd4j.rand(Board.ACTION_SHAPE));
     }
 
-    public int size() {
-        return arrayMap.size();
-    }
-
     private long filledSize() {
         return arrayMap.stream()
                 .count();
@@ -80,7 +81,7 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
         throw new IllegalArgumentException();
     }
 
-    //    @Override
+    @Override
     public void train(final List<TrainSingleEntry> trainData) {
         for (TrainSingleEntry train : trainData) {
             train(train);
@@ -95,7 +96,7 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
 //            ArrayMap.RewardEntry r = rewardEntry.get();
             final INDArray value = rewardEntry.get();
             double before = value.getDouble(action);
-            double value1 = (before + train.getReward()) / 2;
+            double value1 = (1 - learningRate) * before + learningRate * train.getReward();
             value.putScalar(action, value1);
 //            INDArray result = Nd4j.zeros(Board.ACTION_SHAPE);
 //            result.putScalar(train.getAction(), train.getReward());
@@ -140,5 +141,4 @@ public class DecisionTreeAlgorithm extends AbstractKIAlgorithm {
         Collections.shuffle(collect);
         return collect;
     }
-
 }
